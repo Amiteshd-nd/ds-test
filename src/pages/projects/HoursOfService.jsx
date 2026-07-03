@@ -3,7 +3,7 @@ import { useState } from 'react';
 import LazyImage from '../../components/LazyImage';
 import useProjectAnalytics from '../../hooks/useProjectAnalytics';
 import contextImage from '../../assets/images/projects/hours-of-service/context-image.webp';
-import frameHeader from '../../assets/images/projects/hours-of-service/frame-header.webp';
+
 import videoLogRecords from '../../assets/videos/log-records.mov';
 import videoCertificationOfLogs from '../../assets/videos/hours-of-service-3.mov';
 import videoInspectorMode from '../../assets/videos/hours-of-service-1.mov';
@@ -108,11 +108,6 @@ const HoursOfService = () => {
             transition={{ duration: 0.6 }}
             className="flex flex-col items-center gap-4 sm:gap-4 w-full"
           >
-            {/* Frame Header Image */}
-            <div className="w-full max-w-[500px]">
-              <LazyImage src={frameHeader} alt="Hours of Service" className="w-full h-auto object-contain" />
-            </div>
-
             <h1 className="font-roboto text-xl sm:text-5xl leading-[1.32em] text-ui-gray text-center w-full" style={{ letterSpacing: '-5%' }}>
               <span className="sm:hidden">ELD Hours-of-Service  flows for<br />drivers + manager web portal ,<br />improve compliance and visibility.</span>
               <span className="hidden sm:inline">ELD Hours-of-Service  flows for drivers + manager web portal , improve compliance and visibility.</span>

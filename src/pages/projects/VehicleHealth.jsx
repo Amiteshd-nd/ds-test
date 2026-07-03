@@ -5,7 +5,7 @@ import LazyImage from '../../components/LazyImage';
 import useProjectAnalytics from '../../hooks/useProjectAnalytics';
 
 // Images from Figma
-import imgHeroImage from '../../assets/images/projects/vehicle-health/hero-image.webp';
+
 import imgWhyIcon from '../../assets/images/projects/vehicle-health/why-icon.webp';
 import imgCurrentIssuesIcon from '../../assets/images/projects/vehicle-health/current-issues-icon.webp';
 import imgCaretCircleDown from '../../assets/images/projects/vehicle-health/caret-circle-down.webp';
@@ -100,16 +100,6 @@ const VehicleHealth = () => {
               transition={{ duration: 0.6 }}
               className="flex flex-col items-center gap-6 sm:gap-12 w-full"
             >
-              {/* Hero Image */}
-              <div className="w-full max-w-[500px] h-auto aspect-[500/334] rounded-2xl sm:rounded-[32px] overflow-hidden">
-                <LazyImage
-                  src={imgHeroImage}
-                  alt="Fleet Management"
-                  className="w-full h-full object-cover"
-                  priority
-                />
-              </div>
-
               {/* Main Title */}
               <h1 className="font-roboto text-2xl sm:text-5xl leading-[1.32em] text-ui-gray text-center w-full" style={{ letterSpacing: '-5%' }}>
                 Integrated Fleet Management — Maintenance, Inspections & Defect Workflows for the Fleet Safety Dashboard
