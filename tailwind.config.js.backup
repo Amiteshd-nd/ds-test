@@ -1,0 +1,77 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        // Primary colors from Figma
+        dark: {
+          DEFAULT: '#05100E',
+          nav: 'rgba(30, 40, 39, 0.7)',
+        },
+        light: {
+          DEFAULT: '#FFFFFF',
+          yellow: '#FAFFD8',
+          blue: '#E2E9F6',
+        },
+        text: {
+          primary: '#FFFFFF',
+          secondary: '#9A9CAD',
+          tertiary: '#90A2C3',
+          quaternary: '#5D6C87',
+        },
+        ui: {
+          gray: '#232832',
+        },
+        gradient: {
+          pink: {
+            from: '#FF4083',
+            to: '#99264F',
+          },
+          gray: {
+            from: '#FFFFFF',
+            to: '#BABABA',
+          },
+          yellow: {
+            from: '#FFF700',
+            to: '#989300',
+          },
+        },
+      },
+      fontFamily: {
+        rancho: ['Rancho', 'cursive'],
+        roboto: ['Roboto Slab', 'serif'],
+        trispace: ['Trispace', 'monospace'],
+      },
+      fontSize: {
+        // Desktop sizes
+        'heading-desktop': ['64px', { lineHeight: '1.2em', letterSpacing: '-5%' }],
+        'subheading-desktop': ['40px', { lineHeight: '1.2em', letterSpacing: '-5%' }],
+        'button-desktop': ['20px', { lineHeight: '1.319em', letterSpacing: '-5%' }],
+        // Mobile sizes
+        'heading-mobile': ['32px', { lineHeight: '1.2em', letterSpacing: '-5%' }],
+        'subheading-mobile': ['32px', { lineHeight: '1.2em', letterSpacing: '-5%' }],
+        // Common sizes
+        'body': ['16px', { lineHeight: '1.34em', letterSpacing: '-2%' }],
+        'nav': ['16px', { lineHeight: '1.319em', letterSpacing: '-5%' }],
+      },
+      spacing: {
+        'section': '48px',
+      },
+      borderRadius: {
+        'card': '20px',
+        'nav': '16px',
+        'nav-item': '8px',
+      },
+      backgroundImage: {
+        'gradient-pink': 'linear-gradient(135deg, #FF4083 0%, #99264F 100%)',
+        'gradient-gray': 'linear-gradient(135deg, #FFFFFF 0%, #BABABA 100%)',
+        'gradient-yellow': 'linear-gradient(135deg, #FFF700 0%, #989300 100%)',
+      },
+    },
+  },
+  plugins: [],
+}
