@@ -20,13 +20,18 @@ ReactGA.initialize('G-HN2NX8DVHC');
 function App() {
   const location = useLocation();
   const isProjectPage = location.pathname.startsWith('/projects/');
+  const isUnlocked = location.search === '?0000';
 
   // Scroll to top on route change and send pageview to GA
   useEffect(() => {
     window.scrollTo(0, 0);
-    // Send pageview to Google Analytics
     ReactGA.send({ hitType: 'pageview', page: location.pathname });
   }, [location.pathname]);
+
+  // If ?0000 is not in the current URL, show blank screen
+  if (!isUnlocked) {
+    return <div className="min-h-screen bg-dark" />;
+  }
 
   return (
     <div className="min-h-screen bg-dark text-light-DEFAULT">
