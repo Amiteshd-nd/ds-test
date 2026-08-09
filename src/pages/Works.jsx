@@ -10,6 +10,13 @@ import behanceProfile from '../assets/images/behance-profile.webp';
 const Works = () => {
   const projects = [
     {
+      title: 'Bangalore Times',
+      description: 'Namma Quest — a casual social game set in Bangalore. Built with Phaser + React.',
+      image: teluguStreaming,
+      gradient: 'yellow',
+      link: '/game/bangalore-times',
+    },
+    {
       title: 'Hours of Service',
       description: 'A Unified Design System & Component Library for Gazebo  Platform',
       image: hoursOfService,

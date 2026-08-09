@@ -1,6 +1,6 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import ReactGA from 'react-ga4';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
@@ -14,12 +14,17 @@ import GazeboComplexOrganisms from './pages/projects/GazeboComplexOrganisms';
 import VendingAnalytics from './pages/projects/VendingAnalytics';
 import TeluguStreaming from './pages/projects/TeluguStreaming';
 
+// Lazy-loaded so Phaser (~1MB) only downloads when the game route is opened.
+const BangaloreTimes = lazy(() => import('./pages/game/BangaloreTimes'));
+
 // Initialize Google Analytics
 ReactGA.initialize('G-HN2NX8DVHC');
 
 function App() {
   const location = useLocation();
   const isProjectPage = location.pathname.startsWith('/projects/');
+  const isGamePage = location.pathname.startsWith('/game/');
+  const hideChrome = isProjectPage || isGamePage;
 
   // Scroll to top on route change and send pageview to GA
   useEffect(() => {
@@ -34,7 +39,7 @@ function App() {
       <BackgroundLoader />
 
       {/* Top Navigation - Hide on project pages */}
-      {!isProjectPage && <Navbar />}
+      {!hideChrome && <Navbar />}
 
       {/* Main Content with Page Transitions */}
       <AnimatePresence>
@@ -47,11 +52,19 @@ function App() {
           <Route path="/projects/gazebo-complex-organisms" element={<GazeboComplexOrganisms />} />
           <Route path="/projects/vending-analytics" element={<VendingAnalytics />} />
           <Route path="/projects/telugu-streaming" element={<TeluguStreaming />} />
+          <Route
+            path="/game/bangalore-times"
+            element={
+              <Suspense fallback={<div className="fixed inset-0 bg-[#0e0f13]" />}>
+                <BangaloreTimes />
+              </Suspense>
+            }
+          />
         </Routes>
       </AnimatePresence>
 
       {/* Bottom Navigation - Hide on project pages */}
-      {!isProjectPage && <BottomNav />}
+      {!hideChrome && <BottomNav />}
     </div>
   );
 }
