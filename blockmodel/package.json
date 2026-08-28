@@ -1,0 +1,33 @@
+{
+  "name": "blockmodel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Throwaway UX prototype: phone photos -> KIRI Engine -> 3D model viewer",
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0",
+    "build": "next build",
+    "start": "next start -H 0.0.0.0",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "@react-three/drei": "10.7.8",
+    "@react-three/fiber": "9.7.0",
+    "adm-zip": "0.5.16",
+    "better-sqlite3": "13.0.3",
+    "next": "16.3.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "three": "0.185.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/adm-zip": "0.5.8",
+    "@types/better-sqlite3": "7.6.13",
+    "@types/node": "24.9.2",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "@types/three": "0.185.4",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3"
+  }
+}
