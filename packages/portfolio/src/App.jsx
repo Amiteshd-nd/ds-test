@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Link } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { useEffect, lazy, Suspense } from 'react';
 import ReactGA from 'react-ga4';
@@ -14,8 +14,11 @@ import GazeboComplexOrganisms from './pages/projects/GazeboComplexOrganisms';
 import VendingAnalytics from './pages/projects/VendingAnalytics';
 import TeluguStreaming from './pages/projects/TeluguStreaming';
 
-// Lazy-loaded so Phaser (~1MB) only downloads when the game route is opened.
-const BangaloreTimes = lazy(() => import('./pages/game/BangaloreTimes'));
+// Lazy-loaded from the game package so Phaser (~1MB) only downloads when the
+// game route is opened.
+const BangaloreTimes = lazy(() =>
+  import('@cloud-march/game').then((m) => ({ default: m.BangaloreTimes })),
+);
 
 // Initialize Google Analytics
 ReactGA.initialize('G-HN2NX8DVHC');
@@ -56,7 +59,7 @@ function App() {
             path="/game/bangalore-times"
             element={
               <Suspense fallback={<div className="fixed inset-0 bg-[#0e0f13]" />}>
-                <BangaloreTimes />
+                <BangaloreTimes backSlot={<Link to="/works">← Back</Link>} />
               </Suspense>
             }
           />

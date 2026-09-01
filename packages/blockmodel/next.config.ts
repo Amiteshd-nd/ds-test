@@ -1,10 +1,12 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
 const nextConfig: NextConfig = {
-  // This app lives in a subfolder of a larger repo that has its own lockfile.
-  // Pin Turbopack's root here so it doesn't infer the parent repo as the root.
+  // This app is a package in a pnpm-workspaces monorepo. Point Turbopack at the
+  // monorepo root (two levels up) so it resolves the hoisted `next` and other
+  // dependencies from the root node_modules.
   turbopack: {
-    root: import.meta.dirname,
+    root: path.join(import.meta.dirname, "..", ".."),
   },
   // better-sqlite3 is a native module — keep it external to the server bundle.
   serverExternalPackages: ["better-sqlite3"],

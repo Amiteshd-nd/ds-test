@@ -1,0 +1,9 @@
+packages:
+  - 'packages/*'
+
+# Native/postinstall builds we trust and require:
+#   better-sqlite3 (blockmodel DB), esbuild (Vite/Next), sharp (portfolio image scripts)
+allowBuilds:
+  better-sqlite3: true
+  esbuild: true
+  sharp: true

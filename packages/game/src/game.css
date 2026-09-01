@@ -1,0 +1,82 @@
+/* HUD styling for Namma Quest. Plain CSS so the game needs no shared Tailwind
+   theme — it renders identically whether embedded in the portfolio or run alone. */
+
+.nq-root {
+  position: fixed;
+  inset: 0;
+  background: #0e0f13;
+  overflow: hidden;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.nq-hud-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 1rem;
+  pointer-events: none;
+}
+
+.nq-back-slot {
+  pointer-events: auto;
+}
+
+/* Style whatever the host passes as the back control (an <a> or <button>). */
+.nq-back-slot :where(a, button) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e7e7ea;
+  font-size: 0.875rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+.nq-back-slot :where(a, button):hover {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.nq-title-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nq-title {
+  font-weight: 700;
+  color: #e7e7ea;
+  font-size: 0.875rem;
+}
+
+.nq-sub {
+  color: #9ca3af;
+  font-size: 0.75rem;
+}
+
+.nq-controls {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+}
