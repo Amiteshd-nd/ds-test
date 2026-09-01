@@ -1,166 +1,52 @@
-# Amitesh Debnath - Product Designer Portfolio
+# cloud-march
 
-A beautiful, responsive portfolio website built from Figma design, showcasing product design work.
+A **pnpm-workspaces monorepo**. Each project is a package under `packages/`.
 
-## Tech Stack
-
-- **React 18** - UI Library
-- **Vite 5** - Build Tool & Dev Server
-- **Tailwind CSS** - Utility-first CSS Framework
-- **Framer Motion** - Animation Library
-- **React Router DOM** - Client-side Routing
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js (v18 or higher)
-- npm or yarn
-
-### Installation
-
-1. Clone the repository
-```bash
-git clone <your-repo-url>
-cd portfolio
+```
+packages/
+├── portfolio/    # Vite + React portfolio site (the deployed site)
+├── game/         # @cloud-march/game — Bangalore Times (Phaser). Library + standalone app.
+└── blockmodel/   # Next.js prototype: phone photos → 3D model (see its own README)
 ```
 
-2. Install dependencies
-```bash
-npm install
-```
+The **portfolio** embeds the **game** as a library (route `/game/bangalore-times`),
+and the game can also run on its own. **blockmodel** is fully independent.
 
-3. Start the development server
-```bash
-npm run dev
-```
+## Prerequisites
 
-4. Open your browser and navigate to the URL shown in terminal (usually `http://localhost:5173`)
+- Node 20+ and **pnpm**. If you don't have pnpm:
+  ```bash
+  corepack enable pnpm      # uses the version pinned in package.json (needs sudo on some setups)
+  # or: npm i -g pnpm       # or: brew install pnpm
+  ```
 
-### Build for Production
+## Install
 
 ```bash
-npm run build
+pnpm install        # from the repo root — installs & links all packages
 ```
 
-### Preview Production Build
+## Run a package
 
 ```bash
-npm run preview
+pnpm dev:portfolio      # portfolio  → http://localhost:5173  (game lives at /game/bangalore-times)
+pnpm dev:game           # game standalone → http://localhost:5173
+pnpm dev:blockmodel     # blockmodel → http://localhost:3000  (see packages/blockmodel/README.md)
 ```
 
-## Project Structure
+Or target any package directly: `pnpm --filter <name> <script>`
+(names: `portfolio`, `@cloud-march/game`, `blockmodel`).
 
-```
-portfolio/
-├── src/
-│   ├── assets/
-│   │   ├── images/          # Project images
-│   │   │   ├── hours-of-service.png
-│   │   │   ├── vehicle-health.png
-│   │   │   └── gazebo-ds.png
-│   │   └── icons/           # SVG icons
-│   │       ├── logo.svg
-│   │       ├── readcv-logo-bg.svg
-│   │       └── readcv-logo-fg.svg
-│   ├── components/          # Reusable components
-│   │   ├── Navbar.jsx
-│   │   ├── BottomNav.jsx
-│   │   ├── Button.jsx
-│   │   ├── Hero.jsx
-│   │   └── ProjectCard.jsx
-│   ├── pages/              # Page components
-│   │   ├── Home.jsx
-│   │   ├── Works.jsx
-│   │   └── About.jsx
-│   ├── styles/             # Additional styles (if needed)
-│   ├── App.jsx             # Main app component with routing
-│   ├── main.jsx            # App entry point
-│   └── index.css           # Global styles & Tailwind imports
-├── public/                 # Static assets
-├── tailwind.config.js      # Tailwind configuration with design tokens
-├── postcss.config.js       # PostCSS configuration
-└── vite.config.js          # Vite configuration
+## Build
+
+```bash
+pnpm build              # builds every package
+pnpm build:portfolio    # just the portfolio (deployed via netlify.toml → packages/portfolio/dist)
 ```
 
-## Design Tokens
+## Add a new project
 
-All design tokens are configured in `tailwind.config.js` to match the Figma design exactly.
-
-### Colors
-
-```js
-// Primary Colors
-dark: '#05100E'              // Background
-light: '#FFFFFF'             // Primary text
-light-yellow: '#FAFFD8'      // Accent yellow
-
-// Text Colors
-text-primary: '#FFFFFF'
-text-secondary: '#9A9CAD'
-text-tertiary: '#90A2C3'
-text-quaternary: '#5D6C87'
-
-// UI Colors
-ui-gray: '#232832'
-```
-
-### Gradients
-
-```css
-.gradient-pink    /* Hours of Service card */
-.gradient-gray    /* Vehicle Health card */
-.gradient-yellow  /* Gazebo DS card */
-```
-
-### Typography
-
-- **Rancho** - Handwritten welcome message
-- **Roboto Slab** - Headings, buttons, navigation
-- **Trispace** - Body text, project names
-
-### Spacing
-
-- Section gap: `48px`
-- Card border-radius: `20px`
-- Nav border-radius: `16px`
-
-## Features
-
-- Fully responsive design (mobile-first approach)
-- Smooth page transitions with Framer Motion
-- Interactive animations on hover/click
-- Live time display (Bengaluru timezone)
-- Clean component architecture
-- Matches Figma design pixel-perfect
-
-## Development Guidelines
-
-1. **Components** - Keep components small and reusable
-2. **Styling** - Use Tailwind utility classes, refer to design tokens in config
-3. **Animations** - Use Framer Motion for all animations
-4. **Responsive** - Mobile-first approach, test on multiple screen sizes
-5. **Performance** - Optimize images, lazy load when needed
-
-## Pages
-
-- **Home** (`/`) - Landing page with hero and featured projects
-- **Works** (`/works`) - Full portfolio of work (coming soon)
-- **About** (`/about`) - About me page (coming soon)
-
-## Assets
-
-All images and icons are extracted from the original Figma design:
-- Project images are in `src/assets/images/`
-- SVG icons are in `src/assets/icons/`
-
-## Design Reference
-
-Figma Design:
-- Desktop: [View Design](https://www.figma.com/design/kUmKZfzv4OjMw2D774tAfw/Amitesh-Debnath-PF?node-id=322-3473&m=dev)
-- Mobile: [View Design](https://www.figma.com/design/kUmKZfzv4OjMw2D774tAfw/Amitesh-Debnath-PF?node-id=2290-4072&m=dev)
-- Workflow: [View Design](https://www.figma.com/design/kUmKZfzv4OjMw2D774tAfw/Amitesh-Debnath-PF?node-id=2106-638&t=NblmbMTnv9RVftR5-4)
-
-## License
-
-All rights reserved - Amitesh Debnath
+1. Create `packages/<name>/` with its own `package.json`.
+2. `pnpm install` — the workspace picks it up automatically (`packages/*`).
+3. To share it with another package, add `"<pkg-name>": "workspace:*"` to that
+   package's dependencies (see how `portfolio` depends on `@cloud-march/game`).
