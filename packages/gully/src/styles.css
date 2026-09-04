@@ -363,3 +363,27 @@ kbd {
   line-height: 1.45;
   color: var(--ink2);
 }
+
+/* ── boot failure ────────────────────────────────────────────────────────── */
+
+.boot-failure {
+  grid-column: 1 / -1;
+  place-self: center;
+  max-width: 46ch;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-left: 5px solid var(--blocked);
+  border-radius: 4px;
+  padding: 18px 20px;
+  margin: 24px;
+}
+
+.boot-failure h2 { margin: 0 0 6px; font-size: 19px; font-weight: 600; }
+.boot-failure p { margin: 0 0 8px; font-family: var(--prose); font-size: 15px; line-height: 1.5; }
+.boot-failure__hint { color: var(--ink2); font-size: 14px; }
+.boot-failure code {
+  font-family: var(--data);
+  background: rgba(27, 39, 36, 0.06);
+  border-radius: 2px;
+  padding: 0 4px;
+}

@@ -40,7 +40,10 @@ import type { ColourMode, RenderScale, SegmentCollection, SegmentFeature } from 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
 
 async function main() {
-  const segments: SegmentCollection = await (await fetch(segmentsUrl)).json();
+  const res = await fetch(segmentsUrl);
+  if (!res.ok) throw new Error(`segments.geojson returned ${res.status}`);
+  const segments: SegmentCollection = await res.json();
+  if (!segments.features?.length) throw new Error('segments.geojson is empty — run `npm run data`');
   const features = segments.features;
   const byId = new Map(features.map((f) => [f.properties.id, f]));
 
@@ -509,4 +512,18 @@ async function main() {
   });
 }
 
-main().catch((err) => console.error('[gully] boot failed', err));
+main().catch((err) => {
+  // A blank map reads as "the product is broken"; a sentence reads as a state.
+  console.error('[gully] boot failed', err);
+  const card = document.createElement('div');
+  card.className = 'boot-failure';
+  card.setAttribute('role', 'alert');
+  card.innerHTML = `
+    <h2>Gully could not start</h2>
+    <p>${String(err instanceof Error ? err.message : err).replace(/[<>]/g, '')}</p>
+    <p class="boot-failure__hint">
+      Usually this means the segment data is missing or stale. From
+      <code>packages/gully</code>, run <code>npm run data</code> and reload.
+    </p>`;
+  document.querySelector('.stage')?.replaceChildren(card);
+});
