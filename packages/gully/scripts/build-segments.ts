@@ -10,6 +10,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { classDefault, classDefaultConfidence, classDefaultNote, parseWidth } from '../src/segments/width.ts';
 import {
   PILOT_RING,
   CENTRE,
@@ -100,33 +101,7 @@ function distToLine(pt: LngLat, coords: LngLat[]): number {
 
 // ── width parsing ───────────────────────────────────────────────────────────
 
-/** OSM width tags are free text. "4", "4 m", "4m", "13'", "13'6\"", "15 ft". */
-function parseWidth(raw: string | undefined): number | null {
-  if (!raw) return null;
-  const s = raw.trim().toLowerCase();
-
-  const ftIn = s.match(/^(\d+(?:\.\d+)?)\s*'\s*(?:(\d+(?:\.\d+)?)\s*")?$/);
-  if (ftIn) return round1((Number(ftIn[1]) + Number(ftIn[2] ?? 0) / 12) * 0.3048);
-
-  const ft = s.match(/^(\d+(?:\.\d+)?)\s*(?:ft|feet|foot)$/);
-  if (ft) return round1(Number(ft[1]) * 0.3048);
-
-  const m = s.match(/^(\d+(?:\.\d+)?)\s*(?:m|metre|meter|metres|meters)?$/);
-  if (m) {
-    const v = Number(m[1]);
-    return Number.isFinite(v) && v > 0 && v < 60 ? round1(v) : null;
-  }
-  return null;
-}
-
 const round1 = (n: number) => Math.round(n * 10) / 10;
-
-const CLASS_DEFAULT: Record<string, number> = {
-  motorway: 16, trunk: 14, primary: 12, secondary: 10, tertiary: 8,
-  motorway_link: 8, trunk_link: 8, primary_link: 8, secondary_link: 7, tertiary_link: 6,
-  residential: 6, unclassified: 5.5, service: 4, living_street: 4.5,
-  pedestrian: 5, road: 5.5, busway: 7,
-};
 
 // ── survey overrides ────────────────────────────────────────────────────────
 
@@ -275,10 +250,10 @@ function resolveWidth(
   }
 
   return {
-    width_m: CLASS_DEFAULT[highway] ?? 5.5,
+    width_m: classDefault(highway).width_m,
     width_source: 'class_default',
-    width_conf: 0.2,
-    width_note: `assumed from road class (${highway.replace(/_/g, ' ')}) — unverified`,
+    width_conf: classDefaultConfidence(highway),
+    width_note: classDefaultNote(highway),
   };
 }
 

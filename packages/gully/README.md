@@ -21,7 +21,13 @@ pilot instrumentation are built. The pilot itself — one RWA, forty users, four
 is field work, not code.
 
 Anything needing a person — a phone in the field, a trained model, server keys — is in
-[MANUAL.md](MANUAL.md).
+[MANUAL.md](MANUAL.md). The module map and load-bearing invariants are in
+[ARCHITECTURE.md](ARCHITECTURE.md).
+
+```bash
+npm test           # 68 tests over the pure core: engine, snap, rhythm, router, voice, widths
+npm run check      # typecheck + tests + build — the pre-commit gate
+```
 
 **Pilot area:** Kaggadasapura, CV Raman Nagar — a tanker-dependent residential grid.
 61 segments, 3.4 km of road.
@@ -66,7 +72,15 @@ Every segment gets a width and, more importantly, a record of where that number 
 | 2 | OSM `width` tag (`4`, `4 m`, `13'`, `15 ft` all parse) | `osm_tag` | 0.85 |
 | 3 | OSM `est_width` tag | `osm_est` | 0.60 |
 | 4 | `lanes` × 3.0 m, plus 1.5 m if `parking:*` is tagged | `inferred_lanes` | 0.40 |
-| 5 | Highway-class default (residential 6, service 4, …) | `class_default` | 0.20 |
+| 5 | Highway-class default (see below) | `class_default` | 0.20–0.30 |
+
+Class defaults carry provenance ([`src/segments/width.ts`](src/segments/width.ts)):
+`residential` (5.0 m) and `tertiary` (10.0 m) are **medians of every width-tagged road
+of that class in greater Bengaluru** (n = 188 and 62, Overpass, 2026-09-04) and earn
+confidence 0.30; the rest stay global rules of thumb at 0.20. `service` and `secondary`
+were measured too and deliberately not adopted — their city samples are contaminated by
+highway service carriageways, and a contaminated median is worse than an honest guess.
+The inspector states which kind each segment got.
 
 `data/survey-widths.csv` is the Phase 0 field survey's landing place. The pipeline works
 with it empty — which is the current state, and the reason the stat line reads
