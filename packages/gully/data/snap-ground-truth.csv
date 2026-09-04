@@ -1,0 +1,13 @@
+lat,lng,heading_deg,expected_segment_id,note
+# Hand-labelled fixes for the Phase 2 snap accuracy criterion (>=90% over 40 rows).
+#
+# One row per report taken standing in the layout. Read lat/lng/heading off the
+# capture screen's status line, and write down the road you were ACTUALLY on --
+# not the one the app chose. Leave heading empty if the phone had no compass.
+#
+# Segment ids look like w123456:0 and are shown in the map inspector. They change
+# whenever PILOT_RING moves, so re-label if you move the polygon.
+#
+# Run `npm run eval:snap` after every batch.
+#
+# 12.98801,77.66934,84,w119050741:2,standing at the corner by the borewell

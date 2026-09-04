@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Gully — width and blockage</title>
+    <meta
+      name="description"
+      content="One Bengaluru layout at true width, and which of your exits is blocked, by what, and for how long."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@300;400;500;600&family=Barlow:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="masthead__id">
+        <h1 id="layout-name">Gully</h1>
+        <p id="layout-sub" class="masthead__sub">loading the pilot polygon…</p>
+      </div>
+      <p id="stat-line" class="stat" aria-live="polite"></p>
+      <nav class="views" role="tablist" aria-label="View">
+        <button id="view-layout" class="is-on" role="tab" aria-selected="true" data-view="layout">Layout</button>
+        <button id="view-decide" role="tab" aria-selected="false" data-view="decide">Decide</button>
+        <button id="view-compare" role="tab" aria-selected="false" data-view="compare">Compare</button>
+      </nav>
+    </header>
+
+    <main class="stage">
+      <div id="map" class="map" tabindex="0" role="application"
+           aria-label="Pilot layout map. Left and right arrows follow connected road segments; up and down step through every segment."></div>
+
+      <div class="controls" role="group" aria-label="Map overlays">
+        <div class="toggle-set" role="radiogroup" aria-label="Colour segments by">
+          <button class="toggle is-on" data-mode="plain" role="radio" aria-checked="true">Plain</button>
+          <button class="toggle" data-mode="width_source" role="radio" aria-checked="false">Width source</button>
+          <button class="toggle" data-mode="tanker" role="radio" aria-checked="false">Tanker fit</button>
+          <button class="toggle" data-mode="rhythm" role="radio" aria-checked="false">Rhythm</button>
+        </div>
+        <div id="scrubber" class="scrubber" hidden></div>
+        <div id="legend" class="legend" hidden></div>
+      </div>
+
+      <aside id="inspector" class="inspector" aria-live="polite">
+        <div class="inspector__empty">
+          <p>Tap a road to read its width, where that number came from, and what a tanker leaves behind.</p>
+          <p class="inspector__hint">Or focus the map and use the arrow keys.</p>
+        </div>
+      </aside>
+    </main>
+
+    <section id="decide" class="decide" role="tabpanel" aria-label="Your exits right now" hidden></section>
+    <section id="compare" class="compare" role="tabpanel" aria-label="Gully next to a navigation app" hidden></section>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

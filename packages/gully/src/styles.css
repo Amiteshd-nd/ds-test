@@ -1,0 +1,365 @@
+/* Survey-sheet palette. Light figure on a darker ground, like a drawing. */
+:root {
+  --ground: #cbd3cc;
+  --road: #efede6;
+  --casing: #8a9691;
+  --ink: #1b2724;
+  --ink2: #4c5b56;
+  --panel: #f5f4ee;
+  --water: #256b8c;
+  --blocked: #a63a26;
+  --squeeze: #b5811c;
+  --clear: #3e6e52;
+
+  --rule: rgba(27, 39, 36, 0.14);
+  --data: 'Barlow Semi Condensed', 'Barlow', system-ui, sans-serif;
+  --prose: 'Barlow', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--data);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── masthead ───────────────────────────────────────────────────────────── */
+
+.masthead {
+  display: flex;
+  align-items: baseline;
+  gap: 28px;
+  padding: 14px 20px 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--rule);
+  flex-wrap: wrap;
+}
+
+.masthead__id { display: flex; align-items: baseline; gap: 10px; }
+
+.masthead h1 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.masthead__sub {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--ink2);
+}
+
+/* The measurement of the data gap. Phase 1 exists to produce this sentence. */
+.stat {
+  margin: 0;
+  margin-left: auto;
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--ink);
+  max-width: 62ch;
+}
+
+.stat b { font-weight: 600; }
+.stat .stat--weak { color: var(--ink2); font-weight: 300; }
+
+/* ── stage ──────────────────────────────────────────────────────────────── */
+
+.stage[hidden] { display: none; }
+
+.stage {
+  position: relative;
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  min-height: 0;
+}
+
+.map { position: relative; outline: none; }
+
+/* MapLibre puts tabindex on its own canvas, so that is what actually takes
+   focus — style it, not just the container. */
+.map:focus-visible,
+.map .maplibregl-canvas:focus-visible {
+  outline: 3px solid var(--water);
+  outline-offset: -3px;
+}
+
+.maplibregl-ctrl-scale {
+  font-family: var(--data);
+  font-size: 13px;
+  background: rgba(245, 244, 238, 0.9);
+  border-color: var(--ink2);
+  color: var(--ink);
+}
+
+/* ── controls ───────────────────────────────────────────────────────────── */
+
+.controls {
+  position: absolute;
+  left: 16px;
+  bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  z-index: 2;
+}
+
+.toggle-set {
+  display: flex;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(27, 39, 36, 0.16);
+}
+
+.toggle {
+  appearance: none;
+  border: 0;
+  border-right: 1px solid var(--rule);
+  background: transparent;
+  font-family: var(--data);
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ink2);
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.toggle:last-child { border-right: 0; }
+.toggle:hover { background: rgba(27, 39, 36, 0.05); color: var(--ink); }
+.toggle.is-on { background: var(--ink); color: var(--panel); font-weight: 500; }
+.toggle:focus-visible { outline: 2px solid var(--water); outline-offset: -2px; }
+
+.legend {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 10px 12px;
+  box-shadow: 0 1px 3px rgba(27, 39, 36, 0.16);
+  max-width: 300px;
+}
+
+.legend__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.legend__swatch {
+  width: 18px;
+  height: 4px;
+  border-radius: 1px;
+  flex: none;
+}
+
+.legend__count { margin-left: auto; color: var(--ink2); font-weight: 300; }
+
+.legend__rule {
+  margin: 8px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+  font-family: var(--prose);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink2);
+}
+
+/* ── inspector ──────────────────────────────────────────────────────────── */
+
+.inspector {
+  background: var(--panel);
+  border-left: 1px solid var(--rule);
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.inspector__empty {
+  font-family: var(--prose);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink2);
+  max-width: 30ch;
+}
+
+.inspector__hint { font-size: 13px; }
+
+.seg__name {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.seg__id {
+  margin: 2px 0 20px;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--ink2);
+}
+
+.seg__width {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.seg__width b {
+  font-size: 58px;
+  font-weight: 300;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+}
+
+.seg__width span { font-size: 20px; font-weight: 300; color: var(--ink2); }
+
+.seg__source {
+  margin: 8px 0 0;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.seg__dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+
+.seg__conf {
+  margin: 3px 0 0;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--ink2);
+}
+
+.seg__consequence {
+  margin: 20px 0 0;
+  padding: 13px 14px;
+  border-left: 3px solid var(--casing);
+  background: rgba(27, 39, 36, 0.035);
+  font-family: var(--prose);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.seg__consequence--blocked { border-left-color: var(--blocked); }
+.seg__consequence--squeeze { border-left-color: var(--squeeze); }
+.seg__consequence--clear { border-left-color: var(--clear); }
+
+.seg__facts {
+  margin: 22px 0 0;
+  border-top: 1px solid var(--rule);
+}
+
+.seg__fact {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 15px;
+}
+
+.seg__fact dt { color: var(--ink2); font-weight: 300; margin: 0; }
+.seg__fact dd { margin: 0; font-weight: 400; }
+
+.seg__nav {
+  margin: 18px 0 0;
+  font-family: var(--prose);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink2);
+}
+
+kbd {
+  font-family: var(--data);
+  font-size: 12px;
+  border: 1px solid var(--rule);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 0 4px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+/* ── narrow: inspector becomes a bottom sheet ───────────────────────────── */
+
+@media (max-width: 900px) {
+  .stage { grid-template-columns: 1fr; }
+
+  .inspector {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: 44%;
+    border-left: 0;
+    border-top: 1px solid var(--rule);
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 -2px 14px rgba(27, 39, 36, 0.18);
+    z-index: 3;
+  }
+
+  /* The map is the scarce resource on a phone: shrink the overlay, not the map.
+     Sits below the report row, which owns the top strip. */
+  .controls { bottom: auto; top: 60px; left: 10px; right: 10px; gap: 8px; }
+  .toggle { padding: 7px 12px; font-size: 14px; }
+  .legend { padding: 8px 10px; max-width: none; }
+  .legend__row { font-size: 14px; line-height: 1.4; }
+  .legend__rule { font-size: 12px; margin-top: 6px; padding-top: 6px; }
+  .masthead { padding: 10px 14px 9px; gap: 8px; }
+  .masthead h1 { font-size: 18px; }
+  .stat { margin-left: 0; font-size: 14px; }
+}
+
+/* ── rhythm scrubber ─────────────────────────────────────────────────────── */
+
+.scrubber {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 10px 12px;
+  box-shadow: 0 1px 3px rgba(27, 39, 36, 0.16);
+  max-width: 320px;
+  display: grid;
+  gap: 8px;
+}
+
+.scrubber[hidden] { display: none; }
+
+.scrubber__row { display: flex; align-items: center; gap: 8px; }
+
+.scrubber select {
+  font-family: var(--data);
+  font-size: 15px;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 5px 8px;
+}
+
+.scrubber__time { font-size: 17px; font-weight: 500; margin: 0; min-width: 5ch; }
+
+.scrubber input[type='range'] { flex: 1; accent-color: var(--water); }
+
+.scrubber__note {
+  margin: 0;
+  font-family: var(--prose);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink2);
+}

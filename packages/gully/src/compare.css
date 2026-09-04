@@ -1,0 +1,150 @@
+/* The comparison screen. Two cards, deliberately the same size: the argument is
+   about the shape of each answer, so neither side gets more room than the other. */
+
+.compare {
+  overflow-y: auto;
+  padding: 18px 20px 40px;
+  background: var(--ground);
+}
+
+.compare[hidden] { display: none; }
+
+.compare__head,
+.compare__grid,
+.compare__note,
+.compare__show,
+.compare__empty {
+  max-width: 860px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.compare__head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.compare__head h2 { margin: 0; font-size: 22px; font-weight: 600; }
+
+.compare__head select {
+  font-family: var(--data);
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 6px 9px;
+}
+
+.compare__moment { margin: 0 0 0 auto; font-size: 17px; font-weight: 300; color: var(--ink2); }
+
+.compare__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.compare__card {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 16px 18px 18px;
+  min-height: 260px;
+}
+
+.compare__card--us { border-left: 5px solid var(--water); }
+.compare__card--them { border-left: 5px solid var(--casing); }
+
+.compare__card h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink2);
+}
+
+.compare__answer {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.compare__answer--muted { color: var(--casing); }
+.compare__answer--green { color: var(--clear); }
+.compare__answer--amber { color: var(--squeeze); }
+.compare__answer--red { color: var(--blocked); }
+
+.compare__duration { margin: 8px 0 0; font-size: 18px; }
+.compare__consequence { margin: 4px 0 0; font-family: var(--prose); font-size: 15px; line-height: 1.45; }
+
+.compare__route {
+  margin: 12px 0 0;
+  font-size: 15px;
+  font-weight: 300;
+  color: var(--ink2);
+}
+
+.compare__why {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+  font-family: var(--prose);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink2);
+}
+
+.compare__loading { margin: 0; font-size: 17px; color: var(--ink2); }
+
+.compare__note {
+  margin: 16px auto 0;
+  font-family: var(--prose);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink2);
+}
+
+.compare__show {
+  display: block;
+  margin-top: 14px;
+  width: 100%;
+  appearance: none;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: var(--panel);
+  font-family: var(--data);
+  font-size: 16px;
+  color: var(--ink);
+  padding: 12px 16px;
+  cursor: pointer;
+}
+
+.compare__empty {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 20px;
+}
+
+.compare__empty h2 { margin: 0 0 8px; font-size: 19px; font-weight: 600; }
+
+.compare__empty p {
+  margin: 0;
+  font-family: var(--prose);
+  font-size: 15px;
+  line-height: 1.55;
+  max-width: 56ch;
+}
+
+@media (max-width: 900px) {
+  .compare { padding: 14px 12px 40px; }
+  .compare__grid { grid-template-columns: 1fr; }
+  .compare__card { min-height: 0; }
+  .compare__answer { font-size: 22px; }
+  .compare__moment { margin-left: 0; }
+}

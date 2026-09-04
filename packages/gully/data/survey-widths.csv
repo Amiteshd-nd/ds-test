@@ -1,0 +1,8 @@
+segment_id,width_m,measured_at,note
+# Phase 0 field survey fills this file. Tape at three points per segment,
+# record the narrowest. Anything listed here overrides the OSM tag and is
+# stamped width_source=survey, width_conf=0.95.
+#
+# Example rows — uncomment and replace with real measurements:
+# w1234567:0,4.2,2026-09-14,narrowest at the bend by the borewell
+# w1234567:1,3.8,2026-09-14,kerbside parking both sides, measured kerb to kerb

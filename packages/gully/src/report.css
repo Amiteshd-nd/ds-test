@@ -1,0 +1,518 @@
+/* Capture, queue and the report entry points. Same survey-sheet palette as the
+   map; the only place brightness is spent is the shutter and the send chip. */
+
+/* ── entry points on the map ─────────────────────────────────────────────── */
+
+.report-bar {
+  position: absolute;
+  right: 16px;
+  /* Clear of MapLibre's scale bar and attribution strip. */
+  bottom: 58px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+  z-index: 2;
+}
+
+.report-bar button {
+  font-family: var(--data);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(27, 39, 36, 0.16);
+}
+
+.report-bar__go {
+  background: var(--blocked);
+  color: #fdfbf7;
+  border-color: transparent;
+  font-size: 17px;
+  font-weight: 500;
+  padding: 12px 18px;
+}
+
+.report-bar__clear,
+.report-bar__queue {
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 15px;
+  padding: 9px 14px;
+}
+
+.report-bar button:focus-visible { outline: 2px solid var(--water); outline-offset: 2px; }
+.report-bar__go:hover { filter: brightness(1.08); }
+
+/* ── capture overlay ─────────────────────────────────────────────────────── */
+
+body.is-capturing { overflow: hidden; }
+
+/* A tap that lands slightly long must not select the label instead of pressing
+   the button — this is a gloved thumb on a phone, not a mouse. */
+.capture button,
+.report-bar button,
+.queue button {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* A class-level `display` beats the UA's [hidden] rule, so say it explicitly. */
+.capture[hidden],
+.queue[hidden] { display: none; }
+
+.capture {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: #101715;
+  color: #f2efe7;
+  font-family: var(--data);
+  display: flex;
+  flex-direction: column;
+}
+
+.capture__viewfinder,
+.capture__frame {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #101715;
+}
+
+.capture__viewfinder video,
+.capture__still {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.capture__nocam {
+  max-width: 28ch;
+  text-align: center;
+  font-family: var(--prose);
+  font-size: 15px;
+  line-height: 1.55;
+  color: #cfd6d1;
+}
+
+.capture__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  appearance: none;
+  border: 0;
+  border-radius: 3px;
+  background: rgba(16, 23, 21, 0.6);
+  color: #f2efe7;
+  font-family: var(--data);
+  font-size: 15px;
+  padding: 8px 13px;
+  cursor: pointer;
+}
+
+.capture__status {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  right: 92px;
+  z-index: 2;
+  font-size: 15px;
+  line-height: 1.4;
+  padding: 8px 11px;
+  border-radius: 3px;
+  background: rgba(16, 23, 21, 0.6);
+}
+
+/* The safety gate is the one message allowed to shout. */
+.capture__status--gate {
+  background: var(--blocked);
+  font-size: 16px;
+}
+
+.capture__notice {
+  position: absolute;
+  top: 62px;
+  left: 14px;
+  right: 14px;
+  z-index: 2;
+  margin: 0;
+  font-size: 15px;
+  padding: 8px 11px;
+  border-radius: 3px;
+  background: rgba(166, 58, 38, 0.9);
+}
+
+.capture__actions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 16px calc(24px + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, rgba(16, 23, 21, 0.86), transparent);
+}
+
+/* 84px, thumb-reachable, and the only round thing on screen. */
+.capture__shutter {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 5px solid #f2efe7;
+  background: #f2efe7;
+  cursor: pointer;
+  justify-self: center;
+  box-shadow: 0 0 0 3px rgba(16, 23, 21, 0.5);
+}
+
+.capture__shutter:active { transform: scale(0.94); }
+
+.capture__clear,
+.capture__voice {
+  appearance: none;
+  border: 1px solid rgba(242, 239, 231, 0.45);
+  border-radius: 3px;
+  background: rgba(16, 23, 21, 0.55);
+  color: #f2efe7;
+  font-family: var(--data);
+  font-size: 16px;
+  line-height: 1.25;
+  padding: 12px 10px;
+  cursor: pointer;
+}
+
+.capture__clear { justify-self: start; }
+.capture__voice { justify-self: end; }
+.capture__voice[disabled] { opacity: 0.35; }
+.capture__lang { display: block; font-size: 13px; opacity: 0.75; }
+
+.capture__working {
+  grid-column: 1 / -1;
+  text-align: center;
+  margin: 0;
+  padding: 30px 0;
+  font-size: 16px;
+}
+
+.capture__listening {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+  padding: 24px;
+}
+
+.capture__listening p { margin: 0; font-size: 18px; }
+.capture__eg { opacity: 0.65; font-size: 16px !important; }
+
+.capture__pulse {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--water);
+  animation: capture-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes capture-pulse {
+  0%, 100% { transform: scale(0.85); opacity: 0.65; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .capture__pulse { animation: none; }
+}
+
+/* ── confirm sheet ───────────────────────────────────────────────────────── */
+
+.capture__sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  max-height: 82%;
+  overflow-y: auto;
+  background: var(--panel);
+  color: var(--ink);
+  border-radius: 12px 12px 0 0;
+  padding: 16px 16px calc(18px + env(safe-area-inset-bottom));
+}
+
+.capture__where {
+  margin: 0 0 14px;
+  display: grid;
+  gap: 2px;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.capture__where b { font-size: 19px; font-weight: 500; }
+.capture__where span { color: var(--ink2); }
+.capture__snapmeta { font-size: 14px; font-weight: 300; }
+
+/* One tap sends. Everything below it is a correction, not a step. */
+.capture__send {
+  width: 100%;
+  appearance: none;
+  border: 0;
+  border-radius: 4px;
+  background: var(--blocked);
+  color: #fdfbf7;
+  font-family: var(--data);
+  text-align: left;
+  padding: 15px 18px;
+  cursor: pointer;
+  display: grid;
+  gap: 2px;
+}
+
+.capture__send span { font-size: 24px; font-weight: 500; line-height: 1.1; }
+.capture__send small { font-size: 14px; font-weight: 300; opacity: 0.9; }
+.capture__send:active { filter: brightness(0.94); }
+
+.capture__correct {
+  margin: 16px 0 8px;
+  font-size: 15px;
+  color: var(--ink2);
+}
+
+.capture__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.capture__chip {
+  appearance: none;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: transparent;
+  font-family: var(--data);
+  font-size: 16px;
+  color: var(--ink);
+  padding: 10px 13px;
+  cursor: pointer;
+}
+
+.capture__chip:active { background: rgba(27, 39, 36, 0.08); }
+
+.capture__privacy {
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+  font-family: var(--prose);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink2);
+}
+
+.capture__retake {
+  margin-top: 10px;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font-family: var(--data);
+  font-size: 15px;
+  color: var(--ink2);
+  padding: 6px 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* ── sent ────────────────────────────────────────────────────────────────── */
+
+.capture__sent {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+}
+
+.capture__sentline { margin: 0; font-size: 22px; font-weight: 500; max-width: 22ch; }
+.capture__senttime { margin: 0 0 12px; font-size: 15px; opacity: 0.7; }
+
+.capture__again,
+.capture__done {
+  appearance: none;
+  border: 1px solid rgba(242, 239, 231, 0.45);
+  border-radius: 3px;
+  background: transparent;
+  color: #f2efe7;
+  font-family: var(--data);
+  font-size: 16px;
+  padding: 11px 20px;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.capture__again { background: rgba(242, 239, 231, 0.14); }
+
+/* ── queue ───────────────────────────────────────────────────────────────── */
+
+.queue {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(420px, 100%);
+  z-index: 30;
+  background: var(--panel);
+  border-left: 1px solid var(--rule);
+  box-shadow: -2px 0 16px rgba(27, 39, 36, 0.16);
+  overflow-y: auto;
+  padding: 16px 18px calc(18px + env(safe-area-inset-bottom));
+  font-family: var(--data);
+}
+
+.queue__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.queue__head h2 { margin: 0; font-size: 19px; font-weight: 600; }
+
+.queue__head button,
+.queue__foot button {
+  appearance: none;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: transparent;
+  font-family: var(--data);
+  font-size: 15px;
+  color: var(--ink);
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.queue__foot button[disabled] { opacity: 0.45; cursor: default; }
+.queue__danger { color: var(--blocked); }
+
+.queue__stat { margin: 12px 0 2px; font-size: 16px; }
+.queue__target { margin: 0 0 14px; font-size: 14px; font-weight: 300; color: var(--ink2); }
+.queue__empty { font-family: var(--prose); font-size: 14px; color: var(--ink2); }
+
+.queue__list { list-style: none; margin: 0; padding: 0; }
+
+.queue__row {
+  padding: 10px 0 10px 11px;
+  border-top: 1px solid var(--rule);
+  border-left: 3px solid var(--blocked);
+}
+
+.queue__row--clear { border-left-color: var(--clear); }
+
+.queue__what {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.queue__what span { font-weight: 300; color: var(--ink2); }
+.queue__road { margin: 1px 0 0; font-size: 15px; }
+.queue__meta { margin: 2px 0 0; font-size: 13px; font-weight: 300; color: var(--ink2); }
+
+.queue__foot { display: flex; gap: 8px; margin-top: 18px; }
+
+@media (max-width: 900px) {
+  /* One row across the top, primary action first. Stacked in the corner it
+     collides with the map's own overlay toggles on a 375 px screen. */
+  .report-bar {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: auto;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 6px;
+    /* One line that scrolls, never two that wrap: the row sits above the map's
+       own overlay toggles, so its height has to stay predictable. */
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .report-bar::-webkit-scrollbar { display: none; }
+
+  .report-bar button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 11px 12px;
+    font-size: 14px;
+  }
+
+  .report-bar__go { font-size: 15px; font-weight: 500; }
+
+  .queue { width: 100%; border-left: 0; }
+
+  /* Pinch-zoom is the gesture on a phone; the +/- buttons only steal the corner
+     the report row needs. */
+  .maplibregl-ctrl-top-right { display: none; }
+}
+
+.report-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  z-index: 50;
+  margin: 0;
+  max-width: min(90vw, 44ch);
+  background: var(--ink);
+  color: var(--panel);
+  font-family: var(--data);
+  font-size: 16px;
+  padding: 11px 16px;
+  border-radius: 3px;
+  box-shadow: 0 2px 10px rgba(27, 39, 36, 0.3);
+}
+
+/* ── pilot metrics ───────────────────────────────────────────────────────── */
+
+.queue__metrics {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+}
+
+.queue__metrics h3 { margin: 0 0 8px; font-size: 17px; font-weight: 600; }
+.queue__metrics dl { margin: 0; }
+
+.queue__metric {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  font-size: 15px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.queue__metric dt { margin: 0; color: var(--ink2); font-weight: 300; }
+.queue__metric dd { margin: 0; }
+
+/* The one that decides whether any of the rest matters. */
+.queue__metric.is-lead dt,
+.queue__metric.is-lead dd { font-weight: 500; color: var(--ink); }
+
+.queue__metricnote {
+  margin: 10px 0 10px;
+  font-family: var(--prose);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink2);
+}

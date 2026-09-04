@@ -1,0 +1,30 @@
+{
+  "name": "gully",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Gully \u2014 Phase 1: street-level map foundation. Real OSM geometry rendered at true width.",
+  "scripts": {
+    "dev": "vite",
+    "dev:lan": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview",
+    "fetch": "tsx scripts/fetch-osm.ts",
+    "build:segments": "tsx scripts/build-segments.ts",
+    "data": "npm run fetch && npm run build:segments",
+    "typecheck": "tsc --noEmit",
+    "eval:snap": "tsx scripts/eval-snap.ts",
+    "eval:forecast": "tsx scripts/eval-forecast.ts"
+  },
+  "dependencies": {
+    "@tensorflow/tfjs-backend-webgl": "^4.22.0",
+    "@tensorflow/tfjs-converter": "^4.22.0",
+    "@tensorflow/tfjs-core": "^4.22.0",
+    "maplibre-gl": "^5.9.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.2",
+    "vite": "^7.2.4"
+  }
+}
