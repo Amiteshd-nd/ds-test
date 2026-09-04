@@ -14,7 +14,10 @@
     "data": "npm run fetch && npm run build:segments",
     "typecheck": "tsc --noEmit",
     "eval:snap": "tsx scripts/eval-snap.ts",
-    "eval:forecast": "tsx scripts/eval-forecast.ts"
+    "eval:forecast": "tsx scripts/eval-forecast.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {
     "@tensorflow/tfjs-backend-webgl": "^4.22.0",
@@ -25,6 +28,7 @@
   "devDependencies": {
     "tsx": "^4.20.0",
     "typescript": "^5.9.2",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "vitest": "^3.2.7"
   }
 }
