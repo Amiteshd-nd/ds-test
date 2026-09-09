@@ -7,11 +7,14 @@
 // route (/game/bangalore-times/assets/…) and 404. Importing through the bundler
 // hands it a correct, hashed URL in both dev and build.
 
-import playerUrl from './sprites/player.png?url';
-
-export const SPRITE_URLS = {
-  player: playerUrl,
-} as const;
+// Character sheets are discovered too. Every file in sprites/ is a 4x4 grid of
+// 32x48 frames (down, left, right, up), so adding a character is dropping a PNG
+// in — BootScene registers its animations automatically.
+const spriteModules = import.meta.glob('./sprites/*.png', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+}) as Record<string, string>;
 
 // Tilesets and tilemaps are discovered rather than listed. Dropping a PNG into
 // tilesets/ whose basename matches the tileset `name` in Tiled is all that is
@@ -42,6 +45,9 @@ const byBasename = (modules: Record<string, string>): Record<string, string> =>
  * validator enforces this at build time.
  */
 export const TILESET_URLS: Record<string, string> = byBasename(tilesetModules);
+
+/** Character spritesheet URLs keyed by basename, e.g. "citizen". */
+export const SPRITE_URLS: Record<string, string> = byBasename(spriteModules);
 
 /** Tilemap URLs keyed by file basename, e.g. "airport_interior". */
 export const TILEMAP_FILE_URLS: Record<string, string> = byBasename(tilemapModules);

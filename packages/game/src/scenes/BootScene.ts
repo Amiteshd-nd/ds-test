@@ -38,11 +38,13 @@ export class BootScene extends Phaser.Scene {
       console.error(`[BootScene] failed to load "${file.key}" from ${file.url}`);
     });
 
-    // Player spritesheet: 128×192 = 4 columns × 4 rows of 32×48 frames.
-    this.load.spritesheet('player', SPRITE_URLS.player, {
-      frameWidth: SPRITE_WIDTH,
-      frameHeight: SPRITE_HEIGHT,
-    });
+    // Every character sheet: 128×192 = 4 columns × 4 rows of 32×48 frames.
+    for (const [key, url] of Object.entries(SPRITE_URLS)) {
+      this.load.spritesheet(key, url, {
+        frameWidth: SPRITE_WIDTH,
+        frameHeight: SPRITE_HEIGHT,
+      });
+    }
 
     // Every map in the registry, and every tileset on disk. Tilesets are keyed
     // by basename, which the validator guarantees matches the `name` field of
@@ -65,7 +67,7 @@ export class BootScene extends Phaser.Scene {
 
     this.setAllTexturesNearest();
     this.createPlaceholderTextures();
-    this.createPlayerAnimations();
+    this.createCharacterAnimations();
 
     // Which scene follows is set by PhaserGame via the registry, so a host can
     // drop straight into a scene (e.g. the Whitefield sandbox) without editing
@@ -163,13 +165,17 @@ export class BootScene extends Phaser.Scene {
   }
 
   /**
-   * Walk and idle animations, one per direction.
+   * Walk and idle animations for every loaded character sheet.
    *
-   * Spritesheet rows: 0 = down (frames 0-3), 1 = left (4-7), 2 = right (8-11),
-   * 3 = up (12-15). Each row runs [stride-left, idle, stride-right, idle], so
-   * the middle frame of each row doubles as that direction's idle pose.
+   * Rows: 0 = down (frames 0-3), 1 = left (4-7), 2 = right (8-11), 3 = up
+   * (12-15). Each row runs [stride, idle, opposite stride, idle], so the
+   * middle frame doubles as that direction's idle pose.
+   *
+   * Keys are `<sheet>-walk-<dir>` and `<sheet>-idle-<dir>`, which is what
+   * Player and the ambient citizens look up — so a new sheet is animated
+   * without touching this method.
    */
-  private createPlayerAnimations(): void {
+  private createCharacterAnimations(): void {
     const rows: Array<{ dir: string; start: number }> = [
       { dir: 'down', start: 0 },
       { dir: 'left', start: 4 },
@@ -177,24 +183,28 @@ export class BootScene extends Phaser.Scene {
       { dir: 'up', start: 12 },
     ];
 
-    for (const { dir, start } of rows) {
-      const walkKey = `player-walk-${dir}`;
-      if (!this.anims.exists(walkKey)) {
-        this.anims.create({
-          key: walkKey,
-          frames: this.anims.generateFrameNumbers('player', { start, end: start + 3 }),
-          frameRate: 8,
-          repeat: -1,
-        });
-      }
+    for (const sheet of Object.keys(SPRITE_URLS)) {
+      if (!this.textures.exists(sheet)) continue; // load failed; already reported
 
-      const idleKey = `player-idle-${dir}`;
-      if (!this.anims.exists(idleKey)) {
-        this.anims.create({
-          key: idleKey,
-          frames: [{ key: 'player', frame: start + 1 }],
-          frameRate: 1,
-        });
+      for (const { dir, start } of rows) {
+        const walkKey = `${sheet}-walk-${dir}`;
+        if (!this.anims.exists(walkKey)) {
+          this.anims.create({
+            key: walkKey,
+            frames: this.anims.generateFrameNumbers(sheet, { start, end: start + 3 }),
+            frameRate: 8,
+            repeat: -1,
+          });
+        }
+
+        const idleKey = `${sheet}-idle-${dir}`;
+        if (!this.anims.exists(idleKey)) {
+          this.anims.create({
+            key: idleKey,
+            frames: [{ key: sheet, frame: start + 1 }],
+            frameRate: 1,
+          });
+        }
       }
     }
   }

@@ -20,6 +20,25 @@
         "Effects",
         "Foreground"
       ]
+    },
+    "whitefield_street": {
+      "file": "whitefield_street.tmj",
+      "requiredLayers": [
+        "Ground",
+        "Walls",
+        "Objects",
+        "Collision",
+        "Above Player"
+      ],
+      "collisionLayer": "Collision",
+      "spawnLayer": "Spawns",
+      "requiredSpawns": [
+        "player_spawn"
+      ],
+      "optionalLayers": [
+        "Effects",
+        "Foreground"
+      ]
     }
   },
   "layerOrder": [

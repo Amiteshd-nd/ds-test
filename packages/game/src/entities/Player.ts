@@ -23,9 +23,10 @@ export class Player extends Phaser.GameObjects.Sprite {
   private interactionEnabled = true;
   private interactionCallback: (() => void) | null = null;
 
-  constructor(scene: Phaser.Scene, x: number, y: number) {
-    ensurePlayerTexture(scene);
-    super(scene, x, y, 'player');
+  /** `textureKey` also selects the animation set, `<key>-walk-<dir>` etc. */
+  constructor(scene: Phaser.Scene, x: number, y: number, private textureKey = 'player') {
+    if (textureKey === 'player') ensurePlayerTexture(scene);
+    super(scene, x, y, textureKey);
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
@@ -118,11 +119,11 @@ export class Player extends Phaser.GameObjects.Sprite {
   }
 
   private playWalkAnim(): void {
-    this.playAnimIfPresent(`player-walk-${this.currentDirection}`);
+    this.playAnimIfPresent(`${this.textureKey}-walk-${this.currentDirection}`);
   }
 
   private playIdleAnim(): void {
-    this.playAnimIfPresent(`player-idle-${this.currentDirection}`);
+    this.playAnimIfPresent(`${this.textureKey}-idle-${this.currentDirection}`);
   }
 
   private stopMoving(): void {

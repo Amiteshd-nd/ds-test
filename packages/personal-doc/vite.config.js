@@ -46,6 +46,12 @@ export default defineConfig({
     }),
   ],
   build: {
+    // Never inline the game package's art. Below the 4KB default these tiny
+    // palette PNGs would become base64 data URIs, which works but diverges
+    // from the game's own build, skips the assets/game/ routing that keeps
+    // them away from the image optimizer, and hides them from Workbox.
+    assetsInlineLimit: (filePath) =>
+      filePath.replace(/\\/g, '/').includes('/game/src/assets/') ? false : undefined,
     rollupOptions: {
       output: {
         // Keep the game package's art in its own output folder so the image

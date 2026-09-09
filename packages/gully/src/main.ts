@@ -7,7 +7,7 @@ import './compare.css';
 import maplibregl from 'maplibre-gl';
 import segmentsUrl from '@data/segments.geojson?url';
 import scale from '@data/render-scale.json';
-import { CENTRE, LAYOUT_NAME, LAYOUT_SUBTITLE } from '../pilot.config';
+import { CENTRE, LAYOUT_NAME, LAYOUT_SUBTITLE, PILOT_RING } from '../pilot.config';
 import { createMap, type MapHandles } from './map';
 import { renderInspector } from './inspector';
 import { legendHtml, statLine } from './stats';
@@ -16,7 +16,8 @@ import { Queue } from './report/queue';
 import { buildSnapIndex } from './report/snap';
 import { allReports, saveReport } from './report/store';
 import { simulatedFix } from './report/sensors';
-import { buildEvents } from './state/engine';
+import { buildEvents, liveEvents } from './state/engine';
+import { obstructionFootprints } from './segments/obstructions';
 import {
   bucketLabel,
   buildRhythm,
@@ -71,6 +72,7 @@ async function main() {
     segments,
     scale as unknown as RenderScale,
     bounds,
+    PILOT_RING,
     (id) => select(id, false),
   );
 
@@ -277,6 +279,9 @@ async function main() {
     // Rhythm folds only closed events, so it is derived here rather than cached:
     // it changes every time an event ends, which is every few minutes.
     rhythm = buildRhythm(events, Date.now());
+    // Only live events get a footprint. Drawing an expired tanker to scale
+    // would say something the state engine has already stopped claiming.
+    handles.setObstructions(obstructionFootprints(liveEvents(events), segmentFacts, geometry));
     if (!scrubber.hidden) handles.setRhythmColours(rhythmColours());
     decide.render();
   }

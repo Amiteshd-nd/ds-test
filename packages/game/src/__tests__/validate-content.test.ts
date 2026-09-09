@@ -37,14 +37,6 @@ const quests = () => [
 
 const districts = () => [{ id: 'airport', name: 'Airport', phase: 1 }];
 
-const npcs = () => [
-  {
-    file: 'npcs/airport.json',
-    basename: 'airport',
-    json: [{ id: 'guy', name: 'Guy', tier: 2, district: 'airport', dialogue: 'npc', spawn: 's1' }],
-  },
-];
-
 const dialogue = (nodes: Record<string, unknown>) => [
   { file: 'dialogue/npc.json', basename: 'npc', json: { id: 'npc', speaker: 'S', portrait: 'p', nodes } },
 ];

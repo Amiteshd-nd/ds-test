@@ -2,7 +2,9 @@ import Phaser from 'phaser';
 import { Player } from '../entities/Player';
 import { useGameStore } from '../store';
 import { SaveManager } from '../systems/SaveManager';
-import { ensureBotTexture } from '../utils/placeholders';
+import { TILESET_URLS } from '../assets';
+import { MAPS } from '../assets/maps';
+import type { Direction } from '../utils/types';
 import {
   BOT_COUNT,
   BOT_SPEED_MAX,
@@ -13,49 +15,89 @@ import {
   CAMERA_DEADZONE_Y,
   DEPTH,
   SCENE_KEYS,
-  TILE_SIZE,
-  WORLD_HEIGHT,
-  WORLD_WIDTH,
 } from '../utils/constants';
 
-type Bot = Phaser.GameObjects.Sprite & { nextTurn: number };
+/** Ambient citizen: a sprite that walks and knows which way it is facing. */
+type Citizen = Phaser.GameObjects.Sprite & {
+  nextTurn: number;
+  sheet: string;
+  facing: Direction;
+};
+
+// Recoloured variants of one rig — a visibly mixed crowd from a single sheet
+// of drawing work.
+const CITIZEN_SHEETS = ['citizen', 'citizen_teal', 'citizen_ochre'];
 
 /**
- * MVP 1 — a walkable Whitefield block with a controllable player and ambient
- * bots on a random walk. No server and no art: the bots are the "looks like an
- * MMO, but isn't" illusion from the v1.0 tech stack, running entirely on the
- * player's device.
+ * A Whitefield street block, built from the street tileset.
+ *
+ * This is the local-simulation illusion in miniature: ambient citizens on a
+ * random walk make the street feel populated with no server involved. Later,
+ * a handful of these become real players and the rest stay bots.
  */
 export class WhitefieldScene extends Phaser.Scene {
   static readonly KEY = SCENE_KEYS.WHITEFIELD;
+  static readonly DISTRICT = 'whitefield';
 
   private player!: Player;
-  private bots: Bot[] = [];
+  private citizens: Citizen[] = [];
+  private map!: Phaser.Tilemaps.Tilemap;
 
   constructor() {
     super(WhitefieldScene.KEY);
   }
 
   create(): void {
+    this.citizens = [];
     useGameStore.getState().setActiveScene(WhitefieldScene.KEY);
 
-    this.physics.world.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    this.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    // Snap the camera to whole pixels — a fractional scroll re-samples every
-    // sprite and undoes the pixel-art rendering settings.
-    this.cameras.main.roundPixels = true;
+    this.cameras.main.setRoundPixels(true);
+    this.cameras.main.fadeIn(300, 0, 0, 0);
 
-    this.drawGround();
-    this.spawnBots();
+    const def = MAPS.whitefield_street;
+    this.map = this.make.tilemap({ key: def.key });
 
-    this.player = new Player(this, WORLD_WIDTH / 2, WORLD_HEIGHT / 2);
+    const tilesets: Phaser.Tilemaps.Tileset[] = [];
+    for (const declared of this.map.tilesets) {
+      const name = declared.name;
+      if (!(name in TILESET_URLS)) {
+        console.error(`[WhitefieldScene] tileset "${name}" has no image loaded`);
+        continue;
+      }
+      const tileset = this.map.addTilesetImage(name, name);
+      if (tileset) tilesets.push(tileset);
+    }
+
+    const ground = this.map.createLayer('Ground', tilesets);
+    const walls = this.map.createLayer('Walls', tilesets);
+    const objects = this.map.createLayer('Objects', tilesets);
+    const collisionLayer = this.map.createLayer(def.collisionLayer!, tilesets);
+    const above = this.map.createLayer('Above Player', tilesets);
+
+    ground?.setDepth(DEPTH.GROUND);
+    walls?.setDepth(DEPTH.WALLS);
+    objects?.setDepth(DEPTH.OBJECTS);
+    above?.setDepth(DEPTH.ABOVE_PLAYER);
+
+    if (collisionLayer) {
+      collisionLayer.setVisible(false);
+      collisionLayer.setCollisionByExclusion([-1, 0]);
+    }
+
+    const spawns = this.map.getObjectLayer(def.spawnLayer!);
+    const spawn = spawns?.objects.find((o) => o.name === 'player_spawn');
+
+    this.player = new Player(this, spawn?.x ?? 480, spawn?.y ?? 336, 'citizen');
     this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
     this.cameras.main.setDeadzone(CAMERA_DEADZONE_X, CAMERA_DEADZONE_Y);
+    this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+    this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 
-    // Restore a previous run if one is on disk.
+    if (collisionLayer) this.physics.add.collider(this.player, collisionLayer);
+
+    this.spawnCitizens(collisionLayer);
+
     SaveManager.getInstance().restore();
-
-    // Persist position on the way out so a reload resumes where it left off.
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.persist, this);
     this.game.events.once(Phaser.Core.Events.DESTROY, this.persist, this);
   }
@@ -64,39 +106,37 @@ export class WhitefieldScene extends Phaser.Scene {
     SaveManager.getInstance().save(WhitefieldScene.KEY, this.player.x, this.player.y);
   }
 
-  private drawGround(): void {
-    const g = this.add.graphics();
-    g.setDepth(DEPTH.GROUND);
-    g.fillStyle(0x1a1d24, 1);
-    g.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-
-    // Grid on the real tile pitch, so the sense of movement matches the size
-    // a Tiled tilemap will occupy once the art lands.
-    g.lineStyle(1, 0x2a2e38, 1);
-    for (let x = 0; x <= WORLD_WIDTH; x += TILE_SIZE) {
-      g.lineBetween(x, 0, x, WORLD_HEIGHT);
-    }
-    for (let y = 0; y <= WORLD_HEIGHT; y += TILE_SIZE) {
-      g.lineBetween(0, y, WORLD_WIDTH, y);
-    }
-  }
-
-  private spawnBots(): void {
-    ensureBotTexture(this);
+  /**
+   * Populate the street. Citizens are placed on the road corridor rather than
+   * anywhere on the map, so none of them start inside a building.
+   */
+  private spawnCitizens(collisionLayer: Phaser.Tilemaps.TilemapLayer | null): void {
+    const tile = this.map.tileWidth;
+    // Rows 5..16 are pavement, kerb and road — the walkable band.
+    const minY = 5 * tile + tile / 2;
+    const maxY = 16 * tile + tile / 2;
 
     for (let i = 0; i < BOT_COUNT; i++) {
-      const bot = this.add.sprite(
-        Phaser.Math.Between(TILE_SIZE, WORLD_WIDTH - TILE_SIZE),
-        Phaser.Math.Between(TILE_SIZE, WORLD_HEIGHT - TILE_SIZE),
-        'bot',
-      ) as Bot;
+      const sheet = CITIZEN_SHEETS[i % CITIZEN_SHEETS.length];
+      const citizen = this.add.sprite(
+        Phaser.Math.Between(tile, this.map.widthInPixels - tile),
+        Phaser.Math.Between(minY, maxY),
+        sheet,
+      ) as Citizen;
 
-      this.physics.add.existing(bot);
-      const body = bot.body as Phaser.Physics.Arcade.Body;
+      this.physics.add.existing(citizen);
+      const body = citizen.body as Phaser.Physics.Arcade.Body;
+      body.setSize(20, 12);
+      body.setOffset(6, 35);
       body.setCollideWorldBounds(true);
-      bot.setDepth(DEPTH.ENTITIES);
-      bot.nextTurn = 0;
-      this.bots.push(bot);
+      if (collisionLayer) this.physics.add.collider(citizen, collisionLayer);
+
+      citizen.setDepth(DEPTH.ENTITIES);
+      citizen.nextTurn = 0;
+      citizen.sheet = sheet;
+      citizen.facing = 'down';
+      citizen.play(`${sheet}-idle-down`);
+      this.citizens.push(citizen);
     }
 
     useGameStore.getState().setBotCount(BOT_COUNT);
@@ -105,21 +145,40 @@ export class WhitefieldScene extends Phaser.Scene {
   update(time: number): void {
     this.player.update();
 
-    // Random-walk bots: pick a new heading every so often.
-    for (const bot of this.bots) {
-      if (time <= bot.nextTurn) continue;
+    for (const citizen of this.citizens) {
+      const body = citizen.body as Phaser.Physics.Arcade.Body;
 
-      const angle = Phaser.Math.FloatBetween(0, Math.PI * 2);
-      const speed = Phaser.Math.Between(BOT_SPEED_MIN, BOT_SPEED_MAX);
-      const body = bot.body as Phaser.Physics.Arcade.Body;
-      body.setVelocity(Math.cos(angle) * speed, Math.sin(angle) * speed);
-      bot.nextTurn = time + Phaser.Math.Between(BOT_TURN_INTERVAL_MIN, BOT_TURN_INTERVAL_MAX);
+      if (time > citizen.nextTurn) {
+        // Cardinal headings only: a diagonal walk has no matching animation
+        // row, so the sprite would face a direction it is not moving in.
+        const dir = Phaser.Math.RND.pick(['down', 'left', 'right', 'up'] as Direction[]);
+        const speed = Phaser.Math.Between(BOT_SPEED_MIN, BOT_SPEED_MAX);
+        const idle = Phaser.Math.FloatBetween(0, 1) < 0.25;
+
+        body.setVelocity(
+          idle ? 0 : dir === 'left' ? -speed : dir === 'right' ? speed : 0,
+          idle ? 0 : dir === 'up' ? -speed : dir === 'down' ? speed : 0,
+        );
+
+        citizen.facing = dir;
+        citizen.play(`${citizen.sheet}-${idle ? 'idle' : 'walk'}-${dir}`, true);
+        citizen.nextTurn =
+          time + Phaser.Math.Between(BOT_TURN_INTERVAL_MIN, BOT_TURN_INTERVAL_MAX);
+      }
+
+      // A citizen stopped by a wall should not keep playing a walk cycle.
+      if (body.blocked.left || body.blocked.right || body.blocked.up || body.blocked.down) {
+        body.setVelocity(0);
+        citizen.play(`${citizen.sheet}-idle-${citizen.facing}`, true);
+        citizen.nextTurn = Math.min(citizen.nextTurn, time + 200);
+      }
     }
 
-    // Depth-sort so characters lower on screen draw in front.
-    this.player.setDepth(DEPTH.ENTITIES + this.player.y / WORLD_HEIGHT);
-    for (const bot of this.bots) {
-      bot.setDepth(DEPTH.ENTITIES + bot.y / WORLD_HEIGHT);
+    // Depth sort so characters lower on screen draw in front.
+    const h = this.map.heightInPixels;
+    this.player.setDepth(DEPTH.ENTITIES + this.player.y / h);
+    for (const citizen of this.citizens) {
+      citizen.setDepth(DEPTH.ENTITIES + citizen.y / h);
     }
   }
 }

@@ -3,14 +3,24 @@ import maplibregl, {
   type LngLatLike,
   type Map as MlMap,
 } from 'maplibre-gl';
+import { PALETTE, styleBasemap } from './basemap';
+import { junctionDiscs, pilotMask } from './segments/geometry';
+import { hatchImage } from './segments/obstructions';
 import type { ColourMode, RenderScale, SegmentCollection } from './types';
 
 export const SRC = 'segments';
+export const SRC_NODES = 'segment-nodes';
+export const SRC_PILOT = 'pilot';
 export const SRC_ROUTE = 'route';
 export const LAYER_ROUTE = 'route-line';
 export const LAYER_CASING = 'segment-casing';
 export const LAYER_SURFACE = 'segment-surface';
 export const LAYER_SELECTED = 'segment-selected';
+export const LAYER_NODE_CASING = 'node-casing';
+export const LAYER_NODE_SURFACE = 'node-surface';
+export const SRC_OBSTRUCTIONS = 'obstructions';
+export const LAYER_OBSTRUCTION = 'obstruction-fill';
+export const LAYER_OBSTRUCTION_EDGE = 'obstruction-edge';
 
 const BASEMAP = 'https://tiles.openfreemap.org/styles/positron';
 
@@ -82,6 +92,30 @@ export function rhythmColour(colours: Record<string, string>): ExpressionSpecifi
   ] as unknown as ExpressionSpecification;
 }
 
+/**
+ * Half a road's width, in screen pixels — the disc that fills a junction.
+ *
+ * Same metres-per-pixel stops as the line widths, so a disc and the roads it
+ * joins are always the same size. `circle-radius` carries the same restriction
+ * as `line-width`: ["zoom"] only as the direct input of a top-level interpolate.
+ */
+export function metreRadius(scale: RenderScale, extraMetres = 0, minPx = 0): ExpressionSpecification {
+  const widthM: ExpressionSpecification =
+    extraMetres === 0 ? ['get', 'width_m'] : ['+', ['get', 'width_m'], extraMetres];
+
+  const perStop = (mpp: number): ExpressionSpecification => {
+    const px = ['/', widthM, 2 * mpp] as unknown as ExpressionSpecification;
+    return minPx > 0 ? (['max', minPx, px] as unknown as ExpressionSpecification) : px;
+  };
+
+  return [
+    'interpolate',
+    ['exponential', 2],
+    ['zoom'],
+    ...scale.stops.flatMap(([zoom, mpp]) => [zoom, perStop(mpp)]),
+  ] as unknown as ExpressionSpecification;
+}
+
 export function surfaceColour(mode: ColourMode): ExpressionSpecification | string {
   if (mode === 'width_source') {
     return [
@@ -112,34 +146,6 @@ export function surfaceOpacity(mode: ColourMode): ExpressionSpecification | numb
   ] as unknown as ExpressionSpecification;
 }
 
-/**
- * Positron is context, not content. Drop it back so our casings read as the
- * figure: mute the label and POI layers, thin the basemap's own roads, and
- * repaint the ground plane in the survey-sheet sage.
- */
-function muteBasemap(map: MlMap) {
-  for (const layer of map.getStyle().layers ?? []) {
-    const id = layer.id;
-    if (id === 'background') {
-      map.setPaintProperty(id, 'background-color', '#CBD3CC');
-      continue;
-    }
-    if (layer.type === 'symbol') {
-      map.setPaintProperty(id, 'text-opacity', 0.25);
-      map.setPaintProperty(id, 'icon-opacity', 0.2);
-      continue;
-    }
-    if (layer.type === 'line') {
-      map.setPaintProperty(id, 'line-opacity', 0.25);
-      continue;
-    }
-    if (layer.type === 'fill') {
-      if (/water/.test(id)) map.setPaintProperty(id, 'fill-color', '#B6C4C6');
-      else map.setPaintProperty(id, 'fill-opacity', 0.2);
-    }
-  }
-}
-
 /** Our layers go above the basemap and below its labels. */
 function firstSymbolLayer(map: MlMap): string | undefined {
   return map.getStyle().layers?.find((l) => l.type === 'symbol')?.id;
@@ -150,6 +156,8 @@ export interface MapHandles {
   setMode(mode: ColourMode): void;
   setRhythmColours(colours: Record<string, string>): void;
   setSelected(id: string | null): void;
+  /** To-scale obstruction footprints, as GeoJSON polygons. */
+  setObstructions(data: unknown): void;
   setRoute(coordinates: LngLatLike[][]): void;
 }
 
@@ -158,6 +166,7 @@ export function createMap(
   segments: SegmentCollection,
   scale: RenderScale,
   bounds: maplibregl.LngLatBoundsLike,
+  pilotRing: [number, number][],
   onPick: (id: string | null) => void,
 ): Promise<MapHandles> {
   const map = new maplibregl.Map({
@@ -182,10 +191,42 @@ export function createMap(
     // map blank whenever a glyph or sprite request stalls.
     map.once('style.load', () => {
       try {
-      muteBasemap(map);
+      styleBasemap(map);
       const before = firstSymbolLayer(map);
 
       map.addSource(SRC, { type: 'geojson', data: segments as never });
+      map.addSource(SRC_NODES, { type: 'geojson', data: junctionDiscs(segments) as never });
+      map.addSource(SRC_PILOT, { type: 'geojson', data: pilotMask(pilotRing) as never });
+
+      // Everything outside the survey dims. Without this the reader cannot tell
+      // which roads we measured from Positron's own network, and the roads
+      // appear to stop for no reason.
+      map.addLayer(
+        {
+          id: 'pilot-mask',
+          type: 'fill',
+          source: SRC_PILOT,
+          filter: ['==', ['geometry-type'], 'Polygon'],
+          paint: { 'fill-color': PALETTE.outside, 'fill-opacity': 0.22 },
+        },
+        before,
+      );
+
+      map.addLayer(
+        {
+          id: 'pilot-edge',
+          type: 'line',
+          source: SRC_PILOT,
+          filter: ['==', ['geometry-type'], 'LineString'],
+          paint: {
+            'line-color': PALETTE.ink2,
+            'line-width': 1.2,
+            'line-opacity': 0.45,
+            'line-dasharray': [5, 4],
+          },
+        },
+        before,
+      );
 
       map.addLayer(
         {
@@ -194,8 +235,8 @@ export function createMap(
           source: SRC,
           layout: { 'line-cap': 'butt', 'line-join': 'round' },
           paint: {
-            'line-color': '#8A9691',
-            'line-width': metreWidth(scale, 0.9, 1.5),
+            'line-color': PALETTE.casing,
+            'line-width': metreWidth(scale, 0.9, 2.6),
           },
         },
         before,
@@ -210,7 +251,108 @@ export function createMap(
           paint: {
             'line-color': surfaceColour('plain'),
             'line-opacity': surfaceOpacity('plain'),
-            'line-width': metreWidth(scale),
+            // Clamped a little under the casing so a hairline of edge always
+            // survives: zoomed out, a road should still read as a road rather
+            // than dissolve into the ground.
+            'line-width': metreWidth(scale, 0, 1.4),
+          },
+        },
+        before,
+      );
+
+      // Discs fill the squared-off joins the butt caps leave behind: casing
+      // under the surface line, surface over it, both in metres.
+      map.addLayer(
+        {
+          id: LAYER_NODE_CASING,
+          type: 'circle',
+          source: SRC_NODES,
+          paint: {
+            'circle-color': PALETTE.casing,
+            'circle-radius': metreRadius(scale, 0.9, 1.3),
+            'circle-pitch-alignment': 'map',
+          },
+        },
+        LAYER_SURFACE,
+      );
+
+      map.addLayer(
+        {
+          id: LAYER_NODE_SURFACE,
+          type: 'circle',
+          source: SRC_NODES,
+          paint: {
+            'circle-color': surfaceColour('plain'),
+            'circle-opacity': surfaceOpacity('plain'),
+            'circle-radius': metreRadius(scale, 0, 0.7),
+            'circle-pitch-alignment': 'map',
+          },
+        },
+        before,
+      );
+
+      // The signature element: the obstruction, to scale, at the kerb, hatched
+      // like an annotation on a survey drawing (PRD §8).
+      for (const [name, colour] of [
+        ['hatch-blocked', '#A63A26'],
+        ['hatch-squeeze', '#B5811C'],
+      ] as const) {
+        if (!map.hasImage(name)) map.addImage(name, hatchImage(colour), { pixelRatio: 2 });
+      }
+
+      map.addSource(SRC_OBSTRUCTIONS, {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] } as never,
+      });
+
+      map.addLayer(
+        {
+          id: LAYER_OBSTRUCTION,
+          type: 'fill',
+          source: SRC_OBSTRUCTIONS,
+          paint: {
+            'fill-pattern': [
+              'match',
+              ['get', 'severity'],
+              'blocked',
+              'hatch-blocked',
+              'hatch-squeeze',
+            ] as unknown as ExpressionSpecification,
+            // A merely *possible* obstruction is drawn more faintly than a
+            // corroborated one: the picture carries the same uncertainty the
+            // words do.
+            'fill-opacity': [
+              'case',
+              ['==', ['get', 'state'], 'confirmed'],
+              0.95,
+              0.6,
+            ] as unknown as ExpressionSpecification,
+          },
+        },
+        before,
+      );
+
+      map.addLayer(
+        {
+          id: LAYER_OBSTRUCTION_EDGE,
+          type: 'line',
+          source: SRC_OBSTRUCTIONS,
+          paint: {
+            'line-color': [
+              'match',
+              ['get', 'severity'],
+              'blocked',
+              '#A63A26',
+              '#B5811C',
+            ] as unknown as ExpressionSpecification,
+            'line-width': 1.6,
+            // Dashed while unconfirmed — one person has said so, no more.
+            'line-dasharray': [
+              'case',
+              ['==', ['get', 'state'], 'confirmed'],
+              ['literal', [1, 0]],
+              ['literal', [2, 1.5]],
+            ] as unknown as ExpressionSpecification,
           },
         },
         before,
@@ -279,10 +421,16 @@ export function createMap(
           if (mode === 'rhythm') return; // colours arrive via setRhythmColours
           map.setPaintProperty(LAYER_SURFACE, 'line-color', surfaceColour(mode));
           map.setPaintProperty(LAYER_SURFACE, 'line-opacity', surfaceOpacity(mode));
+          // The junction disc carries the widest adjoining segment's properties,
+          // so the same expression colours it with no special casing.
+          map.setPaintProperty(LAYER_NODE_SURFACE, 'circle-color', surfaceColour(mode));
+          map.setPaintProperty(LAYER_NODE_SURFACE, 'circle-opacity', surfaceOpacity(mode));
         },
         setRhythmColours(colours) {
           map.setPaintProperty(LAYER_SURFACE, 'line-color', rhythmColour(colours));
           map.setPaintProperty(LAYER_SURFACE, 'line-opacity', 1);
+          map.setPaintProperty(LAYER_NODE_SURFACE, 'circle-color', rhythmColour(colours));
+          map.setPaintProperty(LAYER_NODE_SURFACE, 'circle-opacity', 1);
         },
         setRoute(lines) {
           const src = map.getSource(SRC_ROUTE) as maplibregl.GeoJSONSource | undefined;
@@ -297,6 +445,11 @@ export function createMap(
         },
         setSelected(id) {
           map.setFilter(LAYER_SELECTED, ['==', ['get', 'id'], id ?? '']);
+        },
+        setObstructions(data) {
+          (map.getSource(SRC_OBSTRUCTIONS) as maplibregl.GeoJSONSource | undefined)?.setData(
+            data as never,
+          );
         },
       });
       } catch (err) {
