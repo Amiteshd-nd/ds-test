@@ -1,0 +1,46 @@
+[
+  {
+    "id": "water_bottle",
+    "name": "Water Bottle",
+    "description": "One litre, sealed. Worth more than it looks.",
+    "icon": "item_placeholder",
+    "type": "consumable",
+    "effect": { "energy": 10 },
+    "stackable": true,
+    "max_stack": 6
+  },
+  {
+    "id": "cutting_chai",
+    "name": "Cutting Chai",
+    "description": "Half a glass, twice the sugar. The city runs on it.",
+    "icon": "item_placeholder",
+    "type": "consumable",
+    "effect": { "energy": 15, "stress": -5 },
+    "stackable": true,
+    "max_stack": 4
+  },
+  {
+    "id": "sim_card",
+    "name": "Prepaid SIM",
+    "description": "A local number. Nothing here works without one.",
+    "icon": "item_placeholder",
+    "type": "key_item",
+    "stackable": false
+  },
+  {
+    "id": "phone_charger",
+    "name": "Phone Charger",
+    "description": "Two-pin. Fits about half the sockets you'll meet.",
+    "icon": "item_placeholder",
+    "type": "equipment",
+    "stackable": false
+  },
+  {
+    "id": "degree_certificate",
+    "name": "Degree Certificate",
+    "description": "Laminated by your mother. You will be asked for it more than you expect.",
+    "icon": "item_placeholder",
+    "type": "key_item",
+    "stackable": false
+  }
+]

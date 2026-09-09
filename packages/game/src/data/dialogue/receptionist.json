@@ -1,0 +1,22 @@
+{
+  "id": "receptionist",
+  "speaker": "Receptionist",
+  "portrait": "npc_placeholder",
+  "nodes": {
+    "start": {
+      "text": "Welcome to Bengaluru! The exit is straight ahead. You'll find taxis and auto-rickshaws outside.",
+      "choices": [
+        { "text": "Which one is cheaper?", "next": "fares" },
+        { "text": "Thanks, I'll manage.", "next": "farewell" }
+      ]
+    },
+    "fares": {
+      "text": "Auto is cheaper — if you can get them on the meter. Pre-paid taxi is safer at this hour. Counter's right behind you.",
+      "effect": { "xp": 10, "xp_branch": "city_survival" },
+      "next": "farewell"
+    },
+    "farewell": {
+      "text": "Have a good stay. And mind the traffic."
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "id": "shopkeeper",
+  "speaker": "Shopkeeper",
+  "portrait": "npc_placeholder",
+  "nodes": {
+    "start": {
+      "text": "Need anything for the road? Water, snacks, phone chargers. Bangalore traffic is no joke — stock up.",
+      "choices": [
+        { "text": "One water bottle. (₹20)", "next": "bought_water", "effect": { "money": -20, "item_add": "water_bottle" } },
+        { "text": "A SIM card, please. (₹300)", "next": "bought_sim", "effect": { "money": -300, "item_add": "sim_card" } },
+        { "text": "Just looking.", "next": "farewell" }
+      ]
+    },
+    "bought_water": {
+      "text": "Smart. It gets dry here, even in the rain.",
+      "next": "farewell"
+    },
+    "bought_sim": {
+      "text": "Activation takes an hour or so. Keep the ID copy, they'll ask again.",
+      "effect": { "xp": 20, "xp_branch": "city_survival" },
+      "next": "farewell"
+    },
+    "farewell": {
+      "text": "Come back if you change your mind."
+    }
+  }
+}

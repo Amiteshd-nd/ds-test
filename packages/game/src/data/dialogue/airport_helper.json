@@ -1,0 +1,32 @@
+{
+  "id": "airport_helper",
+  "speaker": "Airport Helper",
+  "portrait": "npc_placeholder",
+  "nodes": {
+    "start": {
+      "text": "You look new here. Need help finding your way? The chai stall has the best cutting chai in the airport.",
+      "choices": [
+        { "text": "Where do I catch a bus to the city?", "next": "bus" },
+        {
+          "text": "Which area should I look for a PG in?",
+          "next": "insider",
+          "requires": { "skill": "city_survival", "level": 1 }
+        },
+        { "text": "I'm fine, thanks.", "next": "farewell" }
+      ]
+    },
+    "bus": {
+      "text": "Vayu Vajra, right outside gate 4. Goes to most of the city. Cash or card, both work.",
+      "effect": { "xp": 15, "xp_branch": "city_survival" },
+      "next": "farewell"
+    },
+    "insider": {
+      "text": "Depends on where you'll work. Whitefield if it's tech, Koramangala if it's startups. Don't sign anything before you see the water supply.",
+      "effect": { "xp": 25, "xp_branch": "city_survival" },
+      "next": "farewell"
+    },
+    "farewell": {
+      "text": "Take care. It's a good city, once it stops being loud."
+    }
+  }
+}

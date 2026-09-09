@@ -1,0 +1,40 @@
+{
+  "id": "arrival",
+  "title": "Touchdown",
+  "description": "You've landed at Kempegowda International with a suitcase and a degree. Get your bearings, then get out of the terminal.",
+  "chapter": 1,
+  "district": "airport",
+  "type": "search",
+  "objectives": [
+    {
+      "id": "greet_reception",
+      "text": "Ask the receptionist for directions",
+      "type": "dialogue",
+      "target": "receptionist"
+    },
+    {
+      "id": "stock_up",
+      "text": "Pick up something for the road",
+      "type": "collect",
+      "target": "water_bottle",
+      "optional": true
+    },
+    {
+      "id": "reach_exit",
+      "text": "Leave the arrivals hall",
+      "type": "reach",
+      "target": "zone_exit"
+    }
+  ],
+  "rewards": {
+    "xp": 50,
+    "xp_branch": "city_survival",
+    "items": [
+      "degree_certificate"
+    ],
+    "reputation": 10
+  },
+  "on_complete": {
+    "unlock_scene": "PGScene"
+  }
+}

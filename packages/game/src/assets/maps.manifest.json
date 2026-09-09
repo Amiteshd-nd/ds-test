@@ -1,0 +1,35 @@
+{
+  "$comment": "Contract between Tiled exports and the game. Both the runtime map registry (src/assets/maps.ts) and the build-time validator (scripts/validate-maps.mjs) read this file, so a Tiled export that drifts from it fails the build instead of rendering an empty floor.",
+  "tileSize": 32,
+  "maps": {
+    "airport_map": {
+      "file": "airport_interior.tmj",
+      "requiredLayers": [
+        "Ground",
+        "Walls",
+        "Objects",
+        "Collision",
+        "Above Player"
+      ],
+      "collisionLayer": "Collision",
+      "spawnLayer": "Spawns",
+      "requiredSpawns": [
+        "player_spawn"
+      ],
+      "optionalLayers": [
+        "Effects",
+        "Foreground"
+      ]
+    }
+  },
+  "layerOrder": [
+    "Ground",
+    "Walls",
+    "Objects",
+    "Collision",
+    "Above Player",
+    "Effects",
+    "Foreground"
+  ],
+  "$layerOrderComment": "Canonical draw order, back to front. Depth comes from layering rather than from bigger images. A map need not use every layer, but any layer it does use must be named from this list \u2014 an unlisted name is a typo or a taxonomy drift."
+}

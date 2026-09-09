@@ -1,0 +1,22 @@
+{
+  "id": "security_guard",
+  "speaker": "Security Guard",
+  "portrait": "npc_placeholder",
+  "nodes": {
+    "start": {
+      "text": "Keep your luggage with you at all times. The auto stand is to the right, past the shops.",
+      "choices": [
+        { "text": "Is something going on?", "next": "unease" },
+        { "text": "Understood.", "next": "farewell" }
+      ]
+    },
+    "unease": {
+      "text": "Nothing. Just… a lot of calls this morning. Two flights held at the gate, no reason given. Probably nothing.",
+      "effect": { "stress": 5 },
+      "next": "farewell"
+    },
+    "farewell": {
+      "text": "Move along, please. Don't block the walkway."
+    }
+  }
+}

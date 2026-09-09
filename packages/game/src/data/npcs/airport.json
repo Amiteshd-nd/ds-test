@@ -1,0 +1,46 @@
+[
+  {
+    "id": "receptionist",
+    "name": "Airport Receptionist",
+    "tier": 2,
+    "district": "airport",
+    "dialogue": "receptionist",
+    "spawn": "receptionist"
+  },
+  {
+    "id": "airport_helper",
+    "name": "Airport Helper",
+    "tier": 2,
+    "district": "airport",
+    "dialogue": "airport_helper",
+    "spawn": "helper",
+    "tint": 2278750
+  },
+  {
+    "id": "security_guard",
+    "name": "Security Guard",
+    "tier": 2,
+    "district": "airport",
+    "dialogue": "security_guard",
+    "spawn": "gaurd",
+    "tint": 6579625
+  },
+  {
+    "id": "shopkeeper_kiosk",
+    "name": "Kiosk Shopkeeper",
+    "tier": 2,
+    "district": "airport",
+    "dialogue": "shopkeeper",
+    "spawn": "shopkeeper_1",
+    "tint": 16095515
+  },
+  {
+    "id": "shopkeeper_food",
+    "name": "Food Kiosk Vendor",
+    "tier": 2,
+    "district": "airport",
+    "dialogue": "shopkeeper",
+    "spawn": "shopkeeper_2",
+    "tint": 16095515
+  }
+]
