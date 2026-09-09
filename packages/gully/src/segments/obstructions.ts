@@ -160,13 +160,18 @@ export function hatchImage(colour: string, size = 8): ImageData {
 
   ctx.clearRect(0, 0, size, size);
   ctx.strokeStyle = colour;
-  ctx.lineWidth = 2;
+  // Heavy enough to read as a solid object at a glance and still resolve as
+  // hatching up close. Thin lines made the signature element the faintest
+  // thing on the map, which is the opposite of what PRD §8 asks for.
+  ctx.lineWidth = 3;
   ctx.lineCap = 'square';
 
-  // 45 degrees, drawn twice so it tiles seamlessly across the wrap.
+  // 45 degrees, drawn three times so the pattern tiles seamlessly across wraps.
   ctx.beginPath();
   ctx.moveTo(-size, size);
   ctx.lineTo(size, -size);
+  ctx.moveTo(-size / 2, size * 1.5);
+  ctx.lineTo(size * 1.5, -size / 2);
   ctx.moveTo(0, size * 2);
   ctx.lineTo(size * 2, 0);
   ctx.stroke();

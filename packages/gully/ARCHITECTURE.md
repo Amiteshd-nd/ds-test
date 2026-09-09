@@ -13,7 +13,10 @@ framework: **pure core, thin shell.**
 ```
 scripts/            build-time: Overpass fetch, segment build, eval harnesses
 src/
+  basemap.ts          Positron treatment + the palette
   segments/width.ts   width parsing + class defaults (tested)
+  segments/geometry.ts    pilot mask, junction discs
+  segments/obstructions.ts to-scale obstruction footprints + hatch swatch
   report/             capture: geo + snap (tested), voice (tested), sensors,
                       classify, redact, store (IndexedDB), capture UI, queue UI
   state/              engine (tested) — reports → events; priors (ALL PLACEHOLDERS); seed
@@ -79,6 +82,10 @@ hash of the report set rather than mutating.
 - **MapLibre renders 512 px tiles** — the metres-per-pixel constant is
   `40075016.686 / 512 / 2^zoom`, and `["zoom"]` may only appear as the direct
   input of a top-level `interpolate` (violations are dropped *silently*).
+- **`line-dasharray` is not data-driven.** An expression there is accepted and
+  then ignored; split into filtered layers instead.
+- **The mask must be darker than the ground it covers.** Filling it with the
+  ground colour dims nothing — see `PALETTE.outside`.
 - **Nothing from Google Routes is stored.** The road graph stays publishable
   because nothing Google-derived ever enters it.
 

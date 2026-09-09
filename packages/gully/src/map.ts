@@ -19,8 +19,10 @@ export const LAYER_SELECTED = 'segment-selected';
 export const LAYER_NODE_CASING = 'node-casing';
 export const LAYER_NODE_SURFACE = 'node-surface';
 export const SRC_OBSTRUCTIONS = 'obstructions';
+export const LAYER_OBSTRUCTION_BASE = 'obstruction-base';
 export const LAYER_OBSTRUCTION = 'obstruction-fill';
 export const LAYER_OBSTRUCTION_EDGE = 'obstruction-edge';
+export const LAYER_OBSTRUCTION_EDGE_SOFT = 'obstruction-edge-soft';
 
 const BASEMAP = 'https://tiles.openfreemap.org/styles/positron';
 
@@ -305,19 +307,36 @@ export function createMap(
         data: { type: 'FeatureCollection', features: [] } as never,
       });
 
+      const bySeverity = (blocked: string, squeeze: string) =>
+        ['match', ['get', 'severity'], 'blocked', blocked, squeeze] as unknown as ExpressionSpecification;
+
+      // A flat base under the hatch, so the glyph reads as a solid object from
+      // across the room and still resolves into drawn hatching up close.
+      map.addLayer(
+        {
+          id: LAYER_OBSTRUCTION_BASE,
+          type: 'fill',
+          source: SRC_OBSTRUCTIONS,
+          paint: {
+            'fill-color': bySeverity('#A63A26', '#B5811C'),
+            'fill-opacity': [
+              'case',
+              ['==', ['get', 'state'], 'confirmed'],
+              0.42,
+              0.24,
+            ] as unknown as ExpressionSpecification,
+          },
+        },
+        before,
+      );
+
       map.addLayer(
         {
           id: LAYER_OBSTRUCTION,
           type: 'fill',
           source: SRC_OBSTRUCTIONS,
           paint: {
-            'fill-pattern': [
-              'match',
-              ['get', 'severity'],
-              'blocked',
-              'hatch-blocked',
-              'hatch-squeeze',
-            ] as unknown as ExpressionSpecification,
+            'fill-pattern': bySeverity('hatch-blocked', 'hatch-squeeze'),
             // A merely *possible* obstruction is drawn more faintly than a
             // corroborated one: the picture carries the same uncertainty the
             // words do.
@@ -332,33 +351,42 @@ export function createMap(
         before,
       );
 
+      // Two edge layers rather than one, because `line-dasharray` is not a
+      // data-driven property in MapLibre — a `case` there is accepted and then
+      // quietly ignored, so both states drew the same outline.
       map.addLayer(
         {
           id: LAYER_OBSTRUCTION_EDGE,
           type: 'line',
           source: SRC_OBSTRUCTIONS,
+          filter: ['==', ['get', 'state'], 'confirmed'],
+          paint: { 'line-color': bySeverity('#8C2E1E', '#8F6415'), 'line-width': 1.8 },
+        },
+        before,
+      );
+
+      // Dashed while only one person has said so. The picture hedges exactly
+      // where the words do.
+      map.addLayer(
+        {
+          id: LAYER_OBSTRUCTION_EDGE_SOFT,
+          type: 'line',
+          source: SRC_OBSTRUCTIONS,
+          filter: ['!=', ['get', 'state'], 'confirmed'],
           paint: {
-            'line-color': [
-              'match',
-              ['get', 'severity'],
-              'blocked',
-              '#A63A26',
-              '#B5811C',
-            ] as unknown as ExpressionSpecification,
-            'line-width': 1.6,
-            // Dashed while unconfirmed — one person has said so, no more.
-            'line-dasharray': [
-              'case',
-              ['==', ['get', 'state'], 'confirmed'],
-              ['literal', [1, 0]],
-              ['literal', [2, 1.5]],
-            ] as unknown as ExpressionSpecification,
+            'line-color': bySeverity('#8C2E1E', '#8F6415'),
+            'line-width': 1.4,
+            'line-dasharray': [2.5, 2],
           },
         },
         before,
       );
 
-      // Selection ring — sits just outside the casing so it never hides width.
+      // Selection: a hollow outline hugging the casing, not a fat line beneath
+      // it. `line-gap-width` punches the middle out, so the ring can sit on top
+      // of everything — discs, hatching, all of it — and still never cover the
+      // width it is pointing at. Drawn under the old scheme it was a one-pixel
+      // sliver at the bottom of the stack, which is to say invisible.
       map.addLayer(
         {
           id: LAYER_SELECTED,
@@ -367,12 +395,13 @@ export function createMap(
           filter: ['==', ['get', 'id'], ''],
           layout: { 'line-cap': 'butt', 'line-join': 'round' },
           paint: {
-            'line-color': '#1B2724',
-            'line-width': metreWidth(scale, 2.4, 4),
-            'line-opacity': 0.85,
+            'line-color': PALETTE.ink,
+            'line-gap-width': metreWidth(scale, 0.9, 2.6),
+            'line-width': 2,
+            'line-opacity': 0.9,
           },
         },
-        LAYER_CASING,
+        before,
       );
 
       // The chosen route, drawn over everything: it is an answer, not terrain.
