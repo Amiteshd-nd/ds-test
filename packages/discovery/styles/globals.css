@@ -1,0 +1,40 @@
+/* App base. Everything here reads the semantic layer only — never a primitive.
+   If something needs a value with no semantic name, add the token in
+   grammar/tokens.css instead of reaching past the layer. */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  background: var(--bg-canvas);
+  color: var(--fg-primary);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body, var(--fs-md));
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 { margin: 0; font-weight: var(--fw-semi); line-height: var(--lh-tight); }
+p { margin: 0; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+
+a { color: inherit; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+
+:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--r-sm); }
+
+code, kbd, samp, .mono { font-family: var(--font-mono); font-size: var(--fs-code, var(--fs-sm)); }
+
+/* Screen-reader-only: state that must live in the accessible name, not in a colour. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Motion has exactly one job here: showing what changed. Nothing loops. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

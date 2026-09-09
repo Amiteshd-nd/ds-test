@@ -1,0 +1,4 @@
+/* The token file lives in grammar/ and is the source of truth for every surface.
+   docs/build-workflow.md §1 puts it at styles/tokens.css, so this is that path —
+   an import rather than a copy, because two copies of a token file drift. */
+@import '../grammar/tokens.css';

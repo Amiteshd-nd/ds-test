@@ -1,0 +1,346 @@
+/* coding — Anvaya. Developer tooling: the existing grammar is respected, hierarchy
+   comes from rules and alignment rather than containers, and the whole boldness
+   budget goes to the plan view.
+
+   Semantic tokens only. Anything that looks like a magic number here is either a
+   hairline (1px) or a hand-tuned optical value called out in a comment. */
+
+.surface {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(21rem, 26rem);
+  align-items: start;
+}
+.column {
+  min-width: 0;
+  padding: var(--sp-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-7);
+}
+.column + .column {
+  border-left: 1px solid var(--line-hairline);
+  padding-left: var(--sp-5);
+  gap: var(--sp-6);
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow: auto;
+}
+@media (max-width: 68rem) {
+  .surface { grid-template-columns: minmax(0, 1fr); }
+  .column + .column { border-left: 0; border-top: 1px solid var(--line-hairline); position: static; max-height: none; }
+}
+
+/* ---- section frames: a rule and a label, never a card ------------------- */
+.section { display: flex; flex-direction: column; gap: var(--sp-3); }
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--line-hairline);
+}
+.sectionTitle { font-size: var(--fs-md); font-weight: var(--fw-semi); }
+.sectionAside { color: var(--fg-secondary); font-size: var(--fs-xs); }
+.empty { color: var(--fg-tertiary); font-size: var(--fs-sm); }
+
+/* ---- orientation: the readable-cold line -------------------------------- */
+.orient { display: flex; flex-direction: column; gap: var(--sp-3); }
+.orientTop { display: flex; align-items: flex-start; gap: var(--sp-4); justify-content: space-between; }
+.orientWhere { font-size: var(--fs-xl); line-height: var(--lh-tight); font-weight: var(--fw-medium); }
+.orientPhase { color: var(--fg-secondary); font-size: var(--fs-sm); }
+.orientClocks { display: flex; gap: var(--sp-5); }
+.clock { display: flex; flex-direction: column; gap: 2px; }
+.clockLabel { color: var(--fg-tertiary); font-size: var(--fs-xs); }
+.clockValue { font-family: var(--font-mono); font-size: var(--fs-md); font-variant-numeric: tabular-nums; }
+.worry { display: inline-flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-sm); }
+.worry[data-worry='no'] { color: var(--agent-done-fg); }
+.worry[data-worry='soon'] { color: var(--agent-review-fg); }
+.worry[data-worry='now'] {
+  color: var(--agent-blocked-fg);
+  font-weight: var(--fw-semi);
+  background: var(--agent-blocked-bg);
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-sm);
+  box-shadow: var(--agent-blocked-ring);
+}
+.pip { width: 8px; height: 8px; border-radius: var(--r-full); background: currentColor; flex: none; }
+
+.actions { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+.button {
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  font-size: var(--fs-sm);
+  background: var(--bg-raised);
+}
+.button:hover { border-color: var(--fg-secondary); text-decoration: none; }
+.button[data-kind='primary'] { background: var(--fg-primary); color: var(--bg-canvas); border-color: var(--fg-primary); font-weight: var(--fw-medium); }
+.button[data-kind='attention'] { background: var(--agent-blocked-bg); border-color: var(--agent-blocked-fg); color: var(--agent-blocked-fg); font-weight: var(--fw-semi); }
+.button:disabled { opacity: 0.45; cursor: default; }
+
+/* ---- the plan view: this surface's one bold thing ----------------------- */
+.plan { display: flex; flex-direction: column; }
+.planRow {
+  display: grid;
+  grid-template-columns: 1.25rem minmax(0, 1fr) auto;
+  gap: var(--sp-3);
+  align-items: baseline;
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--line-hairline);
+}
+.planRow:last-child { border-bottom: 0; }
+/* The spine: a step's own state, in one column, at a glance. */
+.spine {
+  align-self: stretch;
+  justify-self: center;
+  width: 2px;
+  background: var(--agent-idle-bg);
+  position: relative;
+}
+.spine::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0.55rem; /* optical: aligns the node to the label's cap height */
+  width: 9px; height: 9px;
+  margin-left: -4.5px;
+  border-radius: var(--r-full);
+  background: var(--agent-idle-fg);
+}
+.planLabel { font-size: var(--fs-lg); line-height: var(--lh-tight); }
+.planState { font-size: var(--fs-sm); color: var(--fg-secondary); white-space: nowrap; }
+.planMeta { grid-column: 2 / -1; font-size: var(--fs-sm); color: var(--fg-secondary); }
+.planStream {
+  grid-column: 2 / -1;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--fg-secondary);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.planRow[data-state='running'] .spine { background: var(--agent-active-bg); }
+.planRow[data-state='running'] .spine::before { background: var(--agent-active-fg); }
+.planRow[data-state='running'] .planLabel { font-weight: var(--fw-medium); }
+.planRow[data-state='succeeded'] .spine::before { background: var(--agent-done-fg); }
+.planRow[data-state='succeeded'] .planLabel { color: var(--fg-secondary); }
+.planRow[data-state='failed'] .spine::before { background: var(--agent-failed-fg); }
+.planRow[data-state='failed'] .planState { color: var(--agent-failed-fg); font-weight: var(--fw-medium); }
+.planRow[data-state='stalled'] .spine { background: var(--agent-stalled-bg); }
+.planRow[data-state='stalled'] .planState { color: var(--agent-stalled-fg); font-weight: var(--fw-medium); }
+
+/* Provisional work: genuinely less committed, not a colour swap. Dashed spine,
+   lower contrast, italic state, and the assumption spelled out underneath. */
+.planRow[data-state='speculative'] .spine { background: none; border-left: 2px dashed var(--fg-tertiary); width: 0; }
+.planRow[data-state='speculative'] .spine::before { background: var(--bg-canvas); box-shadow: 0 0 0 1px var(--fg-tertiary); }
+.planRow[data-state='speculative'] .planLabel { color: var(--fg-secondary); }
+.planRow[data-state='speculative'] .planState { font-style: var(--value-inferred-style); }
+
+/* The reserved channel. Nothing else on any surface may use these tokens. */
+.planRow[data-state='blocked_on_permission'],
+.planRow[data-state='blocked_on_human'] {
+  background: var(--agent-blocked-bg);
+  box-shadow: inset var(--agent-blocked-ring);
+  border-radius: var(--r-sm);
+  padding-left: var(--sp-2);
+  padding-right: var(--sp-2);
+}
+.planRow[data-state='blocked_on_permission'] .spine::before,
+.planRow[data-state='blocked_on_human'] .spine::before { background: var(--agent-blocked-fg); }
+.planRow[data-state='blocked_on_permission'] .planState,
+.planRow[data-state='blocked_on_human'] .planState { color: var(--agent-blocked-fg); font-weight: var(--agent-blocked-weight); }
+
+/* Success collapses to one line. Success is not information. */
+.planCollapsed {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0 var(--sp-2) calc(1.25rem + var(--sp-3));
+  border-bottom: 1px solid var(--line-hairline);
+  color: var(--fg-secondary);
+  font-size: var(--fs-sm);
+}
+.planCollapsed button { font-size: var(--fs-sm); color: var(--fg-primary); text-decoration: underline; text-underline-offset: 2px; }
+
+/* A plan revision interrupts the spine — it is an event, not an update. */
+.revision {
+  margin: var(--sp-3) 0;
+  padding: var(--sp-3) var(--sp-4);
+  border-left: var(--agent-conflict-rule);
+  background: var(--agent-conflict-bg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.revisionHead { font-weight: var(--fw-semi); font-size: var(--fs-sm); }
+.revisionBecause { font-size: var(--fs-sm); }
+.revisionLists { display: flex; gap: var(--sp-5); flex-wrap: wrap; font-size: var(--fs-sm); color: var(--fg-secondary); }
+.revisionLists strong { color: var(--fg-primary); font-weight: var(--fw-medium); }
+
+/* ---- divergence: nothing else on screen will say this ------------------- */
+.diverge {
+  border: 1px solid var(--agent-failed-fg);
+  border-left-width: 3px;
+  border-radius: var(--r-sm);
+  padding: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  background: var(--agent-failed-bg);
+}
+.divergeHead { font-weight: var(--fw-semi); color: var(--agent-failed-fg); }
+.divergeGrid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--sp-2) var(--sp-4); font-size: var(--fs-sm); }
+.divergeGrid dt { color: var(--fg-secondary); }
+.divergeNote { font-size: var(--fs-sm); color: var(--fg-secondary); }
+.fileList { display: flex; flex-direction: column; gap: 2px; font-family: var(--font-mono); font-size: var(--fs-xs); }
+
+/* ---- steering: the preview is the pattern ------------------------------- */
+.steer { display: flex; flex-direction: column; gap: var(--sp-3); }
+.steerInput {
+  width: 100%;
+  padding: var(--sp-3);
+  background: var(--bg-raised);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  color: var(--fg-primary);
+  font: inherit;
+  font-size: var(--fs-sm);
+  resize: vertical;
+}
+.steerPreview { display: grid; gap: var(--sp-3); grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.steerCol { display: flex; flex-direction: column; gap: var(--sp-1); font-size: var(--fs-sm); }
+.steerColHead { font-size: var(--fs-xs); color: var(--fg-secondary); }
+.steerCol[data-kind='kept'] .steerColHead { color: var(--agent-done-fg); }
+.steerCol[data-kind='discarded'] .steerColHead { color: var(--agent-failed-fg); }
+.steerCol[data-kind='requeued'] .steerColHead { color: var(--agent-review-fg); }
+.steerCol li { font-family: var(--font-mono); font-size: var(--fs-xs); }
+.steerCol[data-kind='discarded'] li { text-decoration: line-through; color: var(--fg-tertiary); }
+
+/* ---- asks --------------------------------------------------------------- */
+.ask {
+  border: 1px solid var(--agent-blocked-fg);
+  background: var(--agent-blocked-bg);
+  box-shadow: var(--agent-blocked-ring);
+  border-radius: var(--r-sm);
+  padding: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.askKind { font-size: var(--fs-xs); color: var(--agent-blocked-fg); font-weight: var(--fw-semi); }
+.askQuestion { font-size: var(--fs-lg); line-height: var(--lh-tight); }
+.askScope { font-size: var(--fs-sm); color: var(--fg-secondary); }
+.askAnswered { font-size: var(--fs-sm); color: var(--fg-secondary); }
+
+/* ---- checkpoints -------------------------------------------------------- */
+.checkpoint { padding: var(--sp-3) 0; border-bottom: 1px solid var(--line-hairline); display: flex; flex-direction: column; gap: var(--sp-2); }
+.checkpointTop { display: flex; align-items: baseline; gap: var(--sp-3); justify-content: space-between; }
+.checkpointLabel { font-size: var(--fs-md); font-weight: var(--fw-medium); }
+.checkpointState { font-size: var(--fs-xs); color: var(--fg-secondary); white-space: nowrap; }
+.checkpoint[data-state='partial'] .checkpointState { color: var(--agent-review-fg); font-weight: var(--fw-medium); }
+.checkpoint[data-state='restored'] { opacity: 0.7; }
+.checkpointNote { font-size: var(--fs-sm); color: var(--fg-secondary); }
+.checkpointActions { display: flex; gap: var(--sp-2); }
+
+/* ---- changes ------------------------------------------------------------ */
+.change {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: var(--sp-3);
+  align-items: baseline;
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--line-hairline);
+}
+.changePath { font-family: var(--font-mono); font-size: var(--fs-xs); overflow-wrap: anywhere; }
+.changeCount { font-family: var(--font-mono); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.changeAdds { color: var(--agent-done-fg); }
+.changeDels { color: var(--agent-failed-fg); }
+.changeState { font-size: var(--fs-xs); color: var(--fg-secondary); white-space: nowrap; }
+.changeNote { grid-column: 1 / -1; font-size: var(--fs-xs); color: var(--fg-secondary); }
+.change[data-state='proposed'] { opacity: 0.75; }
+.change[data-state='proposed'] .changePath { font-style: var(--value-inferred-style); }
+.change[data-state='applied_unreviewed'] .changeState { color: var(--agent-review-fg); font-weight: var(--fw-medium); }
+.change[data-state='reverted'] .changePath { text-decoration: line-through; color: var(--fg-tertiary); }
+.change[data-state='conflicts_with_manual_edit'] {
+  border-left: var(--agent-conflict-rule);
+  padding-left: var(--sp-3);
+  background: var(--agent-conflict-bg);
+}
+.change[data-state='conflicts_with_manual_edit'] .changeState { color: var(--agent-review-fg); font-weight: var(--fw-semi); }
+.change[data-speculative='true'] .changePath { color: var(--fg-secondary); }
+
+/* ---- non-findings: same weight as a finding ----------------------------- */
+.nonfinding { padding: var(--sp-3) 0; border-bottom: 1px solid var(--line-hairline); display: flex; flex-direction: column; gap: var(--sp-1); }
+.nonfindingTop { display: flex; gap: var(--sp-3); align-items: baseline; justify-content: space-between; }
+.nonfindingWhat { font-size: var(--fs-md); }
+.nonfindingKind { font-size: var(--fs-xs); color: var(--agent-review-fg); font-weight: var(--fw-medium); white-space: nowrap; }
+.nonfindingBoundary { font-size: var(--fs-sm); color: var(--fg-secondary); }
+
+/* ---- envelope ----------------------------------------------------------- */
+.envelope { display: flex; flex-direction: column; gap: var(--sp-3); }
+.envelopeLists { display: flex; flex-direction: column; gap: var(--sp-3); font-size: var(--fs-sm); }
+.envelopeList li { padding: 2px 0; }
+.envelopeList[data-kind='mustAsk'] li { color: var(--agent-blocked-fg); }
+.floor { display: flex; flex-direction: column; gap: var(--sp-2); }
+.floorTop { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
+.floorValue { font-family: var(--font-mono); font-size: var(--fs-md); font-variant-numeric: tabular-nums; }
+.floorHelp { font-size: var(--fs-xs); color: var(--fg-tertiary); }
+.floor input[type='range'] { width: 100%; accent-color: var(--sig-attention); }
+.consequence { font-size: var(--fs-sm); border-left: 2px solid var(--line-strong); padding-left: var(--sp-3); }
+
+/* ---- standing spec: hard and soft are structurally different ------------ */
+.specGroup { display: flex; flex-direction: column; gap: var(--sp-2); }
+.specHard li {
+  border-left: 2px solid var(--agent-failed-fg);
+  padding: var(--sp-1) var(--sp-3);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.specSoft li {
+  border-left: 1px solid var(--line-hairline);
+  padding: var(--sp-1) var(--sp-3);
+  font-size: var(--fs-sm);
+  color: var(--fg-secondary);
+}
+.specTested { font-size: var(--fs-xs); color: var(--fg-secondary); white-space: nowrap; }
+.specUntested { font-size: var(--fs-xs); color: var(--agent-review-fg); white-space: nowrap; }
+.specExample { background: var(--bg-raised); padding: var(--sp-3); border-radius: var(--r-sm); font-size: var(--fs-sm); display: flex; flex-direction: column; gap: var(--sp-1); }
+.specExampleLabel { font-size: var(--fs-xs); color: var(--fg-tertiary); }
+
+/* ---- latency waterfall -------------------------------------------------- */
+.waterfall { display: flex; flex-direction: column; gap: var(--sp-3); }
+.wfChart { width: 100%; height: auto; display: block; overflow: visible; }
+.wfAxisLabel { fill: var(--fg-tertiary); font-size: 10px; font-family: var(--font-mono); }
+.wfTick { stroke: var(--line-hairline); }
+.wfRowLabel { fill: var(--fg-secondary); font-size: 11px; }
+.wfTtft { stroke: var(--fg-primary); stroke-width: 2; }
+.wfLegend { display: flex; gap: var(--sp-4); flex-wrap: wrap; font-size: var(--fs-xs); color: var(--fg-secondary); }
+.wfLegendItem { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.wfSwatch { width: 10px; height: 10px; border-radius: 2px; }
+.wfNumbers { display: flex; gap: var(--sp-5); flex-wrap: wrap; }
+.wfNumber { display: flex; flex-direction: column; gap: 2px; }
+.wfNumberLabel { font-size: var(--fs-xs); color: var(--fg-tertiary); }
+.wfNumberValue { font-family: var(--font-mono); font-size: var(--fs-md); font-variant-numeric: tabular-nums; }
+.wfCaveat { font-size: var(--fs-xs); color: var(--agent-review-fg); }
+
+/* ---- errors ------------------------------------------------------------- */
+.error {
+  border-left: 3px solid var(--agent-failed-fg);
+  background: var(--agent-failed-bg);
+  padding: var(--sp-3) var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.errorKind { font-size: var(--fs-xs); color: var(--agent-failed-fg); font-weight: var(--fw-semi); }
+.errorMessage { font-size: var(--fs-sm); }
+.errorRetry { font-size: var(--fs-xs); color: var(--fg-secondary); }
+
+/* ---- capability -------------------------------------------------------- */
+.capability { font-size: var(--fs-sm); color: var(--agent-review-fg); }

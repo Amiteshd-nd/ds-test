@@ -1,0 +1,14 @@
+/* Just the frame around the studies. The studies' own stylesheet owns everything
+   inside .studies and is scoped so it can't reach out here. */
+.studies { min-height: 100vh; background: #05050a; }
+.nav {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.62);
+  font-size: var(--fs-sm);
+}
+.nav a { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
+.aside { margin-left: auto; font-family: var(--font-mono); font-size: var(--fs-xs); }

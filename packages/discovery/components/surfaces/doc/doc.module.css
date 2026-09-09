@@ -1,0 +1,283 @@
+/* doc — Nirvaha. A ledger, not a dashboard: rules and alignment carry the hierarchy,
+   leading is tight, figures are tabular, and the chrome stays near-neutral so agent
+   state is the only saturated thing on screen.
+
+   Density is the point. Kavitha is on her four-hundredth document. */
+
+.surface {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(24rem, 34rem);
+  align-items: start;
+  min-height: calc(100vh - 5rem);
+}
+.left {
+  min-width: 0;
+  padding: var(--sp-4) var(--sp-5) var(--sp-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.right {
+  min-width: 0;
+  border-left: 1px solid var(--line-hairline);
+  padding: var(--sp-4);
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow: auto;
+}
+@media (max-width: 74rem) {
+  .surface { grid-template-columns: minmax(0, 1fr); }
+  .right { border-left: 0; border-top: 1px solid var(--line-hairline); position: static; max-height: none; }
+}
+
+/* ---- head: the counts, and nothing dressed up as a KPI --------------------- */
+.head { display: flex; align-items: baseline; gap: var(--sp-4); flex-wrap: wrap; padding-bottom: var(--sp-3); border-bottom: 1px solid var(--line-strong); }
+.headTitle { font-size: var(--fs-lg); font-weight: var(--fw-semi); }
+.headCounts { display: flex; gap: var(--sp-4); font-size: var(--fs-sm); color: var(--fg-secondary); }
+.headCount { font-variant-numeric: tabular-nums; }
+.headNeeds { color: var(--agent-review-fg); font-weight: var(--fw-medium); }
+.headClear { color: var(--agent-done-fg); }
+.headActions { margin-left: auto; display: flex; gap: var(--sp-2); }
+.button {
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--bg-raised);
+  font-size: var(--fs-sm);
+}
+.button:hover { border-color: var(--fg-secondary); text-decoration: none; }
+.button[data-kind='primary'] { background: var(--fg-primary); color: var(--bg-raised); border-color: var(--fg-primary); font-weight: var(--fw-medium); }
+.button[data-kind='quiet'] { background: transparent; border-color: transparent; text-decoration: underline; text-underline-offset: 2px; }
+.button:disabled { opacity: 0.4; cursor: default; }
+
+/* ---- the ledger ----------------------------------------------------------- */
+.ledger { display: flex; flex-direction: column; }
+.row {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr) 7.5rem 1.5rem;
+  gap: var(--sp-3);
+  align-items: baseline;
+  padding: var(--sp-2) var(--sp-2);
+  border-bottom: 1px solid var(--line-hairline);
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  scroll-margin-top: 6rem;
+}
+.row:hover { background: var(--bg-sunken); }
+.row[data-selected='true'] { background: var(--prov-region-bg); box-shadow: inset 2px 0 0 var(--prov-tether); }
+.rowName { color: var(--fg-secondary); font-size: var(--fs-sm); }
+.rowValue { font-size: var(--fs-sm); overflow-wrap: anywhere; }
+.rowValue[data-numeric='true'] { font-variant-numeric: tabular-nums; }
+.rowBand { font-size: var(--fs-xs); color: var(--fg-secondary); white-space: nowrap; }
+.rowMark { font-size: var(--fs-xs); color: var(--fg-tertiary); text-align: right; }
+
+/* Band on three channels: the word, the weight, and whether it can be bulk-cleared. */
+.row[data-band='check'] .rowValue { font-weight: var(--fw-medium); }
+.row[data-band='check'] .rowBand { color: var(--agent-review-fg); font-weight: var(--fw-medium); }
+.row[data-band='check'] { background: var(--agent-review-bg); }
+.row[data-band='failed'] .rowBand { color: var(--agent-failed-fg); }
+
+/* A derived fact is a different kind of fact from a read one. */
+.row[data-origin='inferred'] .rowValue {
+  font-style: var(--value-inferred-style);
+  color: var(--value-inferred-fg);
+  border-bottom: var(--value-inferred-underline);
+}
+
+.row[data-review='reviewed'] .rowMark { color: var(--agent-done-fg); }
+.row[data-review='corrected'] .rowMark { color: var(--prov-tether); }
+.row[data-review='unreviewed'][data-band='committed'] .rowMark { color: var(--fg-tertiary); }
+
+.rowNote { grid-column: 2 / -1; font-size: var(--fs-xs); color: var(--fg-secondary); }
+.rowNote[data-kind='flag'] { color: var(--agent-review-fg); font-weight: var(--fw-medium); }
+
+/* ---- the open field: repair, conflict, confusable, range ------------------ */
+.detail {
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--prov-tether);
+  background: var(--bg-raised);
+  padding: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.detailHead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
+.detailName { font-size: var(--fs-md); font-weight: var(--fw-semi); }
+.detailMeta { font-size: var(--fs-xs); color: var(--fg-secondary); }
+.detailValue { font-size: var(--fs-lg); line-height: var(--lh-tight); }
+.detailValue[lang] { line-height: var(--lh-indic-tight); }
+.detailWhy { font-size: var(--fs-sm); color: var(--fg-secondary); }
+.detailActions { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+
+.alternates { display: flex; flex-direction: column; gap: var(--sp-1); }
+.alternate {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--line-hairline);
+  border-radius: var(--r-sm);
+  background: var(--bg-canvas);
+  text-align: left;
+  width: 100%;
+}
+.alternate:hover { border-color: var(--prov-tether); }
+.alternateValue { font-size: var(--fs-sm); }
+.typeRow { display: flex; gap: var(--sp-2); }
+.input {
+  flex: 1;
+  min-width: 0;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--bg-canvas);
+  color: var(--fg-primary);
+  font: inherit;
+  font-size: var(--fs-sm);
+}
+
+/* Conflict: two candidates, side by side, no default selection. */
+.conflict { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
+.candidate {
+  border: 1px solid var(--line-hairline);
+  border-top: var(--agent-conflict-rule);
+  padding: var(--sp-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  background: var(--agent-conflict-bg);
+}
+.candidateValue { font-size: var(--fs-md); }
+.candidateSource { font-size: var(--fs-xs); color: var(--fg-secondary); font-family: var(--font-mono); }
+@media (max-width: 40rem) { .conflict { grid-template-columns: minmax(0, 1fr); } }
+
+.readings { display: flex; gap: var(--sp-3); flex-wrap: wrap; }
+.reading { display: flex; flex-direction: column; gap: 2px; padding: var(--sp-2) var(--sp-3); border: 1px solid var(--line-hairline); border-radius: var(--r-sm); }
+.readingGlyph { font-size: var(--fs-xl); line-height: 1; }
+.readingValue { font-size: var(--fs-xs); color: var(--fg-secondary); font-variant-numeric: tabular-nums; }
+
+.struckPair { display: flex; gap: var(--sp-4); flex-wrap: wrap; }
+.struckVoid { text-decoration: line-through; color: var(--fg-tertiary); }
+.struckCurrent { font-weight: var(--fw-medium); }
+
+/* ---- blocks in the left column ------------------------------------------- */
+.block { border-top: 1px solid var(--line-hairline); padding-top: var(--sp-3); display: flex; flex-direction: column; gap: var(--sp-2); }
+.blockHead { font-size: var(--fs-sm); font-weight: var(--fw-semi); }
+.blockNote { font-size: var(--fs-sm); color: var(--fg-secondary); }
+
+/* Non-findings carry a finding's weight. Footnoting them defeats them. */
+.nonfinding { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-2) var(--sp-3); padding: var(--sp-2) 0; border-bottom: 1px solid var(--line-hairline); }
+.nonfindingWhat { font-size: var(--fs-sm); }
+.nonfindingKind { font-size: var(--fs-xs); color: var(--agent-review-fg); white-space: nowrap; }
+.nonfindingWhere { grid-column: 1 / -1; font-size: var(--fs-xs); color: var(--fg-secondary); }
+.nonfindingNext { grid-column: 1 / -1; font-size: var(--fs-xs); }
+
+.systematic { border: 1px solid var(--agent-review-fg); background: var(--agent-review-bg); padding: var(--sp-3) var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-2); }
+.systematicHead { font-weight: var(--fw-semi); color: var(--agent-review-fg); font-size: var(--fs-sm); }
+
+.fallback { border-left: 3px solid var(--script-fallback-bg, var(--agent-failed-fg)); background: var(--agent-failed-bg); padding: var(--sp-2) var(--sp-3); font-size: var(--fs-sm); }
+
+/* ---- accept: a Consequence Gate, deliberately unlike the flow around it --- */
+.gate {
+  border: 2px solid var(--fg-primary);
+  padding: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  background: var(--bg-raised);
+}
+.gateHead { font-weight: var(--fw-semi); }
+.gateConsequence { font-size: var(--fs-sm); }
+.gateBlocked { font-size: var(--fs-sm); color: var(--agent-review-fg); font-weight: var(--fw-medium); }
+.gatePartial { font-size: var(--fs-sm); color: var(--fg-secondary); border-left: 2px solid var(--line-strong); padding-left: var(--sp-3); }
+.gateActions { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+.trail { display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-xs); color: var(--fg-secondary); font-family: var(--font-mono); }
+
+/* ---- export -------------------------------------------------------------- */
+.formats { display: flex; flex-direction: column; gap: var(--sp-2); }
+.format { display: grid; grid-template-columns: 5rem minmax(0, 1fr); gap: var(--sp-3); align-items: baseline; padding: var(--sp-2) 0; border-bottom: 1px solid var(--line-hairline); text-align: left; width: 100%; }
+.formatName { font-family: var(--font-mono); font-size: var(--fs-sm); }
+.formatLoses { font-size: var(--fs-xs); color: var(--agent-review-fg); }
+.formatKeeps { font-size: var(--fs-xs); color: var(--agent-done-fg); }
+
+/* ---- the source pane ----------------------------------------------------- */
+.sourcePane { display: flex; flex-direction: column; gap: var(--sp-2); }
+.sourceHead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
+.sourceLabel { font-size: var(--fs-sm); font-weight: var(--fw-medium); }
+.pager { display: flex; gap: var(--sp-1); }
+.pageButton { width: 1.6rem; height: 1.6rem; border: 1px solid var(--line-hairline); border-radius: var(--r-sm); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
+.pageButton[data-here='true'] { background: var(--fg-primary); color: var(--bg-raised); border-color: var(--fg-primary); }
+.degraded { font-size: var(--fs-xs); color: var(--agent-review-fg); }
+.provNote { font-size: var(--fs-xs); color: var(--agent-failed-fg); }
+.sourceFoot { font-size: var(--fs-xs); color: var(--fg-secondary); }
+
+.paperFrame { background: var(--bg-sunken); padding: var(--sp-3); overflow: hidden; }
+.paper {
+  position: relative;
+  aspect-ratio: 1 / 1.414;          /* A4 */
+  background: var(--paper-bg);
+  box-shadow: 0 1px 0 var(--line-strong);
+  overflow: hidden;
+  transition: filter var(--dur-base) var(--ease-out);
+}
+.paper[data-rotated='true'] { transform: rotate(-1.4deg) scale(1.02); }
+.paper[data-blurred='true'] { filter: blur(0.7px) contrast(0.92); }
+.paper[data-cut='true'] { clip-path: inset(0 0 6% 0); }
+/* Dimming the page is what makes one region the only readable thing on it —
+   which means the region itself has to stay at full strength. */
+.paper[data-dimmed='true'] .formLine { opacity: 0.28; }
+.paper[data-dimmed='true'] .formLine[data-lit='true'] { opacity: 1; }
+.paper[data-dimmed='true'] .formLine[data-lit='true'] .written { font-weight: 500; }
+
+.paperHead { position: absolute; left: 8%; right: 8%; top: 4%; display: flex; flex-direction: column; gap: 2px; border-bottom: 1px solid var(--paper-rule); padding-bottom: 0.5%; }
+.formTitle { font-size: 0.85rem; color: var(--paper-label); line-height: var(--lh-indic-tight); }
+.formTitleEn { font-size: 0.7rem; color: var(--paper-label); }
+.formMeta { font-size: 0.55rem; color: var(--paper-label); opacity: 0.7; }
+
+.formLine { position: absolute; display: flex; align-items: baseline; gap: 0.4rem; transition: opacity var(--dur-fast) var(--ease-out); }
+.printedLabel {
+  display: flex;
+  flex-direction: column;
+  /* Set per line from form.ts, because a form's right-hand column has less room
+     for its label than its left-hand one. */
+  width: var(--label-span, 8.5rem);
+  flex: none;
+  font-size: 0.6rem;
+  color: var(--paper-label);
+}
+.printedTa { line-height: var(--lh-indic-tight); }
+.valueSlot { flex: 1; min-width: 0; border-bottom: 1px solid var(--paper-rule); display: flex; align-items: baseline; gap: 0.4rem; }
+
+/* "Handwriting": ink colour, a little slant, a little baseline drift. It is not
+   real handwriting and is flagged as such in the decision log — but it is enough
+   to make the print/hand distinction visible, which is what the states need. */
+.written {
+  color: var(--ink);
+  font-size: 0.78rem;
+  transform: rotate(-0.6deg);
+  letter-spacing: 0.01em;
+}
+.written[lang] { letter-spacing: normal; line-height: var(--lh-indic-tight); }
+.struck { color: var(--ink-void); text-decoration: line-through; font-size: 0.72rem; opacity: 0.85; }
+.smudge {
+  display: inline-block;
+  width: 60%;
+  height: 0.7rem;
+  border-radius: 2px;
+  background:
+    repeating-linear-gradient(102deg, var(--paper-smudge) 0 3px, transparent 3px 7px),
+    linear-gradient(90deg, var(--paper-smudge), transparent);
+  filter: blur(1.2px);
+}
+
+.regionRing {
+  position: absolute;
+  box-shadow: var(--prov-region-ring), 0 0 0 100vmax var(--prov-dim);
+  background: var(--prov-region-bg);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.empty { color: var(--fg-tertiary); font-size: var(--fs-sm); }

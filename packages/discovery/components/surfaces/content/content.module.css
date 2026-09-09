@@ -1,0 +1,217 @@
+/* content — Anuvada. A print proof: the source is fixed and central, variants are
+   comparanda, edges rather than corners, paper-quiet everywhere except the drift
+   diff. Nine scripts on one screen, so every text node keys its line height off
+   `lang` and nothing is ever truncated mid-cluster.
+
+   The one bold thing is the drift diff on the back-translation. */
+
+.surface { display: flex; flex-direction: column; min-height: calc(100vh - 5rem); }
+
+/* ---- the source, fixed and central ---------------------------------------- */
+.sourceBar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--sp-4);
+  align-items: end;
+  padding: var(--sp-4) var(--sp-6) var(--sp-3);
+  border-bottom: 1px solid var(--line-hairline);
+}
+.sourceText { font-size: var(--fs-lg); line-height: var(--lh-body); max-width: 52ch; }
+.sourceMeta { display: flex; gap: var(--sp-4); font-size: var(--fs-sm); color: var(--fg-secondary); flex-wrap: wrap; }
+.sourceMeta em { font-style: normal; color: var(--agent-review-fg); font-weight: var(--fw-medium); }
+.actions { display: flex; gap: var(--sp-2); align-items: center; }
+.button {
+  padding: var(--sp-2) var(--sp-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-card, 0);
+  background: var(--bg-raised);
+  font-size: var(--fs-sm);
+}
+.button:hover { border-color: var(--fg-primary); text-decoration: none; }
+.button[data-kind='primary'] { background: var(--fg-primary); color: var(--bg-canvas); border-color: var(--fg-primary); font-weight: var(--fw-medium); }
+.button[data-kind='quiet'] { border-color: transparent; background: transparent; text-decoration: underline; text-underline-offset: 3px; padding-inline: 0; }
+.button:disabled { opacity: 0.4; cursor: default; }
+
+.body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(20rem, 27rem); gap: 0; align-items: start; }
+.main { min-width: 0; padding: var(--sp-4) var(--sp-6) var(--sp-9); display: flex; flex-direction: column; gap: var(--sp-5); }
+.side {
+  min-width: 0;
+  border-left: 1px solid var(--line-hairline);
+  padding: var(--sp-4) var(--sp-5) var(--sp-9);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+@media (max-width: 76rem) {
+  .body { grid-template-columns: minmax(0, 1fr); }
+  .side { border-left: 0; border-top: 1px solid var(--line-hairline); }
+}
+
+.section { display: flex; flex-direction: column; gap: var(--sp-3); }
+.sectionHead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); border-bottom: 1px solid var(--line-hairline); padding-bottom: var(--sp-2); }
+.sectionTitle { font-size: var(--fs-md); font-weight: var(--fw-semi); }
+.sectionAside { font-size: var(--fs-sm); color: var(--fg-secondary); }
+.note { font-size: var(--fs-sm); color: var(--fg-secondary); max-width: 62ch; }
+.empty { color: var(--fg-tertiary); font-size: var(--fs-sm); }
+
+/* ---- the board: ranked by suspicion, clean ones collapse ------------------ */
+.board { display: flex; flex-direction: column; }
+.row {
+  display: grid;
+  /* The right column is capped rather than `auto`: four flags on one variant were
+     taking half the row and wrapping the Tamil to one word per line, which is the
+     opposite of what a board of nine languages is for. */
+  grid-template-columns: 7.5rem minmax(0, 1fr) minmax(11rem, 15rem);
+  gap: var(--sp-4);
+  align-items: start;
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--line-hairline);
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+.row:hover { background: var(--bg-raised); }
+.row[data-open='true'] { background: var(--bg-raised); }
+.lang { display: flex; flex-direction: column; gap: 2px; }
+.langName { font-weight: var(--fw-medium); font-size: var(--fs-sm); }
+.langTag { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--fg-tertiary); }
+/* Wrapping, never truncation — and never mid-cluster, which is why there is no
+   text-overflow here at all. Indic clusters span code points and slicing one
+   produces a different word. */
+.variantText { font-size: var(--fs-md); line-height: var(--lh-indic-body); overflow-wrap: break-word; }
+.rowRight { display: flex; flex-direction: column; align-items: flex-end; gap: var(--sp-1); }
+
+/* The two axes, side by side, as words. Never combined into one number. */
+.axes { display: flex; gap: var(--sp-3); }
+.axis { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.axisLabel { font-size: var(--fs-2xs); color: var(--fg-tertiary); white-space: nowrap; }
+.axisValue { font-size: var(--fs-xs); white-space: nowrap; }
+.axisValue[data-band='committed'] { color: var(--agent-done-fg); }
+.axisValue[data-band='check'] { color: var(--agent-review-fg); font-weight: var(--fw-semi); }
+.axisValue[data-band='failed'] { color: var(--agent-failed-fg); font-weight: var(--fw-semi); }
+
+.flags { display: flex; gap: var(--sp-1) var(--sp-2); flex-wrap: wrap; justify-content: flex-end; }
+.flag { font-size: var(--fs-2xs); padding: 1px var(--sp-2); border: 1px solid currentColor; color: var(--fg-secondary); }
+.flag[data-kind='clause_dropped'] { color: var(--agent-failed-fg); font-weight: var(--fw-semi); }
+.flag[data-kind='fidelity'] { color: var(--agent-review-fg); font-weight: var(--fw-medium); }
+.flag[data-kind='term'], .flag[data-kind='pronunciation'] { color: var(--agent-review-fg); }
+
+.collapsed {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--line-hairline);
+  font-size: var(--fs-sm);
+  color: var(--fg-secondary);
+}
+.collapsed button { font-size: var(--fs-sm); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ---- the drift diff: this surface's one bold move ------------------------- */
+.mirror { display: flex; flex-direction: column; gap: var(--sp-3); border-top: 2px solid var(--fg-primary); padding-top: var(--sp-3); }
+.mirrorPair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-5); }
+@media (max-width: 52rem) { .mirrorPair { grid-template-columns: minmax(0, 1fr); } }
+.mirrorSide { display: flex; flex-direction: column; gap: var(--sp-2); }
+.mirrorLabel { font-size: var(--fs-xs); color: var(--fg-secondary); }
+.mirrorText { font-size: var(--fs-md); line-height: var(--lh-body); }
+.mirrorText[lang] { line-height: var(--lh-indic-body); }
+
+/* Marks CHANGE, and nothing else in this product may use these. */
+.drift { padding: 0 2px; }
+.drift[data-kind='added'] { background: var(--drift-added); }
+.drift[data-kind='removed'] { background: var(--drift-removed); text-decoration: line-through; }
+.drift[data-kind='moved'] { background: var(--drift-moved); }
+.drift[data-kind='held'] { background: var(--drift-held); }
+.driftList { display: flex; flex-direction: column; gap: var(--sp-2); }
+.driftItem { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); gap: var(--sp-3); font-size: var(--fs-sm); }
+.driftKind { font-size: var(--fs-xs); }
+.driftKind[data-kind='added'] { color: var(--sig-attention); }
+.driftKind[data-kind='removed'] { color: var(--sig-hazard); }
+.driftKind[data-kind='moved'] { color: var(--sig-caution); }
+
+/* ---- flags in the open variant ------------------------------------------- */
+.flagBlock {
+  border-left: 3px solid var(--line-strong);
+  padding: var(--sp-3) 0 var(--sp-3) var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.flagBlock[data-kind='clause'] { border-left-color: var(--sig-hazard); background: color-mix(in srgb, var(--sig-hazard) 5%, transparent); }
+.flagBlock[data-kind='term'] { border-left-color: var(--sig-caution); }
+.flagBlock[data-kind='pronunciation'] { border-left-color: var(--sig-caution); }
+.flagBlock[data-kind='typography'] { border-left-color: var(--container-overflow-fg, var(--sig-hazard)); }
+.flagHead { font-weight: var(--fw-semi); font-size: var(--fs-sm); }
+.flagBody { font-size: var(--fs-sm); }
+.flagCaveat { font-size: var(--fs-xs); color: var(--agent-review-fg); }
+
+/* Pronunciation: two scripts, side by side, because two audiences are real. */
+.saidGrid { display: grid; grid-template-columns: 8rem repeat(2, minmax(0, 1fr)); gap: var(--sp-2) var(--sp-3); align-items: baseline; }
+.saidLabel { font-size: var(--fs-xs); color: var(--fg-secondary); }
+.saidValue { font-size: var(--fs-md); }
+.saidValue[data-role='actual'] { color: var(--sig-hazard); }
+.saidScript { font-size: var(--fs-2xs); color: var(--fg-tertiary); }
+
+/* ---- the timeline: time is the primary axis ------------------------------ */
+.timeline { display: flex; flex-direction: column; gap: var(--sp-2); }
+.timelineHead { display: flex; justify-content: space-between; font-size: var(--fs-xs); color: var(--fg-secondary); }
+.track { position: relative; height: 2.2rem; background: var(--bg-raised); border: 1px solid var(--line-hairline); }
+.track[data-role='source'] { background: var(--bg-sunken); }
+.seg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-right: 1px solid var(--bg-canvas);
+  background: color-mix(in srgb, var(--fg-primary) 12%, transparent);
+  display: flex;
+  align-items: center;
+  padding: 0 3px;
+  overflow: hidden;
+  font-size: 9px;
+  color: var(--fg-secondary);
+}
+.seg[data-timing='overrun'] { background: color-mix(in srgb, var(--sig-hazard) 22%, transparent); }
+.seg[data-timing='underrun'] { background: color-mix(in srgb, var(--sig-caution) 22%, transparent); }
+.seg[data-selected='true'] { outline: 2px solid var(--prov-tether, var(--sig-attention)); outline-offset: -2px; }
+/* The overhang: the part that does not fit the shot, drawn outside it. */
+.overhang { position: absolute; top: -3px; bottom: -3px; border: 1px dashed var(--sig-hazard); border-left: 0; }
+.tick { position: absolute; top: 100%; font-size: 9px; color: var(--fg-tertiary); font-family: var(--font-mono); transform: translateX(-50%); }
+.mark { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--sig-hazard); }
+.markLabel { position: absolute; bottom: 100%; font-size: 9px; color: var(--sig-hazard); white-space: nowrap; transform: translateX(-50%); }
+
+/* Audio: a proxy shape, and the interface says it is one. */
+.waveform { display: block; width: 100%; height: 2rem; }
+.waveBar { fill: color-mix(in srgb, var(--fg-primary) 28%, transparent); }
+.audioNote { font-size: var(--fs-xs); color: var(--fg-secondary); border-left: 2px solid var(--line-strong); padding-left: var(--sp-3); }
+
+/* ---- subtitle proof: the variant inside the box it must live in ---------- */
+.probe {
+  border: var(--container-probe-border);
+  padding: var(--sp-2);
+  max-width: 34ch;
+  position: relative;
+}
+.probeText { font-size: var(--fs-md); line-height: var(--lh-indic-body); }
+.probeOver { color: var(--container-overflow-fg); font-size: var(--fs-xs); }
+.tofu { background: var(--script-fallback-bg); padding: 0 2px; }
+
+/* ---- consent, review, publish ------------------------------------------- */
+.consent { display: flex; flex-direction: column; gap: var(--sp-2); border: 1px solid var(--line-strong); padding: var(--sp-3) var(--sp-4); }
+.consent[data-state='missing'], .consent[data-state='expired'], .consent[data-state='scope_exceeded'] {
+  border-color: var(--sig-hazard);
+  border-left-width: 3px;
+}
+.consentHead { font-size: var(--fs-sm); font-weight: var(--fw-semi); }
+.consentBody { font-size: var(--fs-sm); }
+.consentAck { font-size: var(--fs-xs); color: var(--fg-secondary); font-family: var(--font-mono); }
+
+.gate { border: 2px solid var(--fg-primary); padding: var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-3); }
+.gateHead { font-weight: var(--fw-semi); }
+.gateBody { font-size: var(--fs-sm); }
+.gateBlocked { font-size: var(--fs-sm); color: var(--sig-hazard); font-weight: var(--fw-medium); }
+.gateUnverified { font-size: var(--fs-sm); color: var(--agent-review-fg); }
+.trail { display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-xs); color: var(--fg-secondary); font-family: var(--font-mono); }
+
+.nonfinding { padding: var(--sp-2) 0; border-bottom: 1px solid var(--line-hairline); display: flex; flex-direction: column; gap: 2px; }
+.nonfindingWhat { font-size: var(--fs-sm); }
+.nonfindingWhere { font-size: var(--fs-xs); color: var(--fg-secondary); }

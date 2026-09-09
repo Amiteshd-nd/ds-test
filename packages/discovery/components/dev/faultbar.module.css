@@ -1,0 +1,42 @@
+/* Deliberately not product UI. Inverted, monospace, hard edges — it should never
+   be mistakable for something that was designed. */
+.bar {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-2) var(--sp-3);
+  background: #101014;
+  color: #cfcfd6;
+  border-top: 1px solid #34343d;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  flex-wrap: wrap;
+}
+.badge { color: #6f6f7a; letter-spacing: 0; }
+.faults { display: flex; gap: var(--sp-3); flex-wrap: wrap; }
+.fault { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; color: #9a9aa5; }
+.fault[data-on='true'] { color: #ffcc66; }
+.fault input { accent-color: #ffcc66; }
+.control { display: inline-flex; align-items: center; gap: 4px; color: #9a9aa5; }
+.control select,
+.control input {
+  background: #1b1b21;
+  color: #cfcfd6;
+  border: 1px solid #34343d;
+  border-radius: 2px;
+  font: inherit;
+  padding: 2px 4px;
+}
+.control input { width: 4rem; }
+.replay {
+  margin-left: auto;
+  padding: 3px 10px;
+  border: 1px solid #6f6f7a;
+  border-radius: 2px;
+  color: #101014;
+  background: #cfcfd6;
+  font: inherit;
+}

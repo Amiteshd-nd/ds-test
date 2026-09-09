@@ -1,0 +1,21 @@
+/* Dev chrome. Same posture as the fault bar: it should never be mistakable for
+   something that was designed. */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-2) var(--sp-3);
+  background: #101014;
+  color: #9a9aa5;
+  border-bottom: 1px solid #34343d;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  flex-wrap: wrap;
+}
+.home { color: #cfcfd6; text-decoration: underline; text-underline-offset: 2px; }
+.list { display: flex; gap: var(--sp-3); }
+.item { color: #6f6f7a; }
+.item:hover { color: #cfcfd6; text-decoration: none; }
+.item[data-built='true'] { color: #9a9aa5; }
+.item[data-here='true'] { color: #ffcc66; }
+.aside { margin-left: auto; display: flex; gap: var(--sp-3); }

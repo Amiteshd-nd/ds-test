@@ -1,0 +1,511 @@
+/* ============================================================================
+   Design tokens
+   ----------------------------------------------------------------------------
+   Six projects, one token architecture, six sets of values.
+
+     voice    a test bench         spec and evidence, side by side
+     doc      a ledger             dense, expert, verification-cheap
+     work     a briefing note      durable artifact + action ledger
+     content  a print proof        nine scripts, time as the axis
+     coding   developer tooling    readable cold, forty minutes later
+     shell    reference material   the platform layer and the library
+
+   The agent-state channel (section 3) is shared and reserved GLOBALLY across all six.
+   blocked_on_human must look identical everywhere or the reservation buys nothing.
+
+   Structure:
+     1. Primitives      raw values, no meaning
+     2. Semantic        meaning, referencing primitives
+     3. Agent state     the reserved channel — the whole point of the system
+     4. Script-aware    per-script typography, because one line-height is a lie
+     5. Product themes  each overrides the SEMANTIC layer only
+
+   Rule: components reference the SEMANTIC layer only. Never a primitive
+   directly. If a component needs a value that has no semantic name, the
+   system is missing a token — add one, don't reach past the layer.
+   ========================================================================= */
+
+/* ---------------------------------------------------------------------------
+   1. PRIMITIVES
+   ------------------------------------------------------------------------ */
+:root {
+  /* Neutrals — a single ramp, deliberately desaturated.
+     work in particular lives almost entirely here so that agent state can be
+     the only saturated thing on screen. */
+  --n-0:   #ffffff;
+  --n-50:  #f7f7f6;
+  --n-100: #ecebe9;
+  --n-200: #d9d7d3;
+  --n-300: #b9b6b0;
+  --n-400: #8f8c85;
+  --n-500: #6b6862;
+  --n-600: #504e49;
+  --n-700: #3a3835;
+  --n-800: #262523;
+  --n-900: #171614;
+  --n-1000:#000000;
+
+  /* Signal hues. Reserved. Do not use decoratively — see section 3. */
+  --sig-hazard:    #d92b1c;  /* highway hazard red; voice's single loud colour */
+  --sig-caution:   #e8a11a;  /* amber, sign-yellow family */
+  --sig-clear:     #1f7a4d;  /* highway-board green */
+  --sig-attention: #2b5fd9;  /* the "needs you" channel in work */
+  --sig-inert:     var(--n-400);
+
+  /* Spacing — 4px base. */
+  --sp-0: 0;
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --sp-8: 4rem;
+  --sp-9: 6rem;
+
+  /* Type scale. Two scales, because voice and work are not the same product.
+     voice needs sunlight-at-arms-length; work needs eight-hours-of-density. */
+  --fs-2xs: 0.6875rem;  /* 11px — work dense metadata only */
+  --fs-xs:  0.75rem;    /* 12px */
+  --fs-sm:  0.875rem;   /* 14px — work body */
+  --fs-md:  1rem;       /* 16px */
+  --fs-lg:  1.25rem;    /* 20px */
+  --fs-xl:  1.75rem;    /* 28px */
+  --fs-2xl: 2.5rem;     /* 40px */
+  --fs-3xl: 3.5rem;     /* 56px — voice primary fact */
+  --fs-4xl: 5rem;       /* 80px — voice hero state */
+
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semi:    600;
+  --fw-bold:    700;
+
+  /* Radii. Different radii for different object classes — one radius on
+     everything is the card-soup tell. */
+  --r-none: 0;
+  --r-sm:   2px;   /* data cells, inputs */
+  --r-md:   6px;   /* controls */
+  --r-lg:   12px;  /* containers */
+  --r-full: 999px; /* status pips only */
+
+  /* Motion. Short and few. See the restraint note in docs/tech-stack.md. */
+  --dur-instant: 80ms;
+  --dur-fast:    140ms;
+  --dur-base:    220ms;
+  --dur-slow:    400ms;   /* commit moments only */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ---------------------------------------------------------------------------
+   2. SEMANTIC
+   ------------------------------------------------------------------------ */
+:root {
+  --bg-canvas:     var(--n-0);
+  --bg-raised:     var(--n-50);
+  --bg-sunken:     var(--n-100);
+  --bg-inverse:    var(--n-900);
+
+  --fg-primary:    var(--n-900);
+  --fg-secondary:  var(--n-600);
+  --fg-tertiary:   var(--n-400);
+  --fg-inverse:    var(--n-0);
+
+  --line-hairline: var(--n-200);   /* structural rules — work's main device */
+  --line-strong:   var(--n-300);
+  --line-focus:    var(--sig-attention);
+
+  --focus-ring: 0 0 0 2px var(--bg-canvas), 0 0 0 4px var(--line-focus);
+}
+
+/* ---------------------------------------------------------------------------
+   3. AGENT STATE — the reserved channel
+   ----------------------------------------------------------------------------
+   These tokens exist so that agent state is the ONLY thing carrying
+   saturated colour. The rule is absolute: if you use --sig-attention for a
+   nav highlight, BLOCKED_ON_HUMAN stops being visible, and that state is the
+   entire reason the operator has the screen open.
+
+   Every state also carries a --*-weight and --*-icon hook so it is encoded on
+   at least two non-colour channels. Colour alone fails for ~8% of men and
+   fails completely in voice's sunlight condition.
+   ------------------------------------------------------------------------ */
+:root {
+  /* idle / not started */
+  --agent-idle-fg:       var(--n-400);
+  --agent-idle-bg:       var(--n-50);
+  --agent-idle-weight:   var(--fw-regular);
+
+  /* working */
+  --agent-active-fg:     var(--n-700);
+  --agent-active-bg:     var(--n-100);
+  --agent-active-weight: var(--fw-medium);
+
+  /* done, high confidence — "committed" band */
+  --agent-done-fg:       var(--sig-clear);
+  --agent-done-bg:       color-mix(in srgb, var(--sig-clear) 8%, transparent);
+  --agent-done-weight:   var(--fw-regular);
+
+  /* needs review — "check this" band.
+     Behaviour, not just appearance: items in this band are pulled OUT of the
+     main list and cannot be bulk-approved. See grammar §3. */
+  --agent-review-fg:     var(--sig-caution);
+  --agent-review-bg:     color-mix(in srgb, var(--sig-caution) 12%, transparent);
+  --agent-review-weight: var(--fw-medium);
+
+  /* BLOCKED ON HUMAN — the loudest treatment in the system.
+     Nothing else may use this. */
+  --agent-blocked-fg:    var(--sig-attention);
+  --agent-blocked-bg:    color-mix(in srgb, var(--sig-attention) 14%, transparent);
+  --agent-blocked-ring:  0 0 0 2px var(--sig-attention);
+  --agent-blocked-weight:var(--fw-semi);
+
+  /* failed / couldn't do it */
+  --agent-failed-fg:     var(--sig-hazard);
+  --agent-failed-bg:     color-mix(in srgb, var(--sig-hazard) 10%, transparent);
+  --agent-failed-weight: var(--fw-medium);
+
+  /* stalled — running but not progressing. Deliberately distinct from both
+     active and failed, because every dashboard ever built shows this as
+     healthy. See work brief, hard moment 3. */
+  --agent-stalled-fg:    var(--n-600);
+  --agent-stalled-bg:    repeating-linear-gradient(
+                            135deg,
+                            var(--n-100) 0 6px,
+                            var(--n-50)  6px 12px
+                         );
+  --agent-stalled-weight:var(--fw-medium);
+
+  /* inferred vs extracted — a derived value must not look like a read one */
+  --value-extracted-style: normal;
+  --value-inferred-style:  italic;
+  --value-inferred-fg:     var(--n-500);
+  --value-inferred-underline: 1px dashed var(--n-300);
+
+  /* conflicting — two sources disagree. Not an error. */
+  --agent-conflict-fg:   var(--n-900);
+  --agent-conflict-bg:   color-mix(in srgb, var(--sig-caution) 6%, transparent);
+  --agent-conflict-rule: 2px solid var(--sig-caution);
+}
+
+/* ---------------------------------------------------------------------------
+   4. SCRIPT-AWARE TYPOGRAPHY
+   ----------------------------------------------------------------------------
+   One global line-height is a bug, not a simplification. Devanagari, Bangla,
+   Gujarati and Gurmukhi carry marks above AND below the baseline; Latin-tuned
+   leading clips matras and collides with the previous line's descenders.
+
+   Usage: put lang= on the element. Never style Indic text without it.
+     <p lang="hi">…</p>   <span lang="ta">…</span>
+   ------------------------------------------------------------------------ */
+:root {
+  --font-sans: "Anek Latin", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Anek Latin", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Latin baseline */
+  --lh-tight:   1.2;
+  --lh-body:    1.5;
+  --lh-relaxed: 1.65;
+
+  /* Indic needs more. Set per script below. */
+  --lh-indic-tight:   1.35;
+  --lh-indic-body:    1.7;
+  --lh-indic-relaxed: 1.85;
+}
+
+/* Per-script font stacks and leading. Add scripts as products need them. */
+[lang|="hi"], [lang|="mr"], [lang|="ne"], [lang|="sa"], [lang|="kok"],
+[lang|="mai"], [lang|="doi"], [lang|="brx"] {
+  font-family: "Anek Devanagari", "Noto Sans Devanagari", var(--font-sans);
+  line-height: var(--lh-indic-body);
+}
+[lang|="bn"], [lang|="as"] {
+  font-family: "Anek Bangla", "Noto Sans Bengali", var(--font-sans);
+  line-height: var(--lh-indic-body);
+}
+[lang|="ta"] {
+  font-family: "Anek Tamil", "Noto Sans Tamil", var(--font-sans);
+  line-height: var(--lh-indic-relaxed);   /* tallest of the set */
+}
+[lang|="te"] {
+  font-family: "Anek Telugu", "Noto Sans Telugu", var(--font-sans);
+  line-height: var(--lh-indic-relaxed);
+}
+[lang|="kn"] {
+  font-family: "Anek Kannada", "Noto Sans Kannada", var(--font-sans);
+  line-height: var(--lh-indic-relaxed);
+}
+[lang|="ml"] {
+  font-family: "Anek Malayalam", "Noto Sans Malayalam", var(--font-sans);
+  line-height: var(--lh-indic-relaxed);
+}
+[lang|="gu"] {
+  font-family: "Anek Gujarati", "Noto Sans Gujarati", var(--font-sans);
+  line-height: var(--lh-indic-body);
+}
+[lang|="pa"] {
+  font-family: "Anek Gurmukhi", "Noto Sans Gurmukhi", var(--font-sans);
+  line-height: var(--lh-indic-body);
+}
+[lang|="od"], [lang|="or"] {
+  font-family: "Anek Odia", "Noto Sans Oriya", var(--font-sans);
+  line-height: var(--lh-indic-relaxed);
+}
+[lang|="ur"], [lang|="ks"], [lang|="sd"] {
+  font-family: "Noto Nastaliq Urdu", var(--font-sans);
+  line-height: 2;          /* Nastaliq needs a lot */
+  direction: rtl;
+}
+
+/* ---- Hard rules for Indic text. These are not stylistic. ---------------- */
+
+/* No case in Indic scripts. text-transform does nothing to the Devanagari and
+   makes the Latin shout. This kills the all-caps label convention, which is a
+   good outcome. */
+[lang|="hi"], [lang|="bn"], [lang|="ta"], [lang|="te"], [lang|="kn"],
+[lang|="ml"], [lang|="gu"], [lang|="pa"], [lang|="mr"], [lang|="od"],
+[lang|="as"], [lang|="ur"] {
+  text-transform: none !important;
+  /* letter-spacing breaks conjuncts and detaches matras from base glyphs.
+     This is a rendering bug, not a design choice. */
+  letter-spacing: normal !important;
+  font-kerning: normal;
+  /* Truncating mid-conjunct produces a non-word or a different word.
+     Prefer wrapping. */
+  overflow-wrap: break-word;
+  hyphens: none;
+}
+
+/* Text expansion: Indic runs 15–30% wider than English for the same content,
+   more for Tamil and Malayalam. Any container sized to English copy breaks.
+   Design the longest language first. */
+:root {
+  --measure-latin: 68ch;
+  --measure-indic: 52ch;   /* fewer ch, because ch is wider */
+  --expansion-budget: 1.3; /* multiply English-derived widths by this */
+}
+
+/* Numerals: decide deliberately, per context. Many Hindi readers want
+   Devanagari prose and Latin digits for times, amounts and phone numbers.
+   Apply .num-latin to those spans. Document the rule in the case study. */
+.num-latin { font-family: var(--font-sans); font-variant-numeric: tabular-nums; }
+.num-native { font-feature-settings: "lnum" 0; }
+
+/* Tabular figures in any column of numbers. Non-tabular in a data column is
+   the fastest way to look amateur in work. */
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------------------
+   5. PRODUCT THEMES
+   ----------------------------------------------------------------------------
+   Override the SEMANTIC layer only. The agent-state channel stays constant
+   across products — that consistency is what makes it a design system rather
+   than three stylesheets.
+   ------------------------------------------------------------------------ */
+
+/* voice — a test bench. Spec on one side, evidence on the other; the loop
+   between them is the whole product. The one bold thing is the sweep
+   distribution, so the spec editor and transcript viewer stay instrumental.
+
+   NOTE: an earlier version of this theme was built for an end-user driver app
+   (sunlight, 80px type, highway signage). Wrong side of the glass — Voice
+   Agents is an authoring console. Kept in the log as a deprecation. */
+[data-product="voice"] {
+  --bg-canvas:  var(--n-0);
+  --bg-raised:  var(--n-50);
+  --bg-sunken:  var(--n-100);
+  --fg-primary: var(--n-900);
+
+  --fs-body: var(--fs-sm);
+  --fs-meta: var(--fs-2xs);
+  --lh-body: 1.45;
+  --r-card: var(--r-sm);
+  --card-shadow: none;
+  --card-border: 1px solid var(--line-hairline);
+
+  /* Hard constraints vs soft guidance must be STRUCTURALLY different, not just
+     a different colour — they fail in different ways. */
+  --spec-hard-bg:     color-mix(in srgb, var(--sig-hazard) 6%, transparent);
+  --spec-hard-rule:   2px solid var(--sig-hazard);
+  --spec-hard-weight: var(--fw-semi);
+  --spec-soft-bg:     transparent;
+  --spec-soft-rule:   1px solid var(--line-hairline);
+  --spec-soft-weight: var(--fw-regular);
+  --spec-example-bg:  var(--n-100);   /* worked examples are load-bearing */
+
+  /* Sweep. Distribution first; the score is the least useful thing you have. */
+  --sweep-resolved:   var(--sig-clear);
+  --sweep-escalated:  var(--sig-caution);
+  --sweep-abandoned:  var(--n-400);
+  --sweep-breached:   var(--sig-hazard);   /* said the thing it must never say */
+  --sweep-offscript:  var(--sig-attention); /* improvised, and it was fine */
+
+  /* Regression is loud. An edit that fixes one cluster and breaks another is
+     the normal case, and hiding it is the worst thing this surface can do.
+     Reserved: nothing else may use these. */
+  --delta-better: var(--sig-clear);
+  --delta-worse:  var(--sig-hazard);
+  --delta-worse-ring: 0 0 0 2px var(--sig-hazard);
+
+  /* Stale results after a spec edit. Must be impossible to forget. */
+  --stale-overlay: repeating-linear-gradient(135deg,
+                     color-mix(in srgb, var(--n-900) 4%, transparent) 0 8px,
+                     transparent 8px 16px);
+}
+
+/* work REKHA — working instrument. Ledger, mixing desk, trading terminal.
+   Dense is respect: design for her four-hundredth document, not her first. */
+[data-product="work"] {
+  --bg-canvas:  var(--n-50);
+  --bg-raised:  var(--n-0);
+  --bg-sunken:  var(--n-100);
+  --fg-primary: var(--n-900);
+
+  --fs-body: var(--fs-sm);
+  --fs-meta: var(--fs-2xs);
+  --lh-body: 1.4;                /* tight leading, high info density */
+
+  --sp-row: var(--sp-2);
+  --r-card: var(--r-sm);         /* nearly square: this is a ledger */
+
+  /* Hierarchy from rules and alignment, not from containers. */
+  --card-shadow: none;
+  --card-border: 1px solid var(--line-hairline);
+}
+
+/* coding ANVAYA — developer tool. Respect the existing grammar; spend the entire
+   boldness budget on the latency waterfall. */
+[data-product="coding"] {
+  --bg-canvas: var(--n-900);
+  --bg-raised: var(--n-800);
+  --fg-primary: var(--n-100);
+  --fg-secondary: var(--n-400);
+  --line-hairline: var(--n-700);
+
+  --fs-body: var(--fs-sm);
+  --fs-code: var(--fs-sm);
+  --r-card: var(--r-md);
+
+  /* Waterfall segments, named for the developer's decision vocabulary
+     (network / queue / model / synthesis) rather than for trace spans. */
+  --wf-network:   #4a7ec7;
+  --wf-queue:     var(--n-500);
+  --wf-model:     #7b5ec7;
+  --wf-synthesis: #3d9e8c;
+  --wf-ttft-rule: 2px solid var(--n-0);   /* time-to-first-token marker */
+}
+
+
+/* doc — a ledger. One document, dense, verification must be cheap.
+   Shares work's instrument language; its bold thing is the provenance link. */
+[data-product="doc"] {
+  --bg-canvas:  var(--n-50);
+  --bg-raised:  var(--n-0);
+  --bg-sunken:  var(--n-100);
+  --fg-primary: var(--n-900);
+
+  --fs-body: var(--fs-sm);
+  --fs-meta: var(--fs-2xs);
+  --lh-body: 1.45;
+
+  --r-card: var(--r-sm);
+  --card-shadow: none;
+  --card-border: 1px solid var(--line-hairline);
+
+  /* The rendered source document. Added while building the review pane: a
+     photocopy has a paper colour, a ruled grid and ballpoint ink, and none of
+     those had a semantic name. Per rule 1 the system was missing tokens rather
+     than the component needing raw values. */
+  --paper-bg:       #f4f2ec;   /* photocopy grey-cream, not white */
+  --paper-rule:     #cfcabc;   /* printed form rules */
+  --paper-label:    #4a4740;   /* printed labels, worn */
+  --ink:            #1c3f7a;   /* blue ballpoint */
+  --ink-void:       #7c2b22;   /* the pen that struck something out */
+  --paper-smudge:   color-mix(in srgb, var(--n-900) 22%, transparent);
+
+  /* The provenance link is this product's one bold move: a live tether
+     between a value and its region in the source. Reserved treatment. */
+  --prov-tether:    var(--sig-attention);
+  --prov-region-bg: color-mix(in srgb, var(--sig-attention) 18%, transparent);
+  --prov-region-ring: 2px solid var(--sig-attention);
+  --prov-dim:       color-mix(in srgb, var(--n-900) 45%, transparent);
+}
+
+/* content — a print proof. Ten scripts on one screen; the bold thing is the
+   drift diff on the back-translation. Everything else is paper-quiet. */
+[data-product="content"] {
+  --bg-canvas:  var(--n-0);
+  --bg-raised:  var(--n-50);
+  --fg-primary: var(--n-900);
+  --fg-secondary: var(--n-500);
+  --line-hairline: var(--n-200);
+
+  --fs-body: var(--fs-md);        /* reading copy, not scanning data */
+  --lh-body: var(--lh-relaxed);
+
+  --r-card: var(--r-none);        /* proofs have edges, not corners */
+  --card-border: 1px solid var(--line-hairline);
+
+  /* Drift diff. Marks CHANGE between source and back-translation.
+     Nothing else in this product may use these. */
+  --drift-added:   color-mix(in srgb, var(--sig-attention) 16%, transparent);
+  --drift-removed: color-mix(in srgb, var(--sig-hazard) 14%, transparent);
+  --drift-moved:   color-mix(in srgb, var(--sig-caution) 16%, transparent);
+  --drift-held:    transparent;   /* agreement is not information */
+
+  /* Text expansion made visible: show a variant inside the container it must
+     fit, so overflow is a design fact rather than a surprise at ship time. */
+  --container-probe-border: 1px dashed var(--n-300);
+  --container-overflow-fg:  var(--sig-hazard);
+
+  /* Tofu detection: a glyph the font cannot render is invisible to a reader
+     who does not know the script. Make the fallback loud in dev. */
+  --script-fallback-bg: color-mix(in srgb, var(--sig-hazard) 25%, transparent);
+}
+
+/* shell — reference material, not a marketing page for your own design system.
+   Dense, navigable, demo-first. The thing being sold is the thinking. */
+[data-product="shell"] {
+  --bg-canvas:  var(--n-0);
+  --bg-raised:  var(--n-50);
+  --fg-primary: var(--n-900);
+  --fg-secondary: var(--n-500);
+
+  --fs-body: var(--fs-sm);
+  --lh-body: var(--lh-body);
+  --measure-doc: 72ch;
+
+  --r-card: var(--r-sm);
+  --card-border: 1px solid var(--line-hairline);
+  --card-shadow: none;
+
+  /* Pattern-library specific. A pattern that exists to handle time and failure
+     cannot be proven by a screenshot, so every demo gets a fault toggle. */
+  --demo-frame-border: 1px solid var(--line-strong);
+  --demo-fault-active: var(--sig-caution);
+  --changelog-rule:    2px solid var(--n-900);   /* changelog is content, not an appendix */
+  --deprecated-fg:     var(--n-400);
+  --deprecated-strike: 1px solid var(--n-400);
+}
+
+/* ---------------------------------------------------------------------------
+   BASELINE QUALITY FLOOR
+   ------------------------------------------------------------------------ */
+*:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+/* A running sweep will tempt you into animated progress theatre.
+   Progress is one number and one bar. */
+[data-product="voice"] * {
+  transition-duration: var(--dur-fast);
+}

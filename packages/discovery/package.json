@@ -1,0 +1,26 @@
+{
+  "name": "discovery",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Discovery — the agentic UI program: six surfaces, one design grammar.",
+  "scripts": {
+    "dev": "next dev -p 6177",
+    "build": "next build",
+    "start": "next start -p 6177",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "next": "^15.5.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

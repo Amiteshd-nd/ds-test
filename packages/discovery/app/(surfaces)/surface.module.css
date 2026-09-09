@@ -1,0 +1,31 @@
+/* Shared surface chrome. Deliberately thin: everything characterful belongs to
+   the surface, and the shell's job is orientation, never density. */
+.product {
+  min-height: 100vh;
+  background: var(--bg-canvas);
+  color: var(--fg-primary);
+  /* Room for the fault bar, which is fixed to the bottom in dev. */
+  padding-bottom: var(--sp-8);
+}
+.nav {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  padding: var(--sp-3) var(--sp-6);
+  border-bottom: 1px solid var(--line-hairline);
+  font-size: var(--fs-sm);
+  color: var(--fg-secondary);
+}
+.nav a { text-decoration: underline; text-underline-offset: 2px; }
+.navHere { color: var(--fg-primary); font-weight: var(--fw-medium); }
+.navRole { color: var(--fg-secondary); }
+
+/* Stub surfaces: a brief exists, the surface does not. Say so plainly rather than
+   showing an empty shell that reads as broken. */
+.stub { max-width: var(--measure-doc, 68ch); padding: var(--sp-7) var(--sp-6); display: flex; flex-direction: column; gap: var(--sp-4); }
+.stubTitle { font-size: var(--fs-xl); }
+.stubLede { color: var(--fg-secondary); }
+.stubList { display: flex; flex-direction: column; gap: var(--sp-2); font-size: var(--fs-sm); }
+.stubList li { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: var(--sp-3); padding: var(--sp-2) 0; border-bottom: 1px solid var(--line-hairline); }
+.stubList dt, .stubKey { color: var(--fg-tertiary); }
+.stubPath { font-family: var(--font-mono); font-size: var(--fs-xs); }
