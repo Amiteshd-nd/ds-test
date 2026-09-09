@@ -41,6 +41,13 @@ export function listPhotoFilenames(jobId: string): string[] {
     .sort();
 }
 
+// All stored source files for a capture — images AND video (used by resubmit).
+export function listSourceFilenames(jobId: string): string[] {
+  const dir = jobPhotosDir(jobId);
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir).sort();
+}
+
 export function readPhoto(jobId: string, filename: string): Buffer | null {
   // Guard against path traversal — only a bare filename is allowed.
   if (filename.includes("/") || filename.includes("..")) return null;

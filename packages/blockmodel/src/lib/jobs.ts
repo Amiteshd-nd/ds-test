@@ -1,142 +1,371 @@
 import { randomUUID } from "node:crypto";
 import AdmZip from "adm-zip";
-import { createJob, getJob, listJobs, updateJob } from "./db";
+import {
+  archiveCaptureRow,
+  countJobsForCapture,
+  getCapture,
+  insertAsset,
+  insertCapture,
+  insertJob,
+  latestJobForCapture,
+  listActiveJobs,
+  listAssets,
+  listCaptures,
+  updateAsset,
+  updateJobRow,
+} from "./db";
 import { logKiri } from "./logger";
-import { getModelZipUrl, getStatus, KiriError, submitPhotoScan } from "./kiri";
-import { savePhotos } from "./storage";
-import { saveModelBytes } from "./storage";
-import { isTerminal, type Job } from "./types";
+import { getModelZipUrl, getStatus, KiriError, submit3dgs, submitPhotoScan, type KiriFile } from "./kiri";
+import { listSourceFilenames, readPhoto, saveModelBytes, savePhotos } from "./storage";
+import {
+  isTerminal,
+  type AssetRow,
+  type CaptureKind,
+  type CaptureRow,
+  type Job,
+  type JobRow,
+} from "./types";
 
-export { getJob, listJobs };
+// ── Orchestration over captures / assets / jobs ─────────────────────────────
+// The UI consumes the composed `Job` view-model; components never see rows.
 
-// Create a job, save its photos, and hand it to KIRI. Any failure leaves a
-// `failed` job behind (never a silent throw) so the UI always has something to show.
-export async function createAndSubmit(
+interface UploadFile {
+  name: string;
+  type: string;
+  data: Buffer;
+}
+
+// ── Composition: rows → view-model ──────────────────────────────────────────
+
+function composeJob(capture: CaptureRow): Job {
+  const assets = listAssets(capture.id);
+  const job = latestJobForCapture(capture.id);
+
+  const source = assets.find((a) =>
+    ["source_photos", "source_video", "pano_360"].includes(a.type),
+  );
+  const output = assets.find(
+    (a) => (a.type === "mesh_glb" || a.type === "splat_ply") && a.status === "ready" && a.path,
+  );
+
+  return {
+    id: capture.id,
+    name: capture.name,
+    kind: capture.kind,
+    // Pano tours have no reconstruction — they're done the moment they exist.
+    status: capture.kind === "pano_360" ? "succeeded" : (job?.status ?? "failed"),
+    kiriSerialize: job?.providerJobId ?? null,
+    photoCount: source?.count ?? 0,
+    totalBytes: source?.bytes ?? 0,
+    createdAt: capture.createdAt,
+    startedAt: job?.submittedAt ?? capture.createdAt,
+    finishedAt: job?.completedAt ?? (capture.kind === "pano_360" ? capture.createdAt : null),
+    errorCode: job?.errorCode ?? null,
+    errorMsg: job?.errorMsg ?? null,
+    modelPath: output?.path ?? null,
+    attempts: job ? countJobsForCapture(capture.id) : 0,
+    assets,
+  };
+}
+
+export function getJob(id: string): Job | null {
+  const capture = getCapture(id);
+  return capture ? composeJob(capture) : null;
+}
+
+export function listJobs(): Job[] {
+  return listCaptures().map(composeJob);
+}
+
+export function archiveCapture(id: string): boolean {
+  if (!getCapture(id)) return false;
+  archiveCaptureRow(id);
+  return true;
+}
+
+// ── Creation ────────────────────────────────────────────────────────────────
+
+// 360 tour: no reconstruction, no KIRI — the uploaded panos ARE the output.
+export async function createPano(name: string, files: UploadFile[]): Promise<Job> {
+  const id = randomUUID();
+  const now = Date.now();
+  const totalBytes = files.reduce((s, f) => s + f.data.byteLength, 0);
+
+  await savePhotos(
+    id,
+    files.map((f) => ({ name: f.name, data: f.data })),
+  );
+
+  insertCapture({ id, name: name.trim() || "Untitled tour", kind: "pano_360", createdAt: now, archivedAt: null });
+  insertAsset({
+    id: randomUUID(),
+    captureId: id,
+    type: "pano_360",
+    status: "ready",
+    path: `${id}/photos`,
+    bytes: totalBytes,
+    count: files.length,
+    createdAt: now,
+  });
+  return composeJob(getCapture(id)!);
+}
+
+// Photo set → mesh via KIRI photogrammetry.
+export async function createAndSubmit(name: string, files: UploadFile[]): Promise<Job> {
+  return createReconCapture(name, files, "photo_3d", "source_photos");
+}
+
+// Walkthrough video (or photo set) → gaussian splat via KIRI 3DGS.
+export async function createSplatScan(
   name: string,
-  files: { name: string; type: string; data: Buffer }[],
+  files: UploadFile[],
+  source: "video" | "image",
+): Promise<Job> {
+  return createReconCapture(name, files, "splat_3dgs", source === "video" ? "source_video" : "source_photos");
+}
+
+async function createReconCapture(
+  name: string,
+  files: UploadFile[],
+  kind: CaptureKind,
+  sourceType: AssetRow["type"],
 ): Promise<Job> {
   const id = randomUUID();
   const now = Date.now();
   const totalBytes = files.reduce((s, f) => s + f.data.byteLength, 0);
 
-  const job: Job = {
+  // Persist the source FIRST — a failed submission must never lose the upload.
+  await savePhotos(
     id,
-    name: name.trim() || "Untitled scan",
-    status: "uploading",
-    kiriSerialize: null,
-    photoCount: files.length,
-    totalBytes,
-    createdAt: now,
-    startedAt: null,
-    finishedAt: null,
-    errorCode: null,
-    errorMsg: null,
-    modelPath: null,
-  };
-  createJob(job);
+    files.map((f) => ({ name: f.name, data: f.data })),
+  );
 
-  try {
-    await savePhotos(
-      id,
-      files.map((f) => ({ name: f.name, data: f.data })),
-    );
-    const serialize = await submitPhotoScan(
-      files.map((f, i) => ({
-        filename: f.name || `photo-${i}.jpg`,
-        data: f.data,
-        contentType: f.type || "image/jpeg",
-      })),
-    );
-    return (
-      updateJob(id, { kiriSerialize: serialize, status: "queued", startedAt: Date.now() }) ?? job
-    );
-  } catch (err) {
-    const { code, msg } = errorInfo(err);
-    logKiri({ direction: "error", method: "POST", url: "createAndSubmit", body: msg });
-    return (
-      updateJob(id, {
-        status: "failed",
-        errorCode: String(code),
-        errorMsg: msg,
-        finishedAt: Date.now(),
-      }) ?? job
-    );
-  }
+  insertCapture({
+    id,
+    name: name.trim() || (kind === "splat_3dgs" ? "Untitled capture" : "Untitled scan"),
+    kind,
+    createdAt: now,
+    archivedAt: null,
+  });
+  insertAsset({
+    id: randomUUID(),
+    captureId: id,
+    type: sourceType,
+    status: "ready",
+    path: `${id}/photos`,
+    bytes: totalBytes,
+    count: files.length,
+    createdAt: now,
+  });
+
+  await submitAttempt(
+    id,
+    kind,
+    files.map((f, i) => ({
+      filename: f.name || `file-${i}`,
+      data: f.data,
+      contentType: f.type || "application/octet-stream",
+    })),
+    sourceType === "source_video" ? "video" : "image",
+  );
+  return composeJob(getCapture(id)!);
 }
 
-// Poll KIRI for a job's current state and persist any change. Idempotent and
-// safe to call on every UI poll. Downloads + extracts the model exactly once.
-export async function syncJob(id: string): Promise<Job | null> {
-  const job = getJob(id);
-  if (!job) return null;
-  if (isTerminal(job.status)) return job;
-  if (!job.kiriSerialize) return job; // still uploading / never submitted
+// One reconstruction attempt: insert a job row, hand the files to KIRI, record
+// the outcome. Any failure lands on the job row — never a silent throw.
+async function submitAttempt(
+  captureId: string,
+  kind: CaptureKind,
+  files: KiriFile[],
+  source: "video" | "image",
+): Promise<JobRow> {
+  const jobId = randomUUID();
+  const attempts = countJobsForCapture(captureId) + 1;
+  insertJob({
+    id: jobId,
+    captureId,
+    outputAssetId: null,
+    provider: "kiri",
+    providerJobId: null,
+    status: "uploading",
+    attempts,
+    errorCode: null,
+    errorMsg: null,
+    submittedAt: Date.now(),
+    completedAt: null,
+  });
 
   try {
-    const { status } = await getStatus(job.kiriSerialize);
+    const serialize =
+      kind === "splat_3dgs"
+        ? await submit3dgs(files, { source })
+        : await submitPhotoScan(files);
+    updateJobRow(jobId, { providerJobId: serialize, status: "queued" });
+  } catch (err) {
+    const { code, msg } = errorInfo(err);
+    logKiri({ direction: "error", method: "POST", url: `submitAttempt:${captureId}`, body: msg });
+    updateJobRow(jobId, { status: "failed", errorCode: String(code), errorMsg: msg, completedAt: Date.now() });
+  }
+  return latestJobForCapture(captureId)!;
+}
+
+// Resubmit a failed capture using the source files already on disk. Costs a
+// credit like any submission, but never a re-upload from the phone.
+export async function resubmitJob(captureId: string): Promise<Job | null> {
+  const capture = getCapture(captureId);
+  if (!capture || capture.kind === "pano_360") return null;
+
+  const latest = latestJobForCapture(captureId);
+  if (latest && !isTerminal(latest.status)) return composeJob(capture); // already running
+
+  const filenames = listSourceFilenames(captureId);
+  const files: KiriFile[] = [];
+  for (const name of filenames) {
+    const data = readPhoto(captureId, name);
+    if (data) files.push({ filename: name, data, contentType: contentTypeFor(name) });
+  }
+  if (files.length === 0) {
+    logKiri({ direction: "error", method: "POST", url: `resubmit:${captureId}`, body: "no source files on disk" });
+    return composeJob(capture);
+  }
+
+  const isVideo = files.some((f) => /\.(mp4|mov|webm|m4v)$/i.test(f.filename));
+  await submitAttempt(captureId, capture.kind, files, isVideo ? "video" : "image");
+  return composeJob(capture);
+}
+
+function contentTypeFor(filename: string): string {
+  const ext = filename.split(".").pop()?.toLowerCase();
+  const map: Record<string, string> = {
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    webp: "image/webp",
+    heic: "image/heic",
+    mp4: "video/mp4",
+    mov: "video/quicktime",
+    webm: "video/webm",
+    m4v: "video/x-m4v",
+  };
+  return map[ext ?? ""] ?? "application/octet-stream";
+}
+
+// ── Sync: poll KIRI and persist any change ──────────────────────────────────
+// Idempotent; safe from both the UI poll and the server sweeper.
+
+export async function syncJob(captureId: string): Promise<Job | null> {
+  const capture = getCapture(captureId);
+  if (!capture) return null;
+  if (capture.kind === "pano_360") return composeJob(capture);
+
+  const job = latestJobForCapture(captureId);
+  if (!job || isTerminal(job.status) || !job.providerJobId) return composeJob(capture);
+
+  try {
+    const { status } = await getStatus(job.providerJobId);
 
     if (status === "succeeded") {
-      // Only fetch the model once.
-      if (!job.modelPath) {
-        const modelPath = await downloadAndExtractModel(job);
-        return updateJob(id, { status: "succeeded", modelPath, finishedAt: Date.now() });
+      if (!job.outputAssetId) {
+        await downloadAndExtractModel(capture, job);
       }
-      return updateJob(id, { status: "succeeded" });
-    }
-
-    if (status === "failed") {
-      return updateJob(id, {
+      updateJobRow(job.id, { status: "succeeded", completedAt: job.completedAt ?? Date.now() });
+    } else if (status === "failed") {
+      updateJobRow(job.id, {
         status: "failed",
         errorCode: "reconstruction_failed",
         errorMsg:
-          "KIRI could not reconstruct a model from these photos. This usually means too little overlap, motion blur, too few angles, or a reflective/featureless subject.",
-        finishedAt: Date.now(),
+          "KIRI could not reconstruct a model from this capture. This usually means too little overlap, motion blur, too few angles, or a reflective/featureless subject.",
+        completedAt: Date.now(),
       });
+    } else {
+      updateJobRow(job.id, { status });
     }
-
-    // Still in flight (uploading / queued / processing).
-    return updateJob(id, { status });
   } catch (err) {
     const { code, msg } = errorInfo(err);
-    logKiri({ direction: "error", method: "GET", url: "syncJob", body: msg });
-    // A transient poll error shouldn't kill the job — only a hard credit/auth
-    // error is worth surfacing as terminal.
+    logKiri({ direction: "error", method: "GET", url: `syncJob:${captureId}`, body: msg });
+    // Transient poll errors don't kill the job — only hard auth/credit errors do.
     if (err instanceof KiriError && (err.httpStatus === 401 || err.httpStatus === 403)) {
-      return updateJob(id, {
-        status: "failed",
-        errorCode: String(code),
-        errorMsg: msg,
-        finishedAt: Date.now(),
-      });
+      updateJobRow(job.id, { status: "failed", errorCode: String(code), errorMsg: msg, completedAt: Date.now() });
     }
-    return job;
   }
+  return composeJob(capture);
 }
 
-async function downloadAndExtractModel(job: Job): Promise<string> {
-  const zipUrl = await getModelZipUrl(job.kiriSerialize!);
+// Sweep every in-flight job: used by the server-side sweeper so captures
+// complete even with no browser tab open. Also fails-out jobs stuck in
+// `uploading` (a server restart mid-submit leaves them stranded).
+const STUCK_UPLOAD_MS = 10 * 60_000;
+
+export async function sweepActiveJobs(): Promise<number> {
+  const active = listActiveJobs();
+  for (const job of active) {
+    if (job.status === "uploading" && !job.providerJobId) {
+      if (Date.now() - job.submittedAt > STUCK_UPLOAD_MS) {
+        updateJobRow(job.id, {
+          status: "failed",
+          errorCode: "interrupted",
+          errorMsg: "The upload was interrupted before it reached KIRI. Your files are safe — resubmit to try again.",
+          completedAt: Date.now(),
+        });
+        logKiri({ direction: "error", method: "SWEEP", url: `job:${job.id}`, body: "stuck uploading — failed out" });
+      }
+      continue; // still uploading (or just failed out) — nothing to poll
+    }
+    await syncJob(job.captureId);
+  }
+  return active.length;
+}
+
+// ── Model download + extraction ─────────────────────────────────────────────
+
+async function downloadAndExtractModel(capture: CaptureRow, job: JobRow): Promise<void> {
+  const zipUrl = await getModelZipUrl(job.providerJobId!);
   logKiri({ direction: "request", method: "GET", url: "download-zip", meta: { zipUrl: zipUrl.slice(0, 80) } });
-  const res = await fetch(zipUrl);
+  const res = await fetch(zipUrl, { signal: AbortSignal.timeout(10 * 60_000) });
   if (!res.ok) throw new KiriError(res.status, `Failed to download model zip (HTTP ${res.status}).`, res.status);
   const buf = Buffer.from(await res.arrayBuffer());
+  const now = Date.now();
+
+  // Always keep the raw zip (the Download button serves it).
+  const zipPath = await saveModelBytes(capture.id, "model.zip", buf);
+  insertAsset({
+    id: randomUUID(),
+    captureId: capture.id,
+    type: "model_zip",
+    status: "ready",
+    path: zipPath,
+    bytes: buf.byteLength,
+    count: 1,
+    createdAt: now,
+  });
 
   const zip = new AdmZip(buf);
   const entries = zip.getEntries().filter((e) => !e.isDirectory);
-  // Prefer a .glb, then .gltf, then fall back to the first mesh file.
+  // Splat jobs want the gaussian .ply; mesh jobs want the .glb.
   const pick =
-    entries.find((e) => /\.glb$/i.test(e.entryName)) ??
-    entries.find((e) => /\.gltf$/i.test(e.entryName)) ??
-    entries.find((e) => /\.(obj|ply|stl)$/i.test(e.entryName));
+    capture.kind === "splat_3dgs"
+      ? (entries.find((e) => /\.(ply|splat|ksplat)$/i.test(e.entryName)) ??
+        entries.find((e) => /\.glb$/i.test(e.entryName)))
+      : (entries.find((e) => /\.glb$/i.test(e.entryName)) ??
+        entries.find((e) => /\.gltf$/i.test(e.entryName)) ??
+        entries.find((e) => /\.(obj|ply|stl)$/i.test(e.entryName)));
+  if (!pick) return; // zip saved; viewer will explain there's nothing viewable
 
-  // Always keep the raw zip too, so the viewer's Download button has the full asset.
-  await saveModelBytes(job.id, "model.zip", buf);
-
-  if (!pick) {
-    // Nothing viewable, but the zip is saved. Record so the viewer can explain.
-    return saveModelBytes(job.id, "model.zip", buf);
-  }
   const ext = pick.entryName.split(".").pop()!.toLowerCase();
-  return saveModelBytes(job.id, `model.${ext}`, pick.getData());
+  const data = pick.getData();
+  const outPath = await saveModelBytes(capture.id, `model.${ext}`, data);
+  const outId = randomUUID();
+  insertAsset({
+    id: outId,
+    captureId: capture.id,
+    type: ext === "glb" || ext === "gltf" || ext === "obj" || ext === "stl" ? "mesh_glb" : "splat_ply",
+    status: "ready",
+    path: outPath,
+    bytes: data.byteLength,
+    count: 1,
+    createdAt: now,
+  });
+  updateJobRow(job.id, { outputAssetId: outId });
 }
 
 function errorInfo(err: unknown): { code: string | number; msg: string } {

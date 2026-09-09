@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { Job } from "@/lib/types";
 
@@ -40,6 +42,25 @@ function explain(job: Job): { cause: string; fixes: string[] } {
 
 export default function FailedView({ job, photos }: { job: Job; photos: string[] }) {
   const { cause, fixes } = explain(job);
+  const router = useRouter();
+  const [retrying, setRetrying] = useState(false);
+  const [retryError, setRetryError] = useState<string | null>(null);
+
+  // Resubmit using the source files already stored server-side — no re-upload.
+  const retry = async () => {
+    setRetrying(true);
+    setRetryError(null);
+    try {
+      const res = await fetch(`/api/jobs/${job.id}/retry`, { method: "POST" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Retry failed.");
+      router.refresh();
+      window.location.reload(); // JobView re-polls and shows the new attempt
+    } catch (err) {
+      setRetryError(err instanceof Error ? err.message : "Retry failed.");
+      setRetrying(false);
+    }
+  };
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-12">
@@ -92,12 +113,30 @@ export default function FailedView({ job, photos }: { job: Job; photos: string[]
         </div>
       )}
 
-      <Link
-        href="/"
-        className="mt-8 inline-block rounded-lg bg-blue-600 px-4 py-3 font-medium text-white hover:bg-blue-500"
-      >
-        Start a new scan
-      </Link>
+      {retryError && (
+        <p className="mt-6 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{retryError}</p>
+      )}
+
+      <div className="mt-8 flex flex-wrap items-center gap-3">
+        {job.kind !== "pano_360" && (
+          <button
+            onClick={retry}
+            disabled={retrying}
+            className="rounded-lg bg-blue-600 px-4 py-3 font-medium text-white enabled:hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {retrying ? "Resubmitting…" : "Try again (≈ 1 credit, no re-upload)"}
+          </button>
+        )}
+        <Link
+          href="/"
+          className="inline-block rounded-lg border border-neutral-700 px-4 py-3 font-medium text-neutral-200 hover:bg-neutral-800"
+        >
+          Start a new capture
+        </Link>
+        {job.attempts > 1 && (
+          <span className="text-sm text-neutral-500">Attempt {job.attempts}</span>
+        )}
+      </div>
     </main>
   );
 }

@@ -4,12 +4,13 @@
   "private": true,
   "description": "Throwaway UX prototype: phone photos -> KIRI Engine -> 3D model viewer",
   "scripts": {
-    "dev": "next dev -H 0.0.0.0",
+    "dev": "next dev -H 0.0.0.0 -p 6176",
     "build": "next build",
-    "start": "next start -H 0.0.0.0",
+    "start": "next start -H 0.0.0.0 -p 6176",
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
+    "@mkkellogg/gaussian-splats-3d": "0.4.7",
     "@react-three/drei": "10.7.8",
     "@react-three/fiber": "9.7.0",
     "adm-zip": "0.5.16",

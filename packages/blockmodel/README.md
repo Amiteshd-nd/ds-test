@@ -19,7 +19,7 @@ npm run smoke                  # optional: verifies the key works (costs 0 credi
 npm run dev
 ```
 
-Open **http://localhost:3000** on your laptop.
+Open **http://localhost:6176** on your laptop.
 
 ### Get a KIRI API key
 
@@ -44,7 +44,7 @@ The dev server binds to all interfaces (`next dev -H 0.0.0.0`), so:
    ```bash
    ipconfig getifaddr en0
    ```
-3. On your phone, open **http://<that-ip>:3000** (e.g. `http://10.184.165.89:3000`).
+3. On your phone, open **http://<that-ip>:6176** (e.g. `http://10.184.165.89:6176`).
 4. If it doesn't load: macOS may prompt to allow incoming connections the first time
    (allow it), and check **System Settings → Network → Firewall** isn't blocking Node.
 

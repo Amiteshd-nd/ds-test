@@ -13,6 +13,15 @@ const Viewer = dynamic(() => import("@/components/Viewer"), {
   ssr: false,
   loading: () => <div className="fixed inset-0 bg-[#0e0f13]" />,
 });
+const PanoViewer = dynamic(() => import("@/components/PanoViewer"), {
+  ssr: false,
+  loading: () => <div className="fixed inset-0 bg-black" />,
+});
+// The splat renderer is heavy — keep it lazy + client-only, never in the main bundle.
+const SplatViewer = dynamic(() => import("@/components/SplatViewer"), {
+  ssr: false,
+  loading: () => <div className="fixed inset-0 bg-black" />,
+});
 
 interface JobResponse {
   job: Job;
@@ -99,9 +108,16 @@ export default function JobView({ id }: { id: string }) {
 
   const { job, photos } = data;
 
-  if (job.status === "failed") return <FailedView job={job} photos={photos} />;
-  if (job.status === "succeeded" && data.hasModel) return <Viewer job={job} photos={photos} />;
+  // 360 tours are ready the instant they upload — straight to the pano viewer.
+  if (job.kind === "pano_360") return <PanoViewer job={job} photos={photos} />;
 
-  // Uploading / queued / processing — or succeeded-but-no-viewable-mesh.
-  return <ProcessingView job={job} noViewableModel={job.status === "succeeded" && !data.hasModel} />;
+  if (job.status === "failed") return <FailedView job={job} photos={photos} />;
+
+  if (job.status === "succeeded") {
+    if (job.kind === "splat_3dgs" && job.modelPath) return <SplatViewer job={job} photos={photos} />;
+    if (job.kind === "photo_3d" && data.hasModel) return <Viewer job={job} photos={photos} />;
+  }
+
+  // Uploading / queued / processing — or succeeded-but-no-viewable-asset.
+  return <ProcessingView job={job} noViewableModel={job.status === "succeeded"} />;
 }

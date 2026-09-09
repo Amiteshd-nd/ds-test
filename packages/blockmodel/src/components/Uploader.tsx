@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BLUR_THRESHOLD, laplacianVariance } from "@/lib/blur";
+import type { CaptureKind } from "@/lib/types";
 
 interface Photo {
   id: string;
@@ -20,8 +21,12 @@ function formatBytes(n: number): string {
 
 let photoSeq = 0;
 
-export default function Uploader() {
+export default function Uploader({ mode = "photo_3d" }: { mode?: CaptureKind }) {
   const router = useRouter();
+  const isPano = mode === "pano_360";
+  const noun = isPano ? "panorama" : "photo";
+  const min = isPano ? 1 : 20;
+
   const [name, setName] = useState("");
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [dragOver, setDragOver] = useState(false);
@@ -36,39 +41,40 @@ export default function Uploader() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const addFiles = useCallback((fileList: FileList | File[]) => {
-    setError(null);
-    const incoming = Array.from(fileList);
-    const images = incoming.filter((f) => f.type.startsWith("image/"));
-    const rejected = incoming.length - images.length;
-    if (rejected > 0) {
-      setError(`${rejected} non-image file${rejected > 1 ? "s" : ""} skipped.`);
-    }
-    const added: Photo[] = images.map((file) => ({
-      id: `p${photoSeq++}`,
-      file,
-      url: URL.createObjectURL(file),
-      blurVariance: null,
-    }));
-    setPhotos((prev) => [...prev, ...added]);
+  const addFiles = useCallback(
+    (fileList: FileList | File[]) => {
+      setError(null);
+      const incoming = Array.from(fileList);
+      const images = incoming.filter((f) => f.type.startsWith("image/"));
+      const rejected = incoming.length - images.length;
+      if (rejected > 0) {
+        setError(`${rejected} non-image file${rejected > 1 ? "s" : ""} skipped.`);
+      }
+      const added: Photo[] = images.map((file) => ({
+        id: `p${photoSeq++}`,
+        file,
+        url: URL.createObjectURL(file),
+        blurVariance: null,
+      }));
+      setPhotos((prev) => [...prev, ...added]);
 
-    // Blur check in the background — never blocks the UI.
-    setChecking(true);
-    Promise.all(
-      added.map(async (p) => {
-        const v = await laplacianVariance(p.file);
-        return { id: p.id, v };
-      }),
-    ).then((results) => {
-      setPhotos((prev) =>
-        prev.map((p) => {
-          const r = results.find((x) => x.id === p.id);
-          return r ? { ...p, blurVariance: r.v } : p;
-        }),
-      );
-      setChecking(false);
-    });
-  }, []);
+      // Blur scoring only matters for 3D reconstruction, not for 360 panos.
+      if (isPano) return;
+      setChecking(true);
+      Promise.all(
+        added.map(async (p) => ({ id: p.id, v: await laplacianVariance(p.file) })),
+      ).then((results) => {
+        setPhotos((prev) =>
+          prev.map((p) => {
+            const r = results.find((x) => x.id === p.id);
+            return r ? { ...p, blurVariance: r.v } : p;
+          }),
+        );
+        setChecking(false);
+      });
+    },
+    [isPano],
+  );
 
   const removePhoto = (id: string) => {
     setPhotos((prev) => {
@@ -96,9 +102,9 @@ export default function Uploader() {
   ).length;
 
   const count = photos.length;
-  const tooFew = count > 0 && count < 20;
-  const lowForQuality = count >= 20 && count < 40;
-  const canSubmit = count >= 20 && count <= 300 && !submitting;
+  const tooFew = count > 0 && count < min;
+  const lowForQuality = !isPano && count >= 20 && count < 40;
+  const canSubmit = count >= min && (isPano || count <= 300) && !submitting;
 
   const submit = async () => {
     if (!canSubmit) return;
@@ -107,12 +113,13 @@ export default function Uploader() {
     try {
       const form = new FormData();
       form.append("name", name);
+      form.append("kind", mode);
       photos.forEach((p) => form.append("photos", p.file, p.file.name));
       const res = await fetch("/api/jobs", { method: "POST", body: form });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Upload failed.");
-      // Ask for notification permission now — a scan is actually starting.
-      if ("Notification" in window && Notification.permission === "default") {
+      // 3D scans take minutes — offer to notify. 360 tours are instant.
+      if (!isPano && "Notification" in window && Notification.permission === "default") {
         Notification.requestPermission().catch(() => {});
       }
       router.push(`/jobs/${json.job.id}`);
@@ -126,11 +133,13 @@ export default function Uploader() {
     <div className="space-y-5">
       {/* Name */}
       <div>
-        <label className="mb-1 block text-sm text-neutral-400">Scan name</label>
+        <label className="mb-1 block text-sm text-neutral-400">
+          {isPano ? "Tour name" : "Scan name"}
+        </label>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g. Garden gnome"
+          placeholder={isPano ? "e.g. Flat 3B — move-in" : "e.g. Garden gnome"}
           className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 outline-none focus:border-blue-500"
         />
       </div>
@@ -148,9 +157,13 @@ export default function Uploader() {
           dragOver ? "border-blue-500 bg-blue-500/5" : "border-neutral-700 hover:border-neutral-500"
         }`}
       >
-        <p className="text-neutral-200">Tap to choose photos, or drag &amp; drop here</p>
+        <p className="text-neutral-200">
+          Tap to choose {isPano ? "360 photos" : "photos"}, or drag &amp; drop here
+        </p>
         <p className="mt-1 text-sm text-neutral-500">
-          On your phone this opens the camera roll — select 40–80 shots.
+          {isPano
+            ? "Equirectangular (2:1) panoramas work best. Add one per viewpoint to build a tour."
+            : "On your phone this opens the camera roll — select 40–80 shots."}
         </p>
         <input
           ref={inputRef}
@@ -170,12 +183,13 @@ export default function Uploader() {
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
             <span className="text-neutral-200">
-              <strong>{count}</strong> photo{count === 1 ? "" : "s"}
+              <strong>{count}</strong> {noun}
+              {count === 1 ? "" : "s"}
             </span>
             <span className="text-neutral-400">{formatBytes(totalBytes)} total</span>
-            {checking ? (
+            {!isPano && checking ? (
               <span className="text-neutral-500">checking sharpness…</span>
-            ) : blurryCount > 0 ? (
+            ) : !isPano && blurryCount > 0 ? (
               <span className="text-amber-400">{blurryCount} possibly blurry</span>
             ) : null}
             <button onClick={clearAll} className="ml-auto text-neutral-500 underline hover:text-neutral-300">
@@ -185,7 +199,8 @@ export default function Uploader() {
 
           {tooFew && (
             <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">
-              Need at least <strong>20 photos</strong> to start a scan. Add {20 - count} more.
+              Need at least <strong>{min} {noun}{min === 1 ? "" : "s"}</strong>
+              {isPano ? "." : ` to start a scan. Add ${min - count} more.`}
             </p>
           )}
           {lowForQuality && (
@@ -200,7 +215,7 @@ export default function Uploader() {
       {count > 0 && (
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 md:grid-cols-6">
           {photos.map((p) => {
-            const blurry = p.blurVariance !== null && p.blurVariance < BLUR_THRESHOLD;
+            const blurry = !isPano && p.blurVariance !== null && p.blurVariance < BLUR_THRESHOLD;
             return (
               <div key={p.id} className="group relative aspect-square overflow-hidden rounded-lg bg-neutral-900">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -216,7 +231,7 @@ export default function Uploader() {
                     removePhoto(p.id);
                   }}
                   className="absolute right-1 top-1 hidden rounded bg-black/70 px-1.5 text-xs text-white group-hover:block"
-                  aria-label="Remove photo"
+                  aria-label={`Remove ${noun}`}
                 >
                   ✕
                 </button>
@@ -235,10 +250,14 @@ export default function Uploader() {
         className="w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white transition enabled:hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {submitting
-          ? "Uploading…"
-          : count < 20
-            ? "Add at least 20 photos"
-            : `Start scan (${count} photos ≈ 1 credit)`}
+          ? isPano
+            ? "Creating…"
+            : "Uploading…"
+          : count < min
+            ? `Add ${isPano ? "a panorama" : "at least 20 photos"}`
+            : isPano
+              ? `Create 360 tour (${count})`
+              : `Start scan (${count} photos ≈ 1 credit)`}
       </button>
     </div>
   );

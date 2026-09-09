@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getJob, syncJob } from "@/lib/jobs";
+import { archiveCapture, getJob, syncJob } from "@/lib/jobs";
 import { listPhotoFilenames } from "@/lib/storage";
 
 export const runtime = "nodejs";
@@ -18,4 +18,12 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     photos: listPhotoFilenames(id),
     hasModel: Boolean(job.modelPath && /\.(glb|gltf)$/i.test(job.modelPath)),
   });
+}
+
+// DELETE /api/jobs/:id — archive a capture (soft delete: files and rows stay;
+// it just leaves the list). This is a records product — nothing is hard-deleted.
+export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
+  if (!archiveCapture(id)) return NextResponse.json({ error: "Capture not found." }, { status: 404 });
+  return NextResponse.json({ ok: true });
 }
