@@ -2,11 +2,11 @@
 # Optimized for image delivery and performance
 
 # Monorepo (pnpm workspaces). Install runs at the repo root so the whole
-# workspace is linked; we build only the portfolio package and publish its dist.
+# workspace is linked; we build only the personal-doc package and publish its dist.
 # Netlify picks up pnpm from `packageManager` in the root package.json.
 [build]
-  command = "pnpm --filter portfolio build"
-  publish = "packages/portfolio/dist"
+  command = "pnpm --filter personal-doc build"
+  publish = "packages/personal-doc/dist"
 
 # Asset optimization
 [build.processing]
@@ -117,8 +117,8 @@
 
 # Netlify Dev settings
 [dev]
-  command = "pnpm --filter portfolio dev"
-  targetPort = 5173
+  command = "pnpm --filter personal-doc dev"
+  targetPort = 6173
   port = 8888
   autoLaunch = false
 

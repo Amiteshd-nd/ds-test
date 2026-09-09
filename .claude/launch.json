@@ -1,0 +1,67 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "hub",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 8787
+    },
+    {
+      "name": "dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 6173
+    },
+    {
+      "name": "gully",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "packages/gully"
+      ],
+      "port": 6175
+    },
+    {
+      "name": "game",
+      "runtimeExecutable": "corepack",
+      "runtimeArgs": [
+        "pnpm",
+        "--filter",
+        "@cloud-march/game",
+        "dev"
+      ],
+      "port": 6174
+    },
+    {
+      "name": "personal-doc",
+      "runtimeExecutable": "corepack",
+      "runtimeArgs": [
+        "pnpm",
+        "--filter",
+        "personal-doc",
+        "dev"
+      ],
+      "port": 6173
+    },
+    {
+      "name": "discovery",
+      "runtimeExecutable": "corepack",
+      "runtimeArgs": [
+        "pnpm",
+        "--filter",
+        "discovery",
+        "dev"
+      ],
+      "port": 6177
+    }
+  ]
+}
