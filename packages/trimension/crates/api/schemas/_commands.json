@@ -1,0 +1,303 @@
+{
+  "$defs": {
+    "OpeningKindArg": {
+      "enum": [
+        "door",
+        "window",
+        "passage"
+      ],
+      "type": "string"
+    },
+    "PointMm": {
+      "description": "A point in millimetres, as the tool surface talks about them. Converted to exact\ninternal micrometres on the way in — millimetres are what a drafter says and what an\nLLM will produce, and the conversion belongs at the boundary rather than everywhere.",
+      "properties": {
+        "x": {
+          "format": "double",
+          "type": "number"
+        },
+        "y": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Every mutation the product supports, from either kind of client.\n\nAdding a variant here adds it to the UI's dispatch *and* to the agent's tool schema\nsimultaneously, because both are generated from this type. That is the mechanism that\nkeeps I3 true without anyone having to remember it.",
+  "oneOf": [
+    {
+      "description": "Create a layer.",
+      "properties": {
+        "command": {
+          "const": "create_layer",
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "parent": {
+          "default": null,
+          "description": "Parent layer, for a nested layer tree. Cycles are rejected by validation.",
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "command",
+        "name"
+      ],
+      "type": "object"
+    },
+    {
+      "description": "Show or hide a layer.",
+      "properties": {
+        "command": {
+          "const": "set_layer_visible",
+          "type": "string"
+        },
+        "layer": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "visible": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "command",
+        "layer",
+        "visible"
+      ],
+      "type": "object"
+    },
+    {
+      "description": "Create a wall from a centreline.\n\n`height_mm` is optional on purpose: omitting it records an explicitly `Assumed`\nheight naming the default, which is the honest outcome. Supplying it records a\n`Measured` height attributed to whoever issued the command.",
+      "properties": {
+        "centreline_mm": {
+          "items": {
+            "$ref": "#/$defs/PointMm"
+          },
+          "type": "array"
+        },
+        "command": {
+          "const": "create_wall",
+          "type": "string"
+        },
+        "height_mm": {
+          "default": null,
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "layer": {
+          "default": null,
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "thickness_mm": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "command",
+        "centreline_mm",
+        "thickness_mm"
+      ],
+      "type": "object"
+    },
+    {
+      "description": "Change a wall's height. Recorded as `Measured` with the reason given, because a\nhuman or an agent stating a height is evidence — but only if it says why.",
+      "properties": {
+        "command": {
+          "const": "set_wall_height",
+          "type": "string"
+        },
+        "entity": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "height_mm": {
+          "format": "double",
+          "type": "number"
+        },
+        "reason": {
+          "description": "Why this height. Required: a height with no justification is exactly what\ninvariant I4 exists to prevent.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "command",
+        "entity",
+        "height_mm",
+        "reason"
+      ],
+      "type": "object"
+    },
+    {
+      "description": "Cut a door or window into a wall.",
+      "properties": {
+        "command": {
+          "const": "create_opening",
+          "type": "string"
+        },
+        "height_mm": {
+          "format": "double",
+          "type": "number"
+        },
+        "host": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "kind": {
+          "$ref": "#/$defs/OpeningKindArg"
+        },
+        "position_mm": {
+          "description": "Distance along the host wall's centreline to the opening's centre.",
+          "format": "double",
+          "type": "number"
+        },
+        "sill_mm": {
+          "default": null,
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "width_mm": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "command",
+        "host",
+        "kind",
+        "position_mm",
+        "width_mm",
+        "height_mm"
+      ],
+      "type": "object"
+    },
+    {
+      "description": "Draw a plain polyline.",
+      "properties": {
+        "closed": {
+          "default": false,
+          "type": "boolean"
+        },
+        "command": {
+          "const": "create_polyline",
+          "type": "string"
+        },
+        "layer": {
+          "default": null,
+          "format": "uint64",
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "points_mm": {
+          "items": {
+            "$ref": "#/$defs/PointMm"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "command",
+        "points_mm"
+      ],
+      "type": "object"
+    },
+    {
+      "description": "Move an entity to a different layer.",
+      "properties": {
+        "command": {
+          "const": "set_entity_layer",
+          "type": "string"
+        },
+        "entity": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "layer": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "command",
+        "entity",
+        "layer"
+      ],
+      "type": "object"
+    },
+    {
+      "description": "Rename or label an entity.",
+      "properties": {
+        "command": {
+          "const": "set_label",
+          "type": "string"
+        },
+        "entity": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "command",
+        "entity",
+        "label"
+      ],
+      "type": "object"
+    },
+    {
+      "description": "Delete an entity. Source-schema data is never touched — invariant I8 makes the\noriginal drawing permanent, and this only removes derived objects.",
+      "properties": {
+        "command": {
+          "const": "delete_entity",
+          "type": "string"
+        },
+        "entity": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "command",
+        "entity"
+      ],
+      "type": "object"
+    }
+  ],
+  "title": "Command"
+}

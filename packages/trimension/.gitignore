@@ -1,0 +1,12 @@
+# In-repo Rust toolchain (see CLAUDE.md — repo-scope guardrail)
+.toolchain/
+target/
+pkg/
+node_modules/
+dist/
+*.tsbuildinfo
+
+# wasm-bindgen output for the web app (rebuild with `pnpm --filter @trimension/web wasm`)
+apps/web/wasm/
+# Blob store the dev/demo session server writes to (TRIMENSION_STORE)
+storage/

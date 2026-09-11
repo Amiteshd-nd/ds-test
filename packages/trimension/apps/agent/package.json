@@ -1,0 +1,22 @@
+{
+  "name": "@trimension/agent",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "AI SDK 7 host: tool bridge to the session server, plan/approve loop.",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "start": "node --experimental-strip-types src/main.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "4.0.52",
+    "ai": "7.0.97",
+    "zod": "4.6.2",
+    "ws": "8.21.3"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.2",
+    "typescript": "5.9.2",
+    "@types/ws": "8.18.1"
+  }
+}

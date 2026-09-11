@@ -1,0 +1,7 @@
+# 1.98.1 = current stable, 2026-09-01. NOT 1.87 (wgpu's declared MSRV): the transitive
+# graph is higher — encoding_rs 0.8.41 and image 0.25.10 both require >=1.88. The MSRV
+# floor is set by the resolved graph, not by direct dependencies. See VERSIONS.md.
+[toolchain]
+channel = "1.98.1"
+components = ["rustfmt", "clippy"]
+targets = ["wasm32-unknown-unknown"]

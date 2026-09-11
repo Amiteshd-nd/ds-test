@@ -1,0 +1,20 @@
+[package]
+name = "tri-render"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+tri-doc = { workspace = true }
+tri-solid = { workspace = true }
+serde = { workspace = true }
+wgpu = { workspace = true }
+bytemuck = { version = "1", features = ["derive"] }
+pollster = "0.4"
+png = "0.18"
+
+[dev-dependencies]
+tri-commit = { workspace = true }
+tri-import-dxf = { workspace = true }

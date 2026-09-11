@@ -1,0 +1,20 @@
+[package]
+name = "tri-doc"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+serde = { workspace = true }
+slotmap = { workspace = true }
+blake3 = { workspace = true }
+thiserror = { workspace = true }
+schemars = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+wasm-bindgen-test = "0.3.78"

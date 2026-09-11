@@ -1,0 +1,52 @@
+{
+  "description": "Summary statistics and layer breakdown for a region. Returns aggregates, never entity lists.",
+  "input_schema": {
+    "$defs": {
+      "BoxMm": {
+        "properties": {
+          "max_x": {
+            "format": "double",
+            "type": "number"
+          },
+          "max_y": {
+            "format": "double",
+            "type": "number"
+          },
+          "min_x": {
+            "format": "double",
+            "type": "number"
+          },
+          "min_y": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "min_x",
+          "min_y",
+          "max_x",
+          "max_y"
+        ],
+        "type": "object"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+      "bbox": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/BoxMm"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    },
+    "title": "DescribeRegionArgs",
+    "type": "object"
+  },
+  "name": "describe_region",
+  "requires_approval": false
+}

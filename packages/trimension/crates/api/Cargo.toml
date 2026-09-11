@@ -1,0 +1,19 @@
+[package]
+name = "tri-api"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+tri-doc = { workspace = true }
+tri-commit = { workspace = true }
+tri-geom2d = { workspace = true }
+tri-solid = { workspace = true }
+tri-import-dxf = { workspace = true }
+tri-render = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+schemars = { workspace = true }
+thiserror = { workspace = true }

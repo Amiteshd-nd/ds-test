@@ -1,0 +1,56 @@
+# trimension CI. Lives at the monorepo root because GitHub only reads workflows from
+# there; everything it touches is inside packages/trimension.
+name: trimension
+
+on:
+  push:
+    paths: ['packages/trimension/**', '.github/workflows/trimension.yml']
+  pull_request:
+    paths: ['packages/trimension/**', '.github/workflows/trimension.yml']
+
+defaults:
+  run:
+    working-directory: packages/trimension
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # rust-toolchain.toml pins the channel and the wasm32 target.
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.98.1'
+          targets: wasm32-unknown-unknown
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/trimension
+
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+
+      # PRD §4.2: all three compile targets.
+      - name: All targets + tests
+        run: cargo xtask test-all
+
+      # I6 guard. Headless wgpu on CI needs a software adapter.
+      - name: Install lavapipe (headless Vulkan)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mesa-vulkan-drivers vulkan-tools
+      - name: Render parity (I6)
+        run: cargo xtask parity
+        env:
+          WGPU_BACKEND: vulkan
+
+      # I3 guard: registry and generated schemas must not drift.
+      - name: Schema drift (I3)
+        run: |
+          cargo xtask gen-schemas
+          git diff --exit-code -- crates/api/schemas || {
+            echo '::error::Generated tool schemas are stale. Run: cargo xtask gen-schemas'
+            exit 1
+          }

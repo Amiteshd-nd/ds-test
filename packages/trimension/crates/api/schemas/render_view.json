@@ -1,0 +1,91 @@
+{
+  "description": "Render the model headlessly to a PNG so the caller can see what it made. Four views: plan, left elevation, right elevation, and a two-point perspective.",
+  "input_schema": {
+    "$defs": {
+      "BoxMm": {
+        "properties": {
+          "max_x": {
+            "format": "double",
+            "type": "number"
+          },
+          "max_y": {
+            "format": "double",
+            "type": "number"
+          },
+          "min_x": {
+            "format": "double",
+            "type": "number"
+          },
+          "min_y": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "min_x",
+          "min_y",
+          "max_x",
+          "max_y"
+        ],
+        "type": "object"
+      },
+      "ViewModeArg": {
+        "enum": [
+          "plan_view2d",
+          "elevation_left",
+          "elevation_right",
+          "two_point_perspective"
+        ],
+        "type": "string"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+      "bbox": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/BoxMm"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Frame this region. Omit to fit the whole model."
+      },
+      "height_px": {
+        "default": null,
+        "format": "uint32",
+        "minimum": 0,
+        "type": [
+          "integer",
+          "null"
+        ]
+      },
+      "mode": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/ViewModeArg"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "width_px": {
+        "default": null,
+        "format": "uint32",
+        "minimum": 0,
+        "type": [
+          "integer",
+          "null"
+        ]
+      }
+    },
+    "title": "RenderViewArgs",
+    "type": "object"
+  },
+  "name": "render_view",
+  "requires_approval": false
+}

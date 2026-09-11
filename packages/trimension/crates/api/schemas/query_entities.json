@@ -1,0 +1,92 @@
+{
+  "description": "Find entities by bounding box, layer or kind. Returns a capped, summarised list with a truncation flag — never the whole document.",
+  "input_schema": {
+    "$defs": {
+      "BoxMm": {
+        "properties": {
+          "max_x": {
+            "format": "double",
+            "type": "number"
+          },
+          "max_y": {
+            "format": "double",
+            "type": "number"
+          },
+          "min_x": {
+            "format": "double",
+            "type": "number"
+          },
+          "min_y": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "min_x",
+          "min_y",
+          "max_x",
+          "max_y"
+        ],
+        "type": "object"
+      },
+      "EntityKind": {
+        "enum": [
+          "wall",
+          "opening",
+          "polyline",
+          "annotation",
+          "solid",
+          "other"
+        ],
+        "type": "string"
+      }
+    },
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+      "bbox": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/BoxMm"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Restrict to entities touching this box, in millimetres."
+      },
+      "kind": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/EntityKind"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "layer": {
+        "default": null,
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "limit": {
+        "default": null,
+        "description": "Capped at 200 regardless of what is asked for.",
+        "format": "uint",
+        "minimum": 0,
+        "type": [
+          "integer",
+          "null"
+        ]
+      }
+    },
+    "title": "QueryEntitiesArgs",
+    "type": "object"
+  },
+  "name": "query_entities",
+  "requires_approval": false
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@trimension/web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "trimension shell: canvas, chat panel, plan approval.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "wasm": "cd ../.. && cargo build -p tri-wasm --target wasm32-unknown-unknown --release && wasm-bindgen --target web --out-dir apps/web/wasm --out-name trimension target/wasm32-unknown-unknown/release/tri_wasm.wasm"
+  },
+  "dependencies": {
+    "@xstate/react": "6.1.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "xstate": "5.32.6"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "typescript": "5.9.2",
+    "vite": "8.3.0"
+  }
+}

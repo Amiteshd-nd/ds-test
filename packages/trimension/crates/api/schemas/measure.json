@@ -1,0 +1,23 @@
+{
+  "description": "Lengths, areas and volumes for specific entities, each with the provenance of every value that went into it.",
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "properties": {
+      "ids": {
+        "items": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "ids"
+    ],
+    "title": "MeasureArgs",
+    "type": "object"
+  },
+  "name": "measure",
+  "requires_approval": false
+}

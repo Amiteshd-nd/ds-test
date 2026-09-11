@@ -1,5 +1,7 @@
 packages:
   - 'packages/*'
+  # trimension is a Cargo workspace with JS apps nested under it.
+  - 'packages/trimension/apps/*'
 
 # Native/postinstall builds we trust and require:
 #   better-sqlite3 (blockmodel DB), esbuild (Vite/Next), sharp (portfolio image scripts)
@@ -7,3 +9,7 @@ allowBuilds:
   better-sqlite3: true
   esbuild: true
   sharp: true
+
+minimumReleaseAgeExclude:
+  - vite@8.3.0
+  - zod@4.6.2

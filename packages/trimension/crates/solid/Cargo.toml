@@ -1,0 +1,18 @@
+[package]
+name = "tri-solid"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+tri-doc = { workspace = true }
+tri-geom2d = { workspace = true }
+serde = { workspace = true }
+
+[dev-dependencies]
+tri-commit = { workspace = true }
+tri-import-dxf = { workspace = true }
+tri-render = { workspace = true }
+pollster = "0.4"
