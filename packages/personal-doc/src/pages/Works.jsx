@@ -6,9 +6,18 @@ import gazeboDs from '../assets/images/gazebo-ds.webp';
 import vendingAnalytics from '../assets/images/vending-analytics.webp';
 import teluguStreaming from '../assets/images/telugu-streaming.webp';
 import behanceProfile from '../assets/images/behance-profile.webp';
+import askAmitesh from '../assets/icons/ask-amitesh.svg';
 
 const Works = () => {
   const projects = [
+    {
+      title: 'Ask Amitesh — Home 2.2',
+      description:
+        'This portfolio as a chat interface. Ask a question, get a real answer — with a liquid-glass prompt bar and a point-cloud material that reacts as it thinks.',
+      image: askAmitesh,
+      gradient: 'violet',
+      link: '/home-2.2',
+    },
     {
       title: 'Bangalore Times',
       description: 'Namma Quest — a casual social game set in Bangalore. Built with Phaser + React.',

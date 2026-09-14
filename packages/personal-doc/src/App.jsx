@@ -14,6 +14,10 @@ import GazeboComplexOrganisms from './pages/projects/GazeboComplexOrganisms';
 import VendingAnalytics from './pages/projects/VendingAnalytics';
 import TeluguStreaming from './pages/projects/TeluguStreaming';
 
+// Home 2.2 — the chat-native surface. Lazy so its canvas material and chat
+// bundle stay off the critical path for everyone landing on the classic home.
+const HomeV22 = lazy(() => import('./pages/HomeV22'));
+
 // Lazy-loaded from the game package so Phaser (~1MB) only downloads when the
 // game route is opened.
 const BangaloreTimes = lazy(() =>
@@ -27,7 +31,9 @@ function App() {
   const location = useLocation();
   const isProjectPage = location.pathname.startsWith('/projects/');
   const isGamePage = location.pathname.startsWith('/game/');
-  const hideChrome = isProjectPage || isGamePage;
+  // Home 2.2 is a full app shell with its own header, so the site chrome steps aside.
+  const isChatPage = location.pathname === '/home-2.2';
+  const hideChrome = isProjectPage || isGamePage || isChatPage;
 
   // Scroll to top on route change and send pageview to GA
   useEffect(() => {
@@ -47,6 +53,14 @@ function App() {
       <AnimatePresence>
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Home />} />
+          <Route
+            path="/home-2.2"
+            element={
+              <Suspense fallback={<div className="fixed inset-0 bg-[#060609]" />}>
+                <HomeV22 />
+              </Suspense>
+            }
+          />
           <Route path="/works" element={<Works />} />
           <Route path="/about" element={<About />} />
           <Route path="/projects/hours-of-service" element={<HoursOfService />} />

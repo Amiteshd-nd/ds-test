@@ -111,6 +111,11 @@
     background: linear-gradient(135deg, #2784FF 0%, #0615B7 100%);
   }
 
+  /* Home 2.2's own identity — the magenta-into-violet of its chat surface. */
+  .gradient-violet {
+    background: linear-gradient(135deg, #A758FF 0%, #2B1065 100%);
+  }
+
   /* Hide scrollbar */
   .scrollbar-hide {
     -ms-overflow-style: none;

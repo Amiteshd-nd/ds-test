@@ -21,6 +21,7 @@ const ProjectLink = ({ title, description, image, gradient, link, index }) => {
     yellow: 'gradient-yellow',
     green: 'gradient-green',
     blue: 'gradient-blue',
+    violet: 'gradient-violet',
   };
 
   // Check if link is external

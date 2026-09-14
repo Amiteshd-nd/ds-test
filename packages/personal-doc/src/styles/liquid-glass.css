@@ -1,0 +1,155 @@
+/* Liquid-glass material for the /home-2.2 chat surface.
+ *
+ * Deliberately plain CSS: this file is imported straight from the page rather
+ * than from index.css, so it never sees Tailwind's utility layer and must not
+ * use @apply. Everything is prefixed `lg-` so it cannot collide with the
+ * existing site styles, which stay untouched.
+ */
+
+.lg-root {
+  --lg-ink: #060609;
+  --lg-warm: 255 122 61;
+  --lg-cool: 82 146 255;
+  --lg-violet: 167 88 255;
+  --lg-magenta: 255 74 214;
+
+  background: var(--lg-ink);
+  color: #ffffff;
+}
+
+/* dvh keeps the shell honest when mobile browser chrome collapses. */
+.lg-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
+}
+
+/* ---------------------------------------------------------------- surfaces */
+
+.lg-surface {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.015)),
+    rgba(13, 13, 18, 0.6);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.07),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.5),
+    0 20px 50px -20px rgba(0, 0, 0, 0.9);
+}
+
+.lg-surface-flat {
+  background: rgba(255, 255, 255, 0.045);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+/* A true 1px gradient edge. Two masks, one subtracted from the other, leaves
+ * only the border ring painted — the trick real glass kits use for a rim light
+ * that can be re-coloured per state. */
+.lg-hairline {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+/* Specular sheen across the top third, the way a curved glass slab catches a
+ * key light. Screen blend keeps it from muddying the fill underneath. */
+.lg-specular::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.11) 0%,
+    rgba(255, 255, 255, 0.02) 38%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  mix-blend-mode: screen;
+}
+
+/* ------------------------------------------------------------------ motion */
+
+@keyframes lg-caret {
+  0%, 45% { opacity: 1; }
+  50%, 95% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.lg-caret {
+  display: inline-block;
+  width: 2px;
+  margin-left: 1px;
+  background: currentColor;
+  animation: lg-caret 1.05s steps(1) infinite;
+  vertical-align: -0.12em;
+}
+
+@keyframes lg-spin {
+  to { transform: rotate(360deg); }
+}
+
+.lg-spin {
+  animation: lg-spin 7s linear infinite;
+}
+
+@keyframes lg-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.lg-rise {
+  animation: lg-rise 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* --------------------------------------------------------------- scrolling */
+
+.lg-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+  overscroll-behavior: contain;
+}
+
+.lg-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+.lg-scroll::-webkit-scrollbar-track { background: transparent; }
+.lg-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.13);
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.lg-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.24); background-clip: content-box; }
+
+.lg-rail {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-snap-type: x proximity;
+}
+.lg-rail::-webkit-scrollbar { display: none; }
+
+/* ------------------------------------------------------------------ a11y */
+
+.lg-focus:focus-visible {
+  outline: 2px solid rgba(167, 88, 255, 0.85);
+  outline-offset: 2px;
+}
+
+/* The canvas material and every decorative loop stop dead for anyone who has
+ * asked the OS for less motion; the JS render loop checks the same query. */
+@media (prefers-reduced-motion: reduce) {
+  .lg-caret,
+  .lg-spin,
+  .lg-rise {
+    animation: none !important;
+  }
+  .lg-caret { opacity: 1; }
+}
