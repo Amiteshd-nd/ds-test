@@ -185,6 +185,9 @@ export type AgentEvent =
       count: number;
       /** Which spec line governs this. A failure you can't trace is a dead end. */
       specLineId?: string;
+      /** The expected behaviour it violated — a stronger trace than a rule, because
+          somebody wrote it as an assertion. Added after the webinar notes. */
+      behaviourId?: string;
       exemplarRunIds: string[];
       /** Delta vs the previous sweep. Negative = regression. Must be loud. */
       deltaVsLast?: number;
@@ -535,8 +538,231 @@ export type AgentEvent =
   | { t: 'term.pinned'; lang: string; term: string; renderAs: string }
   | { t: 'segment.regenerated'; lang: string; index: number }
 
+  /* ---- work: agents acting AS the user ----
+     Added for projects/work. The difference from every other surface: the agent
+     acts, and the acts are attributed to a person. So authority and attribution are
+     data here, not presentation. See grammar/log/2026-09-09-work-decisions.md. */
+
+  /** The morning brief — a durable artifact, not a transcript. */
+  | {
+      t: 'brief';
+      date: string;
+      /** Reviewable boundaries across the overnight run, not one blob. */
+      segments: { id: string; label: string }[];
+      /** What it looked at. Needed for the empty brief to be a result. */
+      checked: string[];
+    }
+  | {
+      t: 'brief.item';
+      id: string;
+      segmentId: string;
+      text: string;
+      /** Every claim points at the message it came from. */
+      sources: { kind: 'email' | 'slack' | 'notion' | 'crm'; id: string; label: string; available: boolean }[];
+      needs: 'nothing' | 'decision' | 'permission';
+    }
+
+  /** One thing the agent did, or wants to do, in his name. */
+  /** He read this item. His own action, like `field.reviewed` in doc — a brief read
+      in three sittings has to know where he stopped. */
+  | { t: 'brief.read'; id: string; at: number }
+
+  | {
+      t: 'action';
+      id: string;
+      kind: 'email' | 'slack' | 'crm' | 'calendar' | 'doc';
+      summary: string;
+      channel: string;
+      recipient?: string;
+      state: WorkActionState;
+      /** The ethical centre: who the recipient thinks sent this. */
+      attribution: 'as_user' | 'as_agent' | 'ambiguous';
+      /** Undo has a clock. Saying how long is what separates it from a promise. */
+      reversibleUntilMs?: number;
+      sources?: { kind: string; id: string; label: string; available: boolean }[];
+    }
+  | { t: 'action.state'; id: string; state: WorkActionState; at: number; note?: string }
+
+  /** Partial completion across external systems — the state nobody plans for.
+      `unknown` is the real one: never render it as failed, never as done. */
+  | {
+      t: 'action.legs';
+      id: string;
+      legs: { system: string; state: 'done' | 'failed' | 'unknown'; record?: string }[];
+    }
+  | {
+      t: 'compensation';
+      actionId: string;
+      offers: { system: string; undo: string; possible: boolean }[];
+    }
+
+  /** Access, scoping and residency — procurement blockers, so they belong in the design. */
+  | {
+      t: 'scope';
+      id: string;
+      resource: string;
+      grantedFor: string;
+      untilIso?: string;
+      state: 'granted' | 'expired' | 'revoked';
+    }
+  | { t: 'access'; resource: string; sensitive: boolean; permitted: boolean; at: number }
+  | { t: 'residency'; action: string; region: string; rule: string }
+  /** The admin's org-level scope, visible as a ceiling on his own control. */
+  | { t: 'ceiling'; may: string[]; neverWithoutAdmin: string[] }
+
+  /** Earned autonomy: the agent asks to stop asking, and shows what earned it. */
+  | {
+      t: 'taper.proposal';
+      id: string;
+      kind: string;
+      widenTo: string;
+      evidence: { clean: number; sinceIso: string; reversed: number };
+    }
+  | { t: 'taper.decided'; id: string; accepted: boolean; by: string; at: number }
+
+  /* ---- voice: authoring, sweeping, going live ----
+     Added for projects/voice. `spec.version`, `spec.contradiction` and the six
+     `sweep.*` events already existed; these are the altitudes below a cluster, the
+     spec's staleness, and the gate. See grammar/log/2026-09-09-voice-decisions.md. */
+
+  /**
+   * The agent is a prompt document plus tools, variables and a goal — not a list of
+   * rules. Corrected after docs/sarvam-voice-agents-webinar.md; see
+   * docs/webinar-gap-analysis.md §1. Without these the sweep's outcome categories
+   * are invented by the interface rather than derived from what the author defined.
+   */
+  | {
+      t: 'spec.section';
+      id: string;
+      /** Single-state agents: one prompt document, and debugging means finding the
+          paragraph that is wrong. Sections are how you find it. */
+      heading: string;
+      order: number;
+    }
+  | {
+      t: 'spec.tool';
+      id: string;
+      name: string;
+      /** The description is what the model uses to decide when to call it. */
+      description: string;
+      kind: 'api' | 'system';
+      when: 'conversation_start' | 'mid_conversation' | 'conversation_end';
+      /** Hard limit 30s, 3–5s recommended. A tool budget is a latency budget. */
+      budgetMs: number;
+      /** For `data_validator`: the format constraint it enforces. */
+      regex?: string;
+      sectionId?: string;
+    }
+  | {
+      t: 'spec.variable';
+      id: string;
+      name: string;
+      /** Input personalises the call; output is extracted from the transcript after. */
+      direction: 'input' | 'output';
+      dataType: 'string' | 'enum' | 'number';
+      /** For output variables: how the model is told to extract it. */
+      extraction?: string;
+      allowed?: string[];
+      defaultValue?: string;
+    }
+  /** When a call counts as a win, expressed against an output variable. */
+  | { t: 'spec.goal'; variable: string; equals: string; label: string }
+
+  /**
+   * An expected behaviour — the real unit of evaluation. A test is a simulated
+   * scenario plus a list of these in natural language, marked pass/fail against the
+   * transcript. Clusters trace to a failed behaviour, which traces to a section.
+   */
+  | {
+      t: 'spec.behaviour';
+      id: string;
+      text: string;
+      sectionId?: string;
+      /** How many of the simulated calls exercised it, and how many held. */
+      checked?: number;
+      held?: number;
+    }
+
+  /** Turn-taking and telephony settings — where latency stops being a readout and
+      becomes something she can turn. */
+  | {
+      t: 'settings';
+      /** Lower responds faster and listens less. */
+      eagerness: number;
+      interruptions: boolean;
+      /** Needs tuning for noise; naive handling misfires on a market street. */
+      interruptionThreshold: number;
+      nudgeAfterMs: number;
+      nudgesBeforeHangup: number;
+      voicemailDetection: boolean;
+      backgroundAmbience?: string;
+      speakingRate: number;
+    }
+
+  /** Production signal beside the simulation — enough to evidence LIVE_DIVERGING,
+      not a Monitor dashboard. See the gap analysis §8. */
+  | {
+      t: 'production';
+      connectedRate: number;
+      goalRate: number;
+      shortCallRate: number;
+      medianTurnMs: number;
+      calls: number;
+      /** The same numbers from the sweep, so the comparison is on screen. */
+      simulated: { goalRate: number; shortCallRate: number; medianTurnMs: number };
+    }
+
+  /** The spec has moved since the last sweep, so the evidence on screen is stale.
+      The most important state in the surface — she must not be allowed to forget. */
+  | { t: 'spec.dirty'; sinceSweepId: string; editedLines: string[] }
+  /** A hard rule no simulated call ever exercised. Silently untested constraints are
+      how the late-fee incident happens, so absence is reported as a result. */
+  | { t: 'spec.untested'; lineId: string; rule: string }
+
+  /** The fourth altitude: the exact turn, with the spec line that governed it. */
+  | {
+      t: 'sweep.exemplar';
+      clusterId: string;
+      runId: string;
+      /** Code-mixed by design — this is where the transcript typography is proved. */
+      turns: {
+        speaker: 'agent' | 'caller';
+        text: string;
+        lang: string;
+        atMs: number;
+        flags?: ('breach' | 'drift' | 'loop' | 'off_script')[];
+      }[];
+    }
+
+  /** Renting a real number and pointing it at real borrowers. */
+  | {
+      t: 'deployment';
+      state: 'not_deployed' | 'number_pending' | 'live' | 'paused' | 'live_diverging';
+      number?: string;
+      /** Live but bounded: the first N calls, then it re-gates with real evidence. */
+      callCap?: number;
+      capUsed?: number;
+      note?: string;
+    }
+  /** Production is behaving differently from simulation — her actual fear. */
+  | { t: 'live.signal'; kind: 'diverging' | 'steady'; detail: string; clusterId?: string }
+
   /* ---- envelope breach: log it loudly ---- */
   | { t: 'envelope.breach'; nodeId: string; attempted: string; allowed: string };
+
+/** What an action in someone's name can be. `irreversible_done` must not share a
+    visual language with `proposed`, and `failed_midway` is the one every workspace
+    agent handles badly. */
+export type WorkActionState =
+  | 'proposed'
+  | 'auto_executed'
+  | 'executed_approved'
+  | 'blocked_on_human'
+  | 'blocked_on_permission'
+  | 'reversed'
+  | 'irreversible_done'
+  | 'failed_midway'
+  | 'queued_behind_approval';
 
 /** File-change lifecycle. `applied_unreviewed` landed under the envelope without
     anyone looking; `conflicts_with_manual_edit` is the person editing a file the
@@ -629,7 +855,28 @@ export type FaultKind =
   | 'consent_expired'         // granted once, for something else, last year
   | 'subtitle_clipped'        // per-script line height clips its own descenders
   | 'native_review_timeout'   // the reviewer never came back
-  | 'planted_drift_one';      // ONE variant is fluent and wrong — the real experiment
+  | 'planted_drift_one'       // ONE variant is fluent and wrong — the real experiment
+  /* work */
+  | 'failed_midway'           // three systems, one half-finished action
+  | 'unknown_leg'             // the CRM write may or may not have landed
+  | 'scope_expired_work'      // a grant lapsed rather than being revoked
+  | 'scope_breach'            // it tried to exceed the envelope
+  | 'residency_block'         // the data cannot leave the region
+  | 'source_unavailable'      // the email a claim rests on was deleted
+  | 'empty_brief'             // nothing needed him, and that is the result
+  | 'planted_wrong_action'    // plausible and wrong — the distrust measurement
+  | 'attribution_disputed'    // he says he didn't send it; the ledger says he did
+  /* voice */
+  | 'spec_dirty'              // edited since the sweep; the results are stale
+  | 'constraint_untested'     // a hard rule no call exercised
+  | 'sweep_regressed'         // worse than last time in at least one cluster
+  | 'sweep_partial'           // ran out of budget, and is still informative
+  | 'cluster_unnameable'      // a group the clustering cannot describe
+  | 'live_diverging'          // production is not behaving like the simulation
+  | 'handoff_lossy_voice'     // context dropped at a fleet seam
+  | 'interruption_misfire'    // the threshold is wrong for a noisy line
+  | 'held_on_hold'            // parked on hold, burning minutes
+  | 'tool_too_slow';          // a tool over its budget, felt as dead air
 
 export interface RunOptions {
   /** Same seed = identical stream. Required for comparable user tests. */
@@ -1134,6 +1381,225 @@ function applyFaults(script: Script, faults: FaultKind[], rand: () => number): S
         break;
       }
 
+      /* ---- work ---- */
+
+      case 'failed_midway': {
+        // Three systems, one half-finished action. Every workspace agent hits this.
+        out = insertBeforeEnd(out, [
+          [800, { t: 'action', id: 'a7', kind: 'crm',
+                  summary: 'Log the Meridian escalation, notify the account team and update the deal',
+                  channel: 'CRM + Slack + Gmail', state: 'failed_midway', attribution: 'as_user' }],
+          [200, { t: 'action.legs', id: 'a7', legs: [
+                   { system: 'CRM', state: 'done', record: 'deal-903 → At risk' },
+                   { system: 'Gmail', state: 'done', record: 'Sent to account team' },
+                   { system: 'Slack', state: 'failed' },
+                 ] }],
+          [150, { t: 'compensation', actionId: 'a7', offers: [
+                   { system: 'CRM', undo: 'Move deal-903 back to Active', possible: true },
+                   { system: 'Gmail', undo: 'The email is sent and cannot be unsent', possible: false },
+                 ] }],
+        ]);
+        break;
+      }
+
+      case 'unknown_leg': {
+        // The one that matters: it cannot tell whether the write landed. Rendering
+        // this as failed invites a duplicate; rendering it as done invites a gap.
+        out = insertBeforeEnd(out, [
+          [900, { t: 'action', id: 'a8', kind: 'crm',
+                  summary: 'Update the Ashcroft renewal value',
+                  channel: 'CRM', state: 'failed_midway', attribution: 'as_user' }],
+          [200, { t: 'action.legs', id: 'a8', legs: [
+                   { system: 'CRM', state: 'unknown', record: 'Request timed out after the write was sent' },
+                   { system: 'Gmail', state: 'done', record: 'Confirmation drafted, not sent' },
+                 ] }],
+        ]);
+        break;
+      }
+
+      case 'scope_expired_work':
+        out = out.map(([d, e]) =>
+          e.t === 'scope' && e.id === 'sc3'
+            ? [d, { ...e, state: 'expired' as const, untilIso: '2026-09-01' }]
+            : [d, e]
+        );
+        break;
+
+      case 'scope_breach': {
+        out = insertBeforeEnd(out, [
+          [700, { t: 'access', resource: 'Finance workspace — Q3 forecast',
+                  sensitive: true, permitted: false, at: 0 }],
+          [0,   { t: 'envelope.breach', nodeId: 'triage',
+                  attempted: 'read the finance workspace',
+                  allowed: 'mail, Slack and the partnerships wiki' }],
+        ]);
+        break;
+      }
+
+      case 'residency_block': {
+        out = insertBeforeEnd(out, [
+          [600, { t: 'residency',
+                  action: 'Summarise the Halcyon contract with the EU model',
+                  region: 'ap-south-1',
+                  rule: 'Customer contracts may not leave the India region' }],
+        ]);
+        break;
+      }
+
+      case 'source_unavailable':
+        // The claim stands and the evidence does not. Say which.
+        out = out.map(([d, e]) =>
+          e.t === 'brief.item' && e.id === 'bi2'
+            ? [d, { ...e, sources: e.sources.map((src) => ({ ...src, available: false })) }]
+            : [d, e]
+        );
+        break;
+
+      case 'empty_brief': {
+        // The highest-trust thing this product can say, and most tools waste it.
+        out = out.filter(([, e]) =>
+          e.t !== 'brief.item' && e.t !== 'action' && e.t !== 'taper.proposal' && e.t !== 'handoff'
+        );
+        out = insertBeforeEnd(out, [
+          [200, { t: 'nonfinding', nodeId: 'triage',
+                  looked_for: 'Anything that needed you overnight',
+                  kind: 'absent',
+                  boundary: { corpus: '312 messages, 3 Slack channels, 9 follow-ups due',
+                              timeRange: '19:00–08:40' } }],
+        ]);
+        break;
+      }
+
+      case 'planted_wrong_action':
+        // Plausible and wrong: the right customer, the wrong number. If he does not
+        // catch this in the brief, the brief is pleasant rather than useful.
+        out = out.map(([d, e]) =>
+          e.t === 'action' && e.id === 'a2'
+            ? [d, { ...e, summary: 'Reply to Nandini agreeing to Friday 4pm and confirming the 18% renewal discount',
+                    state: 'auto_executed' as WorkActionState }]
+            : [d, e]
+        );
+        break;
+
+      case 'attribution_disputed': {
+        out = insertBeforeEnd(out, [
+          [1200, { t: 'action.state', id: 'a4', state: 'irreversible_done', at: 0,
+                   note: 'He says he did not send this. The ledger says it went out in his name at 03:12.' }],
+        ]);
+        break;
+      }
+
+      /* ---- voice ---- */
+
+      case 'spec_dirty':
+        // Her results are now stale. This has to travel with the evidence, not sit
+        // in a corner, because the whole risk is that she reads a sweep that no
+        // longer describes the agent she has.
+        out = insertBeforeEnd(out, [[600, {
+          t: 'spec.dirty', sinceSweepId: 'sw7', editedLines: ['h1', 's2'],
+        }]]);
+        break;
+
+      case 'constraint_untested':
+        out = insertBeforeEnd(out, [
+          [500, { t: 'spec.untested', lineId: 'h3', rule: 'Never threaten legal action' }],
+          [0,   { t: 'sweep.caveat', kind: 'constraint_never_exercised',
+                  detail: 'Two hard rules were never exercised by any call in this sweep.' }],
+        ]);
+        break;
+
+      case 'sweep_regressed':
+        // An edit that fixes one cluster and breaks another is the normal case.
+        out = out.map(([d, e]) =>
+          e.t === 'sweep.cluster' && e.id === 'c3'
+            ? [d, { ...e, count: 131, deltaVsLast: -47 }]
+            : [d, e]
+        );
+        break;
+
+      case 'sweep_partial':
+        // Still informative, and must not present as a failure.
+        out = out.map(([d, e]) => {
+          if (e.t === 'sweep.progress' && e.done === 1000) return [d, { ...e, done: 414 }];
+          if (e.t === 'sweep.distribution') {
+            return [d, { ...e, outcomes: {
+              resolved: 292, escalated: 44, abandoned: 36, looped: 17,
+              timed_out: 8, constraint_breached: 3, off_script_but_fine: 14 } }];
+          }
+          return [d, e];
+        });
+        out = insertBeforeEnd(out, [[200, { t: 'sweep.caveat', kind: 'sample_too_small',
+          detail: 'Stopped at 414 of 1000 — the budget ran out. The shape holds; the small clusters are noisy.' }]]);
+        break;
+
+      case 'cluster_unnameable':
+        // Saying so beats inventing a label she would then act on.
+        out = insertBeforeEnd(out, [[400, {
+          t: 'sweep.cluster', id: 'c5',
+          cause: 'Unclear — 22 calls group together and no shared cause was found',
+          count: 22, exemplarRunIds: ['r0330', 'r0781', 'r0902'],
+        }]]);
+        break;
+
+      case 'live_diverging':
+        out = insertBeforeEnd(out, [
+          [700, { t: 'deployment', state: 'live_diverging', number: '+91 80 4718 2200',
+                  callCap: 25, capUsed: 25 }],
+          // The claim needs evidence beside it, or "diverging" is just a word.
+          [0,   { t: 'production', calls: 25, connectedRate: 0.64, goalRate: 0.42,
+                  shortCallRate: 0.31, medianTurnMs: 2180,
+                  simulated: { goalRate: 0.71, shortCallRate: 0.08, medianTurnMs: 1840 } }],
+          [0,   { t: 'live.signal', kind: 'diverging',
+                  detail: 'Real callers hang up in the first ten seconds four times as often as the simulation did.',
+                  clusterId: 'c3' }],
+        ]);
+        break;
+
+      case 'handoff_lossy_voice':
+        out = insertBeforeEnd(out, [[800, {
+          t: 'handoff', from: 'explainer', to: 'negotiator',
+          carried: ['policy id', 'due date', 'caller language'],
+          dropped: ['caller said they lost their job'],
+          inferred: ['willingness to pay: high'],
+        }]]);
+        break;
+
+      case 'interruption_misfire':
+        // Naive interruption handling misfires in noise: the agent stops talking
+        // because a bus went past. Felt by the caller as being ignored.
+        out = insertBeforeEnd(out, [
+          [500, { t: 'settings', eagerness: 0.4, interruptions: true, interruptionThreshold: 0.2,
+                  nudgeAfterMs: 7000, nudgesBeforeHangup: 2, voicemailDetection: true,
+                  backgroundAmbience: 'quiet office', speakingRate: 1.15 }],
+          [0,   { t: 'sweep.cluster', id: 'c7',
+                  cause: 'Stopped mid-sentence when the line was noisy and never resumed',
+                  count: 71, behaviourId: 'b1', exemplarRunIds: ['r0655'], deltaVsLast: -71 }],
+        ]);
+        break;
+
+      case 'held_on_hold':
+        // The sidecar catches hold music and cuts the call rather than paying for it.
+        out = insertBeforeEnd(out, [[600, {
+          t: 'sweep.caveat', kind: 'unrepresentative_population',
+          detail: '38 calls were parked on hold music and cut by the harness. They are not in the outcome shape, because nobody spoke to the agent.',
+        }]]);
+        break;
+
+      case 'tool_too_slow':
+        // 30s is the hard limit and 3–5s the advice; over budget the caller hears
+        // dead air, which is a latency failure wearing a tool's clothing.
+        out = out.map(([d, e]) =>
+          e.t === 'spec.tool' && e.id === 'tl1'
+            ? [d, { ...e, budgetMs: 12_000 }]
+            : [d, e]
+        );
+        out = insertBeforeEnd(out, [[700, {
+          t: 'sweep.cluster', id: 'c8',
+          cause: 'Went quiet for ten seconds while it looked up the balance',
+          count: 58, exemplarRunIds: ['r0908'], deltaVsLast: -58,
+        }]]);
+        break;
+
       case 'asr_wrong_language':
         out.unshift([150, {
           t: 'error', kind: 'language_mismatch',
@@ -1267,6 +1733,115 @@ export const scripts = {
             question: 'Tamil round trip diverges on the cashless clause. Send for native review?',
             options: ['Send for review', 'Fix the term and regenerate', 'Approve anyway'],
             blocking: 'branch' }],
+  ] satisfies Script,
+
+  /** work — the overnight run, as Anand finds it at 8:40am.
+      Email triage, Slack, the wiki. Everything here was done in his name.
+
+      Synthetic: fictional company, fictional customers, no real data. */
+  morningBrief: [
+    [0,    { t: 'run.start', runId: 'brief_0912', at: 0, intent: 'overnight_triage_and_brief' }],
+
+    // The admin's ceiling comes first: it bounds everything below it, so it cannot
+    // be a footnote in a settings page he never opens.
+    [60,   { t: 'ceiling',
+             may: ['read mail and Slack', 'draft replies', 'update the CRM', 'post in #partners-internal'],
+             neverWithoutAdmin: ['send to external domains', 'access the finance workspace',
+                                 'move data out of ap-south-1'] }],
+    [40,   { t: 'envelope', at: 0,
+             may: ['triage and label mail', 'draft replies for review', 'update CRM stages',
+                   'post internal summaries'],
+             mustAsk: ['send anything a customer reads', 'decline a meeting', 'change a deal value'],
+             confidenceFloor: 0.88,
+             consequence: { autoApplied: 31, asks: 4, expectedWrong: 1 } }],
+    [40,   { t: 'scope', id: 'sc1', resource: 'Gmail — partnerships@', grantedFor: 'Triage and drafting',
+             untilIso: '2026-12-31', state: 'granted' }],
+    [30,   { t: 'scope', id: 'sc2', resource: 'Slack — #partners, #deals, #support-escalations',
+             grantedFor: 'Read and summarise', untilIso: '2026-12-31', state: 'granted' }],
+    [30,   { t: 'scope', id: 'sc3', resource: 'Notion — Partnerships wiki', grantedFor: 'Read only',
+             untilIso: '2026-10-01', state: 'granted' }],
+
+    [180,  { t: 'brief', date: '2026-09-12',
+             segments: [
+               { id: 'seg-mail', label: 'Mail, overnight' },
+               { id: 'seg-slack', label: 'Slack you are accountable for' },
+               { id: 'seg-chase', label: 'Follow-ups that came due' },
+             ],
+             checked: ['312 messages in partnerships@', '#partners, #deals, #support-escalations',
+                       '9 follow-ups due today'] }],
+
+    /* ---- what it did without asking ---- */
+    [220,  { t: 'brief.item', id: 'bi1', segmentId: 'seg-mail',
+             text: 'Nineteen messages were newsletters or receipts. Labelled and archived.',
+             sources: [{ kind: 'email', id: 'm-4471', label: '19 messages', available: true }],
+             needs: 'nothing' }],
+    [90,   { t: 'action', id: 'a1', kind: 'email', summary: 'Archived 19 newsletters and receipts',
+             channel: 'partnerships@', state: 'auto_executed', attribution: 'as_agent',
+             sources: [{ kind: 'email', id: 'm-4471', label: '19 messages', available: true }] }],
+
+    [140,  { t: 'brief.item', id: 'bi2', segmentId: 'seg-mail',
+             text: 'Nandini at Trestle asked to move Thursday to Friday. Calendar is free; the reply is drafted.',
+             sources: [{ kind: 'email', id: 'm-4482', label: 'Nandini R — "Thursday?"', available: true }],
+             needs: 'decision' }],
+    // A customer reads this one, so the envelope makes it an ask rather than a send.
+    [80,   { t: 'action', id: 'a2', kind: 'email', summary: 'Reply to Nandini agreeing to Friday 4pm',
+             channel: 'partnerships@', recipient: 'nandini@trestle.io',
+             state: 'proposed', attribution: 'as_user',
+             sources: [{ kind: 'email', id: 'm-4482', label: 'Nandini R — "Thursday?"', available: true }] }],
+
+    [160,  { t: 'brief.item', id: 'bi3', segmentId: 'seg-mail',
+             text: 'The Halcyon renewal thread moved to legal. CRM stage updated to Contracting.',
+             sources: [{ kind: 'email', id: 'm-4490', label: 'Halcyon — redlines attached', available: true },
+                       { kind: 'crm', id: 'deal-882', label: 'Halcyon renewal', available: true }],
+             needs: 'nothing' }],
+    [70,   { t: 'action', id: 'a3', kind: 'crm', summary: 'Moved Halcyon renewal to Contracting',
+             channel: 'CRM', state: 'auto_executed', attribution: 'as_agent',
+             sources: [{ kind: 'crm', id: 'deal-882', label: 'Halcyon renewal', available: true }] }],
+
+    // Sent, in his name, unreviewed. Reversible for a few minutes and then not.
+    [150,  { t: 'action', id: 'a4', kind: 'email',
+             summary: 'Sent the standard NDA to Priyal at Coastline',
+             channel: 'partnerships@', recipient: 'priyal@coastline.co',
+             state: 'auto_executed', attribution: 'as_user', reversibleUntilMs: 240_000,
+             sources: [{ kind: 'email', id: 'm-4501', label: 'Priyal M — "NDA before we talk?"', available: true }] }],
+
+    /* ---- what needs him ---- */
+    [180,  { t: 'brief.item', id: 'bi4', segmentId: 'seg-slack',
+             text: 'Support escalated Meridian twice overnight. They are asking for a call today.',
+             sources: [{ kind: 'slack', id: 's-9912', label: '#support-escalations, 01:14', available: true }],
+             needs: 'decision' }],
+    [90,   { t: 'action', id: 'a5', kind: 'calendar',
+             summary: 'Hold 30 minutes with Meridian at 15:00 and decline the internal sync',
+             channel: 'Calendar', state: 'blocked_on_human', attribution: 'as_user' }],
+
+    [140,  { t: 'brief.item', id: 'bi5', segmentId: 'seg-chase',
+             text: 'Four follow-ups came due. Three are drafted; one needs a number I do not have.',
+             sources: [{ kind: 'crm', id: 'deal-771', label: 'Ashcroft — pricing', available: true }],
+             needs: 'permission' }],
+    [80,   { t: 'action', id: 'a6', kind: 'email',
+             summary: 'Send Ashcroft the revised pricing',
+             channel: 'partnerships@', recipient: 'ops@ashcroft.in',
+             state: 'blocked_on_permission', attribution: 'as_user' }],
+
+    /* ---- the seam between agents ---- */
+    [120,  { t: 'handoff', from: 'triage', to: 'drafting',
+             carried: ['thread history', 'deal stage', 'his usual sign-off'],
+             dropped: ['that Nandini asked twice before'],
+             inferred: ['tone: warm, brief'] }],
+
+    /* ---- what it looked at and left alone ---- */
+    [110,  { t: 'nonfinding', nodeId: 'triage',
+             looked_for: 'Anything needing you in #deals and the wiki',
+             kind: 'absent',
+             boundary: { corpus: '#deals (41 messages), Partnerships wiki (6 edits)',
+                         timeRange: '19:00–08:40' } }],
+
+    /* ---- earned autonomy: the agent asks to stop asking ---- */
+    [200,  { t: 'taper.proposal', id: 'tp1', kind: 'Meeting reschedules with existing partners',
+             widenTo: 'Send without asking, up to a one-week move',
+             evidence: { clean: 14, sinceIso: '2026-08-29', reversed: 0 } }],
+
+    [90,   { t: 'run.end', runId: 'brief_0912', at: 0, outcome: 'partial' }],
   ] satisfies Script,
 
   /** doc — one hand-filled loan application, twenty-two fields, reviewed by one person.
@@ -1536,6 +2111,160 @@ export const scripts = {
     [120,  { t: 'variant', lang: 'en-IN', text: 'Cashless treatment at a network hospital, with no paperwork',
              fluency: 'committed', fidelity: 'committed', register: 'modern-colloquial', expansion: 1 }],
     [80,   { t: 'run.end', runId: 'dub_2291', at: 0, outcome: 'partial' }],
+  ] satisfies Script,
+
+  /** voice — the flagship loop: the spec Meera wrote, a thousand simulated calls,
+      the clusters, one exemplar turn, and the gate in front of a real phone call.
+
+      Hindi and Marathi transcripts are synthetic and unchecked. Delays are
+      placeholders — `latency.distribution` says so. */
+  voiceAuthoring: [
+    [0,    { t: 'run.start', runId: 'sw_7712', at: 0, intent: 'renewal_reminder_agent' }],
+
+    // The artifact she edits. Hard and soft are separate lists because they fail
+    // in different ways and must not be siblings.
+    // The agent is a prompt document with sections — debugging means finding the
+    // paragraph that is wrong, so the paragraphs have names.
+    [60,   { t: 'spec.section', id: 'sec-open',   heading: 'Opening and identity',   order: 1 }],
+    [10,   { t: 'spec.section', id: 'sec-money',  heading: 'Amounts, fees and dates', order: 2 }],
+    [10,   { t: 'spec.section', id: 'sec-hard',   heading: 'Hardship and callbacks',  order: 3 }],
+    [10,   { t: 'spec.section', id: 'sec-close',  heading: 'Closing',                 order: 4 }],
+
+    // Tools. The description is what the model uses to decide when to call one, and
+    // the budget is a latency budget: 30s is the hard limit, 3–5s is the advice.
+    [40,   { t: 'spec.tool', id: 'tl1', name: 'fetch_loan_status', kind: 'api',
+             description: 'Current balance, due date and whether a payment posted today',
+             when: 'conversation_start', budgetMs: 3000, sectionId: 'sec-money' }],
+    [20,   { t: 'spec.tool', id: 'tl2', name: 'log_promise_to_pay', kind: 'api',
+             description: 'Record the date the borrower commits to',
+             when: 'mid_conversation', budgetMs: 4000, sectionId: 'sec-hard' }],
+    [20,   { t: 'spec.tool', id: 'tl3', name: 'data_validator', kind: 'system',
+             description: 'Checks a collected phone number is ten digits before the agent moves on',
+             when: 'mid_conversation', budgetMs: 800, regex: '^[6-9][0-9]{9}$' }],
+    [20,   { t: 'spec.tool', id: 'tl4', name: 'end_interaction', kind: 'system',
+             description: 'Hang up', when: 'conversation_end', budgetMs: 500 }],
+
+    // Input personalises the call; output is extracted from the transcript after it,
+    // and the goal is defined against an output variable.
+    [30,   { t: 'spec.variable', id: 'v-name', name: 'borrower_name', direction: 'input',
+             dataType: 'string', defaultValue: 'Sunita' }],
+    [10,   { t: 'spec.variable', id: 'v-due', name: 'due_date', direction: 'input',
+             dataType: 'string', defaultValue: '20 September' }],
+    [20,   { t: 'spec.variable', id: 'v-disp', name: 'call_disposition', direction: 'output',
+             dataType: 'enum',
+             allowed: ['promise_to_pay', 'already_paid', 'hardship', 'callback', 'refused', 'wrong_person'],
+             extraction: 'Pick the one that matches how the call actually ended.' }],
+    [10,   { t: 'spec.variable', id: 'v-sum', name: 'call_summary', direction: 'output',
+             dataType: 'string', extraction: 'One or two lines on what happened.' }],
+    [20,   { t: 'spec.goal', variable: 'call_disposition', equals: 'promise_to_pay',
+             label: 'The borrower commits to a date' }],
+
+    // The real unit of evaluation: expected behaviours in her own words, checked
+    // against every simulated transcript.
+    [40,   { t: 'spec.behaviour', id: 'b1', sectionId: 'sec-open',
+             text: 'Says who is calling and which company before anything else',
+             checked: 1000, held: 994 }],
+    [15,   { t: 'spec.behaviour', id: 'b2', sectionId: 'sec-money',
+             text: 'Points at the statement when asked about a late fee, and never says a number',
+             checked: 84, held: 78 }],
+    [15,   { t: 'spec.behaviour', id: 'b3', sectionId: 'sec-hard',
+             text: 'Confirms a requested callback time back to the caller',
+             checked: 141, held: 96 }],
+    [15,   { t: 'spec.behaviour', id: 'b4', sectionId: 'sec-open',
+             text: 'Stays in the language the caller opened in unless they switch first',
+             checked: 1000, held: 937 }],
+
+    // Turn-taking, which is where latency stops being a readout.
+    [30,   { t: 'settings', eagerness: 0.4, interruptions: true, interruptionThreshold: 0.55,
+             nudgeAfterMs: 7000, nudgesBeforeHangup: 2, voicemailDetection: true,
+             backgroundAmbience: 'quiet office', speakingRate: 1.15 }],
+
+    [120,  { t: 'spec.version', id: 'v4',
+             hard: [
+               { id: 'h1', rule: 'Never state a penalty or late-fee amount', tested: true },
+               { id: 'h2', rule: 'Never confirm a payment as received',      tested: false },
+               { id: 'h3', rule: 'Never threaten legal action',              tested: true },
+             ],
+             soft: [
+               { id: 's1', guidance: 'Warm, not apologetic' },
+               { id: 's2', guidance: 'Use English loanwords where they land naturally' },
+               { id: 's3', guidance: 'Offer the payment link before the branch address' },
+             ],
+             examples: [
+               { id: 'e1', input: 'Caller asks how much the late fee is',
+                 expected: 'Point at the statement. Do not quote a number.', pinning: true },
+               { id: 'e2', input: 'Caller says they lost their job',
+                 expected: 'Acknowledge, offer the hardship line, do not push the date.', pinning: true },
+             ] }],
+
+    // A hard rule nothing exercised. Absence reported as a result.
+    [90,   { t: 'spec.untested', lineId: 'h2',
+             rule: 'Never confirm a payment as received' }],
+
+    [160,  { t: 'sweep.start', sweepId: 'sw7', specId: 'v4', runs: 1000 }],
+    [900,  { t: 'sweep.progress', done: 340, total: 1000 }],
+    [1100, { t: 'sweep.progress', done: 1000, total: 1000 }],
+
+    // Shape first. Never a pass rate, and the ordering is the pattern.
+    [220,  { t: 'sweep.distribution', outcomes: {
+               resolved: 712, escalated: 108, abandoned: 84, looped: 41,
+               timed_out: 19, constraint_breached: 6, off_script_but_fine: 30 } }],
+
+    [120,  { t: 'sweep.cluster', id: 'c1',
+             cause: 'The bot quoted a late fee when the caller asked',
+             count: 6, specLineId: 'h1', behaviourId: 'b2',
+             exemplarRunIds: ['r0412', 'r0688'], deltaVsLast: -4 }],
+    [80,   { t: 'sweep.cluster', id: 'c2',
+             cause: 'Switched to English in the first turn and stayed there',
+             count: 63, specLineId: 's2', behaviourId: 'b4',
+             exemplarRunIds: ['r0119'], deltaVsLast: 11 }],
+    [80,   { t: 'sweep.cluster', id: 'c3',
+             cause: 'Caller hung up during the opening',
+             count: 84, exemplarRunIds: ['r0007', 'r0203'], deltaVsLast: 0 }],
+    [80,   { t: 'sweep.cluster', id: 'c4',
+             cause: 'Improvised a hardship answer that was not in the spec, and it was fine',
+             count: 30, exemplarRunIds: ['r0551'], deltaVsLast: 6 }],
+    // The webinar's own worked failure: the callback time is never confirmed back.
+    [80,   { t: 'sweep.cluster', id: 'c6',
+             cause: 'Took a callback time and never repeated it back',
+             count: 45, behaviourId: 'b3', specLineId: 's3',
+             exemplarRunIds: ['r0233'], deltaVsLast: -45 }],
+
+    // The fourth altitude: the exact turn, code-mixed, with the breach marked.
+    [200,  { t: 'sweep.exemplar', clusterId: 'c1', runId: 'r0412', turns: [
+               { speaker: 'agent', text: 'नमस्ते, मैं Sahyog Finance से बोल रही हूँ। आपका renewal due है।',
+                 lang: 'hi-IN', atMs: 1200 },
+               { speaker: 'caller', text: 'हाँ, कितना late fee लगेगा अगर मैं अगले हफ्ते करूँ?',
+                 lang: 'hi-IN', atMs: 6400 },
+               { speaker: 'agent', text: 'Late fee ₹450 होगा sir, अगर आप 20 तारीख के बाद pay करते हैं।',
+                 lang: 'hi-IN', atMs: 9100, flags: ['breach'] },
+               { speaker: 'caller', text: 'ठीक है, मैं देखता हूँ।', lang: 'hi-IN', atMs: 13_800 },
+             ] }],
+
+    // Caveats are content, not footnotes. This is where eval tooling quietly lies.
+    [110,  { t: 'sweep.caveat', kind: 'constraint_never_exercised',
+             detail: 'No call reached the payment-confirmation path, so h2 is untested.' }],
+    [70,   { t: 'sweep.caveat', kind: 'clean_audio_only',
+             detail: 'Simulated on clean audio. Production is 8kHz telephony, often on speakerphone.' }],
+    [60,   { t: 'sweep.caveat', kind: 'unrepresentative_population',
+             detail: 'Synthetic callers are more patient and more fluent than real borrowers.' }],
+
+    [80,   { t: 'latency.sample', nodeId: 'turn', ttftMs: 680, totalMs: 1840,
+             segments: [
+               { kind: 'network', ms: 180 },
+               { kind: 'queue', ms: 140 },
+               { kind: 'model', ms: 1120 },
+               { kind: 'synthesis', ms: 400 },
+             ] }],
+    [40,   { t: 'latency.distribution', label: 'agent turn, 1000 calls', n: 1000,
+             ttft: { p50: 680, p95: 1520 }, total: { p50: 1840, p95: 3900 },
+             source: 'placeholder' }],
+
+    [60,   { t: 'sweep.end', sweepId: 'sw7', regressed: true }],
+
+    // Not live. The gate is the next thing she touches.
+    [80,   { t: 'deployment', state: 'not_deployed' }],
+    [60,   { t: 'run.end', runId: 'sw_7712', at: 0, outcome: 'partial' }],
   ] satisfies Script,
 
   /** voice — a fleet run with a lossy handoff. */

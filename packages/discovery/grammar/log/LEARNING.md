@@ -32,10 +32,22 @@ Format: `YYYY-MM-DD · project · thing`
 - 2026-09-09 · content · Refusing to fake the audio was the right call and it costs two states: pronunciation and voice drift are designed and untestable until there's a key.
 
 ## work
--
+- 2026-09-09 · work · `FAILED_MIDWAY` is not a state, it is a list of legs — and the only interesting one is `unknown`. Neither done nor failed, and drawing it as either causes a different bug.
+- 2026-09-09 · work · An undo with no clock is a promise. Saying "for 4 more minutes" is what makes it an undo.
+- 2026-09-09 · work · Attribution has three values, not two. The third — he edited a draft before sending — is the common one and the one every tool collapses.
+- 2026-09-09 · work · The admin ceiling has to be drawn *above* the user's own control. Beside it, it reads as a peer setting; above it, it reads as a limit, which is what it is.
 
 ## voice
--
+- 2026-09-09 · voice · "Distribution before score" is easy to say and hard to hold: every instinct is to put one number at the top. Splitting out the breach count is the same mistake wearing a different hat.
+- 2026-09-09 · voice · A stale sweep is worse than no sweep, because it looks like evidence. That is the only thing the go-live gate hard-blocks on.
+- 2026-09-09 · voice · Blocking on an untested rule can trap someone forever if the rule is hard to provoke. A call cap turns the same problem into a measurement.
+- 2026-09-09 · voice · `OFF_SCRIPT_BUT_FINE` is the most interesting column in the distribution and binary pass/fail destroys it. It belongs next to `resolved`, not next to the failures.
+- 2026-09-09 · voice · Writing the caveats as *content* rather than footnotes changes how the whole surface reads. Three sentences in the flow did more than any visual treatment.
+- 2026-09-09 · voice · An agent is a prompt document with tools, variables and a goal — not a list of rules. Getting the object wrong made the sweep's outcome categories *ours*, and evidence that floats free of the thing it evaluates is decoration.
+- 2026-09-09 · voice · The evaluation primitive is an **expected behaviour** — an assertion in her words — not a cluster. Clusters say what went wrong; behaviours say which promise broke, which is the question she actually has.
+- 2026-09-09 · voice · A tool budget is a latency budget. 5s and the caller hears dead air, 30s is the hard stop. The clearest case yet of a number that is really an interaction, so it is drawn as a warning rather than a field.
+- 2026-09-09 · voice · `LIVE_DIVERGING` without production numbers beside simulated ones is a word, not a claim — the same over-claiming the surface polices everywhere else, aimed inward.
+- 2026-09-09 · voice · Reading a source about the real product against a built surface is worth more than reading it before building. The gaps were only legible because there was something to hold them against.
 
 ---
 
@@ -44,4 +56,5 @@ Format: `YYYY-MM-DD · project · thing`
 - The state gallery paid for itself in the first ten minutes: two states read as "nothing needs you" that badly needed someone, and both were invisible on the happy path. I expected the gallery to be a chore before the real work.
 - Writing the state list first meant the runtime, not the screen, was the thing being designed. The screen took an afternoon; the state list is what the argument rests on.
 - Three copies of the same hook is not a smell to note, it's the rule firing. Promoting on the third use took twenty minutes and deleted more code than it added.
+- The gap analysis found seven fixable gaps and three I chose not to fix, and writing the three down was the harder half. An omission you can defend is a design position; an omission you never noticed is a hole.
 - The cold-read line wants *two* clocks — since start and since last progress — and STALLED is the state that proves it. One clock lies in exactly the case that matters.

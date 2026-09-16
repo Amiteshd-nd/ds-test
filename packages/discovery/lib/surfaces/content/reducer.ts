@@ -354,6 +354,34 @@ function apply(state: ContentState, e: AgentEvent, now: number): ContentState {
     case 'export.ready':
     case 'export.lossy':
     case 'export.blocked':
+    /* work's events. */
+    case 'brief':
+    case 'brief.item':
+    case 'brief.read':
+    case 'action':
+    case 'action.state':
+    case 'action.legs':
+    case 'compensation':
+    case 'scope':
+    case 'access':
+    case 'residency':
+    case 'ceiling':
+    case 'taper.proposal':
+    case 'taper.decided':
+    /* voice's events. */
+    case 'spec.dirty':
+    case 'spec.untested':
+    case 'sweep.exemplar':
+    case 'deployment':
+    case 'live.signal':
+    /* voice's agent-definition events, added after the webinar notes. */
+    case 'spec.section':
+    case 'spec.tool':
+    case 'spec.variable':
+    case 'spec.goal':
+    case 'spec.behaviour':
+    case 'settings':
+    case 'production':
       return state;
 
     default: {

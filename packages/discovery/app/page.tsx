@@ -27,14 +27,14 @@ const SURFACES = [
     href: '/work',
     order: 4,
     name: 'Work Agents',
-    build: 'brief only',
+    build: 'built',
     what: 'Agents acting as you, with an audit trail that holds up. Authority, not accuracy.',
   },
   {
     href: '/voice',
     order: 5,
     name: 'Voice Agents',
-    build: 'brief only',
+    build: 'built',
     what: 'Authoring an agent, then simulating a thousand calls before one reaches a person.',
   },
 ];

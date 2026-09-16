@@ -82,6 +82,36 @@ export const CONTENT_FAULTS: FaultOption[] = [
   { kind: 'rate_limited', label: 'rate limited' },
 ];
 
+/** work's faults. */
+export const WORK_FAULTS: FaultOption[] = [
+  { kind: 'failed_midway', label: 'half-finished across systems' },
+  { kind: 'unknown_leg', label: 'no answer from one system' },
+  { kind: 'scope_expired_work', label: 'a grant lapsed' },
+  { kind: 'scope_breach', label: 'tried to go outside its envelope' },
+  { kind: 'residency_block', label: 'data cannot leave the region' },
+  { kind: 'source_unavailable', label: 'the source message is gone' },
+  { kind: 'empty_brief', label: 'nothing needed you' },
+  { kind: 'planted_wrong_action', label: 'plausible and wrong, already sent' },
+  { kind: 'attribution_disputed', label: 'he says he did not send it' },
+  { kind: 'rate_limited', label: 'rate limited' },
+];
+
+/** voice's faults. */
+export const VOICE_FAULTS: FaultOption[] = [
+  { kind: 'spec_dirty', label: 'spec edited since the sweep' },
+  { kind: 'constraint_untested', label: 'a rule no call exercised' },
+  { kind: 'sweep_regressed', label: 'worse than last time' },
+  { kind: 'sweep_partial', label: 'budget ran out' },
+  { kind: 'cluster_unnameable', label: 'a group with no cause' },
+  { kind: 'live_diverging', label: 'production unlike the simulation' },
+  { kind: 'handoff_lossy_voice', label: 'context dropped at a seam' },
+  { kind: 'interruption_misfire', label: 'stops talking on a noisy line' },
+  { kind: 'held_on_hold', label: 'parked on hold music' },
+  { kind: 'tool_too_slow', label: 'a tool over its budget' },
+  { kind: 'rate_limited', label: 'rate limited' },
+  { kind: 'auth_failed', label: 'auth failed' },
+];
+
 export function FaultBar({
   onReplay,
   streaming,

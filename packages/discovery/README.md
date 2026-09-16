@@ -25,8 +25,8 @@ corepack pnpm dev:discovery      # → http://localhost:6177
 | 1 | Coding Agents | `/coding` | **built** — plan view, steering, checkpoints, waterfall |
 | 2 | Doc Agents | `/doc` | **built** — provenance link, epistemic states, repair, accept gate |
 | 3 | Content Agents | `/content` | **built** — back-translation mirror, timeline, consent, publish gate |
-| 4 | Work Agents | `/work` | brief only |
-| 5 | Voice Agents | `/voice` | brief only |
+| 4 | Work Agents | `/work` | **built** — morning brief, action ledger, envelope with an admin ceiling |
+| 5 | Voice Agents | `/voice` | **built** — the agent (sections, tools, variables, goal), expected behaviours, simulation sweep at four altitudes, turn-taking, the go-live gate, production vs simulation |
 | 6 | shell / patterns | `/patterns` | pattern index reads `grammar/patterns.md`; demos not built |
 
 Plus `/dev` (the state galleries) and `/studies` (the background studies this package started as —
@@ -96,6 +96,49 @@ limitation in [the log](grammar/log/2026-09-09-content-decisions.md).
   so it names the voice, the lapsed grant and whoever clicked past it. Nothing says "verified".
 - **Nothing plays, and the surface says so.** No key, no TTS, and the browser's speech synthesis
   would misrepresent the exact thing under review. Waveform is a labelled proxy.
+
+## work — the fourth surface
+
+[State list](projects/work/states.md): 34 states, two decisions in
+[the log](grammar/log/2026-09-09-work-decisions.md).
+
+- **The action ledger** is the bold thing, and it is a product surface rather than an audit dump.
+  Every row carries who the recipient thinks sent it, because the decision was ledger-only
+  disclosure: they are told nothing, so this list is the only place the truth lives.
+- **A sent thing is not a drafted thing** — `irreversible_done` gets a different container, square
+  and heavy-ruled, not a different colour.
+- **Partial failure is a list of legs**, and the leg that matters is the one whose outcome is
+  unknown: retrying could duplicate, assuming failure leaves a gap, so the row says exactly that.
+- **The taper is an ask, not a slider.** The agent proposes widening after a run of clean actions
+  and shows the record — including the reversals, even at zero.
+- **The empty brief is a result**, with its boundary stated. The highest-trust thing the product says.
+
+## voice — the flagship
+
+[State list](projects/voice/states.md): 56 states, ten of the seventeen patterns, two decisions in
+[the log](grammar/log/2026-09-09-voice-decisions.md).
+
+Fifteen of those states came from [the webinar notes](docs/sarvam-voice-agents-webinar.md), read
+against the finished surface rather than before it. The correction they forced is in
+[the gap analysis](docs/webinar-gap-analysis.md): an agent is a **prompt document with named
+sections, tools carrying latency budgets, input and output variables, and a goal** — not a list of
+rules. The sweep's seven outcomes used to be categories this interface invented; they are now read
+against a goal the author defined, and a failed **expected behaviour** — an assertion in her own
+words — links down to the calls that broke it. Three gaps are left open on purpose, and the
+analysis says why.
+
+- **The sweep is the hero**, read at four altitudes with a path down and back up: shape → clusters
+  by cause → one exemplar call → the exact turn, with the spec line that governed it.
+- **No pass rate anywhere**, in the events or the UI — a test fails if one appears. A paragraph
+  states what a thousand synthetic calls are and are not, and three caveats sit in the flow rather
+  than in footnotes.
+- **Regression is loud and reserved.** Computed in the reducer, shown above the clusters.
+- **Hard rules are structurally different from guidance** — different container, weight and
+  position — and an untested one is marked in the hazard channel, because a rule nothing exercised
+  is believed rather than known.
+- **The gate caps rather than blocks.** Going live starts at 25 calls so an untested rule becomes a
+  measurement. The one hard block is a sweep whose spec has since changed: evidence describing a
+  different agent is worse than none.
 
 ## Architecture, briefly
 

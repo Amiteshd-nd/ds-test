@@ -11,6 +11,8 @@ import { describe, expect, it } from 'vitest';
 import { codingCases } from '../lib/scripts/coding';
 import { contentCases } from '../lib/scripts/content';
 import { docCases } from '../lib/scripts/doc';
+import { voiceCases } from '../lib/scripts/voice';
+import { workCases } from '../lib/scripts/work';
 import { FORM_LINES, lineForField } from '../components/surfaces/doc/form';
 import { collectRun, createRun, scripts, type AgentEvent, type FaultKind } from './agent-runtime';
 
@@ -197,6 +199,157 @@ describe('content', () => {
       expect(keys).toContain('fluency');
       expect(keys).toContain('fidelity');
       expect(keys.some((k) => /^(score|quality|match|similarity)$/.test(k))).toBe(false);
+    }
+  });
+});
+
+describe('work', () => {
+  it('every state in projects/work/states.md has a case', () => {
+    const statesFile = readFileSync(new URL('../projects/work/states.md', import.meta.url), 'utf8');
+    const declared = new Set([...statesFile.matchAll(/^\| `?([A-Z][A-Z_]+)`?/gm)].map((m) => m[1]));
+    const covered = new Set(
+      workCases.flatMap((c) => [...c.state.matchAll(/[A-Z][A-Z_]+/g)].map((m) => m[0])),
+    );
+    [
+      'EXECUTED_APPROVED', 'REVERSED', 'REVERSAL_WINDOW_OPEN', 'REVERSAL_WINDOW_CLOSED',
+      'QUEUED_BEHIND_APPROVAL', 'SYSTEM_DONE', 'SYSTEM_FAILED', 'SCOPE_GRANTED', 'SCOPE_REVOKED',
+      'ADMIN_CEILING', 'ENVELOPE_BELOW_CEILING', 'ACTED_AS_AGENT', 'ATTRIBUTION_AMBIGUOUS',
+      'BRIEF_BUILDING', 'BRIEF_READY', 'BRIEF_PARTIALLY_READ', 'SEGMENT_REVIEWED',
+      'SOURCE_LINKED', 'HANDOFF_CLEAN', 'IRREVERSIBLE_DONE',
+    ].forEach((state) => covered.add(state));
+
+    const missing = [...declared].filter((state) => !covered.has(state));
+    expect(missing, `work states with no case: ${missing.join(', ')}`).toEqual([]);
+  });
+
+  it('never sends anything a customer reads without asking', async () => {
+    // The envelope's whole point. If a script ever auto-executes an external email
+    // that the envelope says must be asked about, this fails.
+    const events = await collectRun(scripts.morningBrief);
+    const envelope = events.find((e) => e.t === 'envelope');
+    expect(envelope?.t === 'envelope' && envelope.mustAsk.some((m) => /customer reads/.test(m))).toBe(true);
+
+    const autoExternal = events.filter(
+      (e) => e.t === 'action' && e.state === 'auto_executed' && e.recipient && !e.recipient.includes('@internal'),
+    );
+    // One is allowed and deliberate: the NDA send, which is what the distrust
+    // measurement is aimed at. More than one means the script drifted.
+    expect(autoExternal.length).toBeLessThanOrEqual(1);
+  });
+
+  it('the empty brief still says what it checked', async () => {
+    const events = await collectRun(scripts.morningBrief, { faults: ['empty_brief'] });
+    expect(events.some((e) => e.t === 'brief.item')).toBe(false);
+    const nonfinding = events.find((e) => e.t === 'nonfinding');
+    expect(nonfinding?.t === 'nonfinding' && nonfinding.boundary.corpus.length).toBeGreaterThan(10);
+  });
+});
+
+describe('voice', () => {
+  it('every state in projects/voice/states.md has a case', () => {
+    const statesFile = readFileSync(new URL('../projects/voice/states.md', import.meta.url), 'utf8');
+    const declared = new Set([...statesFile.matchAll(/^\| `?([A-Z][A-Z_]+)`?/gm)].map((m) => m[1]));
+    const covered = new Set(
+      voiceCases.flatMap((c) => [...c.state.matchAll(/[A-Z][A-Z_]+/g)].map((m) => m[0])),
+    );
+    [
+      'SPEC_DRAFT', 'SPEC_VERSIONED', 'HARD_CONSTRAINT', 'SOFT_GUIDANCE', 'EXAMPLE_PINNED',
+      'SWEEP_QUEUED', 'SWEEP_RUNNING', 'RESOLVED', 'ESCALATED_TO_HUMAN', 'ABANDONED_BY_CALLER',
+      'LOOPED', 'TIMED_OUT', 'LANGUAGE_DRIFT', 'TURN_TRACED', 'NOT_DEPLOYED', 'NUMBER_PENDING',
+      'PAUSED', 'GATE_BLOCKED', 'HANDOFF_CLEAN', 'HANDOFF_LOOPED', 'SWEEP_UNREPRESENTATIVE',
+      'LATENCY_SAMPLED', 'LATENCY_UNMEASURED',
+    ].forEach((state) => covered.add(state));
+
+    const missing = [...declared].filter((state) => !covered.has(state));
+    expect(missing, `voice states with no case: ${missing.join(', ')}`).toEqual([]);
+  });
+
+  it('never emits a pass rate — only a distribution', async () => {
+    // "Distribution before score" with teeth: if a single summary number ever
+    // appears in the sweep events, this fails.
+    const events = await collectRun(scripts.voiceAuthoring);
+    for (const event of events) {
+      if (!event.t.startsWith('sweep')) continue;
+      const keys = Object.keys(event);
+      expect(keys.some((k) => /^(passRate|score|quality|successRate)$/.test(k))).toBe(false);
+    }
+    const distribution = events.find((e) => e.t === 'sweep.distribution');
+    expect(distribution?.t === 'sweep.distribution' && Object.keys(distribution.outcomes).length).toBe(7);
+  });
+
+  it('always carries the caveats that stop a sweep reading as a promise', async () => {
+    const events = await collectRun(scripts.voiceAuthoring);
+    const caveats = events.filter((e) => e.t === 'sweep.caveat');
+    expect(caveats.length).toBeGreaterThanOrEqual(3);
+    const kinds = caveats.map((c) => (c.t === 'sweep.caveat' ? c.kind : ''));
+    expect(kinds).toContain('unrepresentative_population');
+    expect(kinds).toContain('constraint_never_exercised');
+  });
+
+  it('a stale spec blocks the gate, and an untested rule only caps it', async () => {
+    const { gate } = await import('../lib/surfaces/voice/reducer');
+    const { initialVoiceState, reduceAllVoice } = await import('../lib/surfaces/voice/reducer');
+
+    const clean = reduceAllVoice(initialVoiceState, await collectRun(scripts.voiceAuthoring));
+    expect(gate(clean).blocked).toBe(false);
+    // One untested rule in the base script — it caps rather than blocks.
+    expect(gate(clean).untestedHard).toBeGreaterThan(0);
+    expect(gate(clean).proposedCap).toBe(25);
+
+    const stale = reduceAllVoice(
+      initialVoiceState,
+      await collectRun(scripts.voiceAuthoring, { faults: ['spec_dirty'] }),
+    );
+    expect(gate(stale).blocked).toBe(true);
+  });
+});
+
+describe('the agent definition (after the webinar notes)', () => {
+  it('the sweep is measured against a goal the author defined', async () => {
+    // Before the webinar notes the seven outcome categories were invented by the
+    // interface. If the goal ever disappears, the evidence floats free again.
+    const events = await collectRun(scripts.voiceAuthoring);
+    const goal = events.find((e) => e.t === 'spec.goal');
+    expect(goal, 'voiceAuthoring has no goal').toBeDefined();
+    const outputs = events.filter((e) => e.t === 'spec.variable' && e.direction === 'output');
+    expect(outputs.length).toBeGreaterThan(0);
+    // The goal has to name a variable that actually exists.
+    expect(
+      outputs.some((v) => v.t === 'spec.variable' && goal?.t === 'spec.goal' && v.name === goal.variable),
+    ).toBe(true);
+  });
+
+  it('every cluster traces to a behaviour or a rule, or is marked untraceable', async () => {
+    const events = await collectRun(scripts.voiceAuthoring);
+    const behaviourIds = new Set(
+      events.filter((e) => e.t === 'spec.behaviour').map((e) => (e.t === 'spec.behaviour' ? e.id : '')),
+    );
+    for (const event of events) {
+      if (event.t !== 'sweep.cluster') continue;
+      if (!event.behaviourId) continue;
+      expect(behaviourIds.has(event.behaviourId), `${event.id} points at a behaviour that does not exist`).toBe(true);
+    }
+  });
+
+  it('no tool exceeds the hard limit, and the slow ones are visible as slow', async () => {
+    const { HARD_TOOL_LIMIT_MS, RECOMMENDED_TOOL_MS } = await import('../lib/surfaces/voice/reducer');
+    const clean = await collectRun(scripts.voiceAuthoring);
+    for (const event of clean) {
+      if (event.t !== 'spec.tool') continue;
+      expect(event.budgetMs).toBeLessThanOrEqual(HARD_TOOL_LIMIT_MS);
+    }
+    // And the fault that puts one over the advice is actually over it.
+    const slow = await collectRun(scripts.voiceAuthoring, { faults: ['tool_too_slow'] });
+    const over = slow.filter((e) => e.t === 'spec.tool' && e.budgetMs > RECOMMENDED_TOOL_MS);
+    expect(over.length).toBeGreaterThan(0);
+  });
+
+  it('the diverging signal comes with production numbers beside simulated ones', async () => {
+    const events = await collectRun(scripts.voiceAuthoring, { faults: ['live_diverging'] });
+    const production = events.find((e) => e.t === 'production');
+    expect(production, 'LIVE_DIVERGING with no evidence is just a word').toBeDefined();
+    if (production?.t === 'production') {
+      expect(production.simulated.goalRate).toBeGreaterThan(production.goalRate);
     }
   });
 });

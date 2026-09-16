@@ -12,6 +12,14 @@ export default function Dev() {
           <span>Every state in projects/coding/states.md, side by side, driven by the runtime.</span>
         </li>
         <li>
+          <Link href="/dev/gallery/voice">State gallery — voice</Link>
+          <span>Every state in projects/voice/states.md, each with a cluster open.</span>
+        </li>
+        <li>
+          <Link href="/dev/gallery/work">State gallery — work</Link>
+          <span>Every state in projects/work/states.md, ledgers included.</span>
+        </li>
+        <li>
           <Link href="/dev/gallery/content">State gallery — content</Link>
           <span>Every state in projects/content/states.md, each with a variant open.</span>
         </li>

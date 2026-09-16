@@ -1,0 +1,171 @@
+/* voice — Dhvani. A test bench: the specimen on one side, the evidence about the
+   specimen on the other, and the whole product is the loop between them.
+
+   The one bold thing is the sweep distribution. Everything else — the spec editor,
+   the transcript, the deployment panel — stays instrumental. */
+
+.surface { display: grid; grid-template-columns: minmax(20rem, 26rem) minmax(0, 1fr); align-items: start; min-height: calc(100vh - 5rem); }
+.spec { min-width: 0; padding: var(--sp-4) var(--sp-5) var(--sp-9); display: flex; flex-direction: column; gap: var(--sp-4); border-right: 1px solid var(--line-hairline); position: sticky; top: 0; max-height: 100vh; overflow: auto; }
+.evidence { min-width: 0; padding: var(--sp-4) var(--sp-6) var(--sp-9); display: flex; flex-direction: column; gap: var(--sp-5); }
+@media (max-width: 74rem) {
+  .surface { grid-template-columns: minmax(0, 1fr); }
+  .spec { border-right: 0; border-bottom: 1px solid var(--line-hairline); position: static; max-height: none; }
+}
+
+.head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); border-bottom: 1px solid var(--line-strong); padding-bottom: var(--sp-2); }
+.headTitle { font-size: var(--fs-md); font-weight: var(--fw-semi); }
+.headAside { font-size: var(--fs-xs); color: var(--fg-secondary); font-variant-numeric: tabular-nums; }
+.actions { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+.button { padding: var(--sp-2) var(--sp-3); border: 1px solid var(--line-strong); border-radius: var(--r-card, 2px); background: var(--bg-raised); font-size: var(--fs-sm); }
+.button:hover { border-color: var(--fg-primary); text-decoration: none; }
+.button[data-kind='primary'] { background: var(--fg-primary); color: var(--bg-canvas); border-color: var(--fg-primary); font-weight: var(--fw-medium); }
+.button[data-kind='quiet'] { border-color: transparent; background: transparent; text-decoration: underline; text-underline-offset: 3px; padding-inline: 0; }
+.button:disabled { opacity: 0.4; cursor: default; }
+.note { font-size: var(--fs-sm); color: var(--fg-secondary); }
+.empty { font-size: var(--fs-sm); color: var(--fg-tertiary); }
+
+/* ---- the spec: hard rules are a different KIND of thing from guidance -------- */
+.specGroup { display: flex; flex-direction: column; gap: var(--sp-2); }
+.specLabel { font-size: var(--fs-xs); color: var(--fg-secondary); }
+.hardList { display: flex; flex-direction: column; gap: var(--sp-2); }
+.hard {
+  background: var(--spec-hard-bg);
+  border-left: var(--spec-hard-rule);
+  padding: var(--sp-2) var(--sp-3);
+  font-weight: var(--spec-hard-weight);
+  font-size: var(--fs-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.soft {
+  background: var(--spec-soft-bg);
+  border-left: var(--spec-soft-rule);
+  padding: var(--sp-1) var(--sp-3);
+  font-weight: var(--spec-soft-weight);
+  font-size: var(--fs-sm);
+  color: var(--fg-secondary);
+}
+.specTested { font-size: var(--fs-2xs); color: var(--agent-done-fg); }
+/* Untested is not neutral: it is a rule believed rather than shown. */
+.specUntested { font-size: var(--fs-2xs); color: var(--sig-hazard); font-weight: var(--fw-semi); }
+.example { background: var(--spec-example-bg); padding: var(--sp-2) var(--sp-3); font-size: var(--fs-sm); display: flex; flex-direction: column; gap: 2px; }
+.examplePinned { font-size: var(--fs-2xs); color: var(--fg-secondary); }
+
+/* Stale evidence travels with the evidence, not in a corner. */
+.dirty { border: 2px solid var(--sig-caution); padding: var(--sp-3); display: flex; flex-direction: column; gap: var(--sp-2); }
+.dirtyHead { font-size: var(--fs-sm); font-weight: var(--fw-semi); }
+.stale { background-image: var(--stale-overlay); }
+
+/* ---- the distribution: the one bold thing ---------------------------------- */
+.shape { display: flex; flex-direction: column; gap: var(--sp-3); }
+.bar { display: flex; width: 100%; height: 3.2rem; overflow: hidden; border: 1px solid var(--line-hairline); }
+.slice { min-width: 2px; display: flex; align-items: flex-end; }
+.slice[data-outcome='resolved'] { background: var(--sweep-resolved); }
+.slice[data-outcome='off_script_but_fine'] { background: var(--sweep-offscript); }
+.slice[data-outcome='escalated'] { background: var(--sweep-escalated); }
+.slice[data-outcome='abandoned'] { background: var(--sweep-abandoned); }
+.slice[data-outcome='looped'] { background: color-mix(in srgb, var(--sweep-abandoned) 60%, var(--sweep-escalated)); }
+.slice[data-outcome='timed_out'] { background: color-mix(in srgb, var(--sweep-abandoned) 40%, transparent); }
+/* The one that is categorically different. */
+.slice[data-outcome='constraint_breached'] { background: var(--sweep-breached); box-shadow: inset 0 0 0 2px var(--bg-canvas); }
+
+.legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); gap: var(--sp-2) var(--sp-4); }
+.legendItem { display: flex; align-items: baseline; gap: var(--sp-2); font-size: var(--fs-sm); }
+.swatch { width: 10px; height: 10px; flex: none; }
+.legendCount { font-variant-numeric: tabular-nums; color: var(--fg-secondary); }
+.legendItem[data-outcome='constraint_breached'] { font-weight: var(--fw-semi); color: var(--sweep-breached); }
+
+/* ---- clusters, and the path down to one turn ------------------------------- */
+.cluster { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr) auto; gap: var(--sp-3); align-items: baseline; padding: var(--sp-3) 0; border-bottom: 1px solid var(--line-hairline); width: 100%; text-align: left; }
+.cluster:hover { background: var(--bg-raised); }
+.cluster[data-open='true'] { background: var(--bg-raised); }
+.clusterCount { font-variant-numeric: tabular-nums; font-size: var(--fs-md); }
+.clusterCause { font-size: var(--fs-md); }
+.clusterTrace { grid-column: 2 / -1; font-size: var(--fs-xs); color: var(--fg-secondary); }
+.clusterUntraced { grid-column: 2 / -1; font-size: var(--fs-xs); color: var(--sig-caution); }
+.delta { font-size: var(--fs-sm); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.delta[data-dir='worse'] { color: var(--delta-worse); font-weight: var(--fw-semi); }
+.delta[data-dir='better'] { color: var(--delta-better); }
+.delta[data-dir='same'] { color: var(--fg-tertiary); }
+
+/* Regression is loud, and this treatment is reserved for it. */
+.regressed { border: 2px solid var(--delta-worse); box-shadow: var(--delta-worse-ring); padding: var(--sp-3) var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-2); }
+.regressedHead { font-weight: var(--fw-semi); color: var(--delta-worse); }
+
+/* ---- the transcript: code-mixed, stable baseline --------------------------- */
+.transcript { display: flex; flex-direction: column; gap: var(--sp-2); padding: var(--sp-3) 0 var(--sp-3) var(--sp-4); border-left: 2px solid var(--line-strong); }
+.turn { display: grid; grid-template-columns: 4rem 3.5rem minmax(0, 1fr); gap: var(--sp-3); align-items: baseline; font-size: var(--fs-sm); }
+.turnWho { font-size: var(--fs-xs); color: var(--fg-secondary); }
+.turnAt { font-family: var(--font-mono); font-size: var(--fs-2xs); color: var(--fg-tertiary); font-variant-numeric: tabular-nums; }
+/* Per-script line height keys off lang; mixed-script rows keep one baseline. */
+.turnText { line-height: var(--lh-indic-body); }
+.turn[data-breach='true'] { background: color-mix(in srgb, var(--sig-hazard) 10%, transparent); box-shadow: inset 3px 0 0 var(--sig-hazard); }
+.turnFlag { grid-column: 3; font-size: var(--fs-xs); color: var(--sig-hazard); font-weight: var(--fw-semi); }
+
+/* ---- caveats are content, not footnotes ------------------------------------ */
+.caveats { display: flex; flex-direction: column; gap: var(--sp-2); border-top: 1px solid var(--line-hairline); padding-top: var(--sp-3); }
+.caveat { display: grid; grid-template-columns: 11rem minmax(0, 1fr); gap: var(--sp-3); font-size: var(--fs-sm); }
+.caveatKind { font-size: var(--fs-xs); color: var(--sig-caution); }
+.evidenceNote { border-left: 2px solid var(--line-strong); padding-left: var(--sp-3); display: flex; flex-direction: column; gap: var(--sp-1); }
+.evidenceHead { font-size: var(--fs-sm); font-weight: var(--fw-semi); }
+
+/* ---- the gate: friction of a different kind -------------------------------- */
+.gate { border: 3px double var(--fg-primary); padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-3); }
+.gateHead { font-size: var(--fs-lg); font-weight: var(--fw-semi); }
+.gateConsequence { font-size: var(--fs-md); line-height: var(--lh-body); }
+.gateBlocked { font-size: var(--fs-sm); color: var(--sig-hazard); font-weight: var(--fw-medium); }
+.gateCap { font-size: var(--fs-sm); border-left: 2px solid var(--sig-caution); padding-left: var(--sp-3); }
+.gateLive { font-size: var(--fs-sm); color: var(--sig-clear); font-weight: var(--fw-medium); }
+.gateDiverging { font-size: var(--fs-sm); color: var(--delta-worse); font-weight: var(--fw-semi); }
+
+/* ---- fleet and latency ----------------------------------------------------- */
+.handoff { display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-sm); padding: var(--sp-2) 0; border-bottom: 1px solid var(--line-hairline); }
+.seam { font-family: var(--font-mono); font-size: var(--fs-xs); }
+.dropped { color: var(--delta-worse); }
+.latencyRow { display: flex; gap: var(--sp-5); flex-wrap: wrap; }
+.latencyItem { display: flex; flex-direction: column; gap: 2px; }
+.latencyLabel { font-size: var(--fs-xs); color: var(--fg-tertiary); }
+.latencyValue { font-family: var(--font-mono); font-size: var(--fs-md); font-variant-numeric: tabular-nums; }
+
+/* ---- the agent definition: prompt document + tools + variables + goal --------
+   Added after the webinar notes. Sections exist because debugging a single-state
+   agent means finding the paragraph that is wrong. */
+.sectionHeading { font-size: var(--fs-sm); font-weight: var(--fw-semi); border-bottom: 1px solid var(--line-hairline); padding-bottom: 2px; }
+
+.tool { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 2px var(--sp-2); padding: var(--sp-2) 0; border-bottom: 1px solid var(--line-hairline); align-items: baseline; }
+.toolName { font-family: var(--font-mono); font-size: var(--fs-sm); }
+.toolWhen { font-size: var(--fs-2xs); color: var(--fg-tertiary); white-space: nowrap; }
+.toolBudget { font-size: var(--fs-2xs); color: var(--fg-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.toolDescription { grid-column: 1 / -1; font-size: var(--fs-xs); color: var(--fg-secondary); }
+/* Over the recommended budget the caller hears dead air, so it is a warning. */
+.tool[data-over='true'] .toolBudget { color: var(--sig-hazard); font-weight: var(--fw-semi); }
+.toolOver { grid-column: 1 / -1; font-size: var(--fs-xs); color: var(--sig-hazard); }
+
+.variable { display: flex; flex-direction: column; gap: 1px; padding: var(--sp-1) 0; }
+.variableName { font-family: var(--font-mono); font-size: var(--fs-sm); }
+.variableEnum { font-family: var(--font-mono); font-size: var(--fs-2xs); color: var(--fg-tertiary); }
+.goal { font-size: var(--fs-sm); border-left: 2px solid var(--sig-clear); padding-left: var(--sp-3); }
+
+/* Expected behaviours: the other way into the evidence. */
+.behaviours { display: flex; flex-direction: column; gap: var(--sp-2); border-top: 1px solid var(--line-hairline); padding-top: var(--sp-3); }
+.behaviour { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px var(--sp-3); padding: var(--sp-2) 0; border-bottom: 1px solid var(--line-hairline); align-items: baseline; }
+.behaviourText { font-size: var(--fs-sm); }
+.behaviourCount { font-size: var(--fs-xs); color: var(--fg-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.behaviour[data-broken='true'] .behaviourCount { color: var(--delta-worse); font-weight: var(--fw-semi); }
+.behaviour[data-broken='true'] .behaviourText { font-weight: var(--fw-medium); }
+.behaviourSection { grid-column: 1 / -1; font-size: var(--fs-2xs); color: var(--fg-tertiary); }
+
+.setting { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px var(--sp-3); padding: var(--sp-1) 0; font-size: var(--fs-sm); align-items: baseline; }
+.settingValue { font-family: var(--font-mono); font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.setting[data-warn='true'] .settingValue { color: var(--sig-hazard); font-weight: var(--fw-semi); }
+.setting .note { grid-column: 1 / -1; }
+
+/* Production beside simulation. Two columns, and the gap between them is the point. */
+.production { display: flex; flex-direction: column; gap: var(--sp-1); border-top: 2px solid var(--line-strong); padding-top: var(--sp-3); }
+.prodRow { display: grid; grid-template-columns: minmax(0, 1fr) 6rem 6rem; gap: var(--sp-3); font-size: var(--fs-sm); padding: var(--sp-1) 0; border-bottom: 1px solid var(--line-hairline); }
+.prodHead { font-size: var(--fs-xs); color: var(--fg-secondary); }
+.prodValue { font-variant-numeric: tabular-nums; text-align: right; }
+.prodRow[data-worse='true'] .prodValue:last-child { color: var(--delta-worse); font-weight: var(--fw-semi); }
+
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

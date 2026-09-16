@@ -14,8 +14,8 @@ const SURFACES = [
   { id: 'coding', href: '/coding', built: true },
   { id: 'doc', href: '/doc', built: true },
   { id: 'content', href: '/content', built: true },
-  { id: 'work', href: '/work', built: false },
-  { id: 'voice', href: '/voice', built: false },
+  { id: 'work', href: '/work', built: true },
+  { id: 'voice', href: '/voice', built: true },
 ];
 
 export function SurfaceNav({ current }: { current: string }) {

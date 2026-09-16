@@ -1,0 +1,143 @@
+/* work — Sahaya. A ledger and a briefing note: rules and alignment, tabular figures,
+   tight leading, muted chrome so agent state is the only saturated thing.
+
+   The one structural decision worth reading: a sent thing and a drafted thing do not
+   share a container shape. Everything else is quiet. */
+
+.surface { display: grid; grid-template-columns: minmax(0, 1fr) minmax(21rem, 28rem); align-items: start; min-height: calc(100vh - 5rem); }
+.main { min-width: 0; padding: var(--sp-4) var(--sp-6) var(--sp-9); display: flex; flex-direction: column; gap: var(--sp-5); }
+.side { min-width: 0; border-left: 1px solid var(--line-hairline); padding: var(--sp-4) var(--sp-5) var(--sp-9); display: flex; flex-direction: column; gap: var(--sp-5); position: sticky; top: 0; max-height: 100vh; overflow: auto; }
+@media (max-width: 74rem) {
+  .surface { grid-template-columns: minmax(0, 1fr); }
+  .side { border-left: 0; border-top: 1px solid var(--line-hairline); position: static; max-height: none; }
+}
+
+.head { display: flex; align-items: baseline; gap: var(--sp-4); flex-wrap: wrap; padding-bottom: var(--sp-3); border-bottom: 1px solid var(--line-strong); }
+.headTitle { font-size: var(--fs-lg); font-weight: var(--fw-semi); }
+.counts { display: flex; gap: var(--sp-4); font-size: var(--fs-sm); color: var(--fg-secondary); }
+.count { font-variant-numeric: tabular-nums; }
+.countNeeds { color: var(--agent-blocked-fg); font-weight: var(--fw-semi); }
+.countAsHim { color: var(--agent-review-fg); font-weight: var(--fw-medium); }
+.countBroken { color: var(--agent-failed-fg); font-weight: var(--fw-medium); }
+.actions { margin-left: auto; display: flex; gap: var(--sp-2); }
+
+.button { padding: var(--sp-1) var(--sp-3); border: 1px solid var(--line-strong); border-radius: var(--r-sm); background: var(--bg-raised); font-size: var(--fs-sm); }
+.button:hover { border-color: var(--fg-secondary); text-decoration: none; }
+.button[data-kind='primary'] { background: var(--fg-primary); color: var(--bg-raised); border-color: var(--fg-primary); font-weight: var(--fw-medium); }
+.button[data-kind='attention'] { background: var(--agent-blocked-bg); border-color: var(--agent-blocked-fg); color: var(--agent-blocked-fg); font-weight: var(--fw-semi); }
+.button[data-kind='quiet'] { background: transparent; border-color: transparent; text-decoration: underline; text-underline-offset: 2px; padding-inline: 0; }
+.button:disabled { opacity: 0.4; cursor: default; }
+
+.section { display: flex; flex-direction: column; gap: var(--sp-3); }
+.sectionHead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); border-bottom: 1px solid var(--line-hairline); padding-bottom: var(--sp-2); }
+.sectionTitle { font-size: var(--fs-md); font-weight: var(--fw-semi); }
+.sectionAside { font-size: var(--fs-xs); color: var(--fg-secondary); }
+.note { font-size: var(--fs-sm); color: var(--fg-secondary); }
+.empty { font-size: var(--fs-sm); color: var(--fg-tertiary); }
+
+/* ---- the brief: a document, resumable, read in fifteen-minute gaps ---------- */
+.segment { display: flex; flex-direction: column; gap: var(--sp-2); }
+.segmentLabel { font-size: var(--fs-xs); color: var(--fg-secondary); border-bottom: 1px solid var(--line-hairline); padding-bottom: 2px; }
+.item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-2) var(--sp-3); padding: var(--sp-3) 0; border-bottom: 1px solid var(--line-hairline); align-items: baseline; }
+.item[data-read='true'] { opacity: 0.55; }
+.itemText { font-size: var(--fs-md); line-height: var(--lh-body); }
+.itemNeeds { font-size: var(--fs-xs); white-space: nowrap; color: var(--fg-tertiary); }
+.item[data-needs='decision'] .itemNeeds { color: var(--agent-blocked-fg); font-weight: var(--fw-semi); }
+.item[data-needs='permission'] .itemNeeds { color: var(--agent-review-fg); font-weight: var(--fw-semi); }
+.itemSources { grid-column: 1 / -1; display: flex; gap: var(--sp-3); flex-wrap: wrap; font-size: var(--fs-xs); }
+.source { color: var(--prov-tether, var(--sig-attention)); text-decoration: underline; text-underline-offset: 2px; }
+.sourceGone { color: var(--fg-tertiary); text-decoration: line-through; }
+.sourceGoneNote { color: var(--agent-review-fg); }
+
+/* The empty brief is a result. It gets the space a finding would get. */
+.emptyBrief { border: 1px solid var(--line-strong); padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-3); }
+.emptyHeading { font-size: var(--fs-lg); font-weight: var(--fw-semi); }
+.checked { display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-sm); color: var(--fg-secondary); }
+
+/* ---- the ledger: dense, tabular, attributable at a glance ------------------ */
+.ledger { display: flex; flex-direction: column; }
+.action {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr) 9rem;
+  gap: var(--sp-3);
+  align-items: baseline;
+  padding: var(--sp-3) var(--sp-3);
+  border-bottom: 1px solid var(--line-hairline);
+}
+.actionKind { font-size: var(--fs-2xs); color: var(--fg-tertiary); font-family: var(--font-mono); }
+.actionSummary { font-size: var(--fs-sm); }
+.actionState { font-size: var(--fs-xs); color: var(--fg-secondary); text-align: right; white-space: nowrap; }
+.actionMeta { grid-column: 2 / -1; font-size: var(--fs-xs); color: var(--fg-secondary); display: flex; gap: var(--sp-3); flex-wrap: wrap; }
+.actionRow { grid-column: 2 / -1; display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+
+/* A sent thing is not a drafted thing. Different container, not a different colour:
+   square corners, a heavier top rule, and no hover affordance — nothing to do. */
+.action[data-irreversible='true'] {
+  border-top: 2px solid var(--fg-primary);
+  border-bottom: 2px solid var(--fg-primary);
+  border-radius: 0;
+  background: var(--bg-sunken);
+  margin: var(--sp-2) 0;
+}
+.action[data-state='proposed'] { border-left: 3px dashed var(--line-strong); }
+.action[data-state='blocked_on_human'] { background: var(--agent-blocked-bg); box-shadow: inset var(--agent-blocked-ring); }
+.action[data-state='blocked_on_human'] .actionState { color: var(--agent-blocked-fg); font-weight: var(--agent-blocked-weight); }
+.action[data-state='blocked_on_permission'] { border-left: 3px solid var(--agent-review-fg); }
+.action[data-state='blocked_on_permission'] .actionState { color: var(--agent-review-fg); font-weight: var(--fw-medium); }
+.action[data-state='failed_midway'] { border-left: 3px solid var(--agent-failed-fg); background: var(--agent-failed-bg); }
+.action[data-state='failed_midway'] .actionState { color: var(--agent-failed-fg); font-weight: var(--fw-semi); }
+.action[data-state='reversed'] .actionSummary { text-decoration: line-through; color: var(--fg-tertiary); }
+
+/* Attribution: the thing the recipient cannot see, so the ledger must. */
+.attribution { font-size: var(--fs-2xs); padding: 1px var(--sp-2); border: 1px solid currentColor; white-space: nowrap; }
+.attribution[data-kind='as_user'] { color: var(--agent-review-fg); font-weight: var(--fw-semi); }
+.attribution[data-kind='ambiguous'] { color: var(--fg-secondary); }
+.attribution[data-kind='as_agent'] { color: var(--fg-tertiary); }
+.attributionNote { grid-column: 2 / -1; font-size: var(--fs-xs); color: var(--agent-review-fg); }
+
+/* ---- partial failure ------------------------------------------------------ */
+.legs { grid-column: 1 / -1; display: flex; flex-direction: column; gap: var(--sp-1); padding-top: var(--sp-2); }
+.leg { display: grid; grid-template-columns: 6rem 7rem minmax(0, 1fr); gap: var(--sp-3); font-size: var(--fs-xs); align-items: baseline; }
+.legSystem { font-family: var(--font-mono); }
+.legState[data-state='done'] { color: var(--agent-done-fg); }
+.legState[data-state='failed'] { color: var(--agent-failed-fg); }
+/* Neither done nor failed, and drawn as neither. */
+.legState[data-state='unknown'] { color: var(--agent-review-fg); font-weight: var(--fw-semi); }
+.legUnknownNote { grid-column: 1 / -1; font-size: var(--fs-xs); color: var(--agent-review-fg); border-left: 2px solid var(--agent-review-fg); padding-left: var(--sp-3); }
+.compensation { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-xs); }
+.compImpossible { color: var(--agent-failed-fg); }
+
+/* ---- side column ---------------------------------------------------------- */
+.scope { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--sp-2) var(--sp-3); padding: var(--sp-2) 0; border-bottom: 1px solid var(--line-hairline); font-size: var(--fs-sm); }
+.scopeState { font-size: var(--fs-xs); color: var(--fg-secondary); white-space: nowrap; }
+.scope[data-state='expired'] .scopeState, .scope[data-state='revoked'] .scopeState { color: var(--agent-review-fg); font-weight: var(--fw-medium); }
+.scopeNote { grid-column: 1 / -1; font-size: var(--fs-xs); color: var(--fg-secondary); }
+
+.ceiling { border: 1px solid var(--line-strong); border-top-width: 3px; padding: var(--sp-3) var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-2); }
+.ceilingHead { font-size: var(--fs-sm); font-weight: var(--fw-semi); }
+.ceilingList { font-size: var(--fs-sm); color: var(--fg-secondary); display: flex; flex-direction: column; gap: 2px; }
+.ceilingNote { font-size: var(--fs-xs); color: var(--fg-tertiary); }
+
+.breach { border-left: 3px solid var(--agent-failed-fg); background: var(--agent-failed-bg); padding: var(--sp-2) var(--sp-3); font-size: var(--fs-sm); }
+.residency { border-left: 3px solid var(--agent-review-fg); padding: var(--sp-2) var(--sp-3); font-size: var(--fs-sm); display: flex; flex-direction: column; gap: 2px; }
+
+/* The taper ask: evidence first, then the request. Not a slider. */
+.taper { border: 1px solid var(--line-strong); padding: var(--sp-3) var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-2); }
+.taperHead { font-size: var(--fs-sm); font-weight: var(--fw-semi); }
+.taperEvidence { font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.taperWiden { font-size: var(--fs-sm); color: var(--fg-secondary); }
+.taperNote { font-size: var(--fs-xs); color: var(--fg-tertiary); }
+.taperDecided { font-size: var(--fs-xs); color: var(--fg-secondary); font-family: var(--font-mono); }
+
+.handoff { display: flex; flex-direction: column; gap: var(--sp-1); font-size: var(--fs-sm); padding: var(--sp-2) 0; border-bottom: 1px solid var(--line-hairline); }
+.handoffSeam { font-family: var(--font-mono); font-size: var(--fs-xs); }
+.handoffDropped { color: var(--agent-review-fg); }
+
+.nonfinding { padding: var(--sp-2) 0; border-bottom: 1px solid var(--line-hairline); display: flex; flex-direction: column; gap: 2px; }
+.nonfindingWhat { font-size: var(--fs-sm); }
+.nonfindingWhere { font-size: var(--fs-xs); color: var(--fg-secondary); }
+
+.envelope { display: flex; flex-direction: column; gap: var(--sp-2); }
+.envelopeList { font-size: var(--fs-sm); display: flex; flex-direction: column; gap: 2px; }
+.envelopeList[data-kind='mustAsk'] { color: var(--agent-blocked-fg); }
+.consequence { font-size: var(--fs-sm); border-left: 2px solid var(--line-strong); padding-left: var(--sp-3); }
