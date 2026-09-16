@@ -51,7 +51,7 @@ function Bullets({ items }) {
         <li key={i} className="flex gap-3 text-[15px] leading-[1.6] text-white/75">
           <span
             className="mt-[0.62em] h-1.5 w-1.5 shrink-0 rounded-full"
-            style={{ background: 'linear-gradient(135deg,#ff4ad6,#5292ff)' }}
+            style={{ background: 'var(--lg-bullet-fill)' }}
           />
           <span>{item}</span>
         </li>
@@ -71,7 +71,7 @@ function Stats({ items }) {
         >
           <span
             className="lg-hairline"
-            style={{ background: 'linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.03))' }}
+            style={{ background: 'linear-gradient(180deg, var(--lg-rim-a), var(--lg-rim-b))' }}
           />
           <div className="text-[21px] font-semibold tracking-[-0.02em] text-white">{s.value}</div>
           <div className="mt-0.5 text-[11.5px] leading-snug text-white/45">{s.label}</div>
@@ -96,12 +96,15 @@ function Cards({ ids }) {
             >
               <span
                 className="lg-hairline"
-                style={{ background: `linear-gradient(140deg, ${accent}55, rgba(255,255,255,.05))` }}
+                style={{ background: `linear-gradient(140deg, ${accent}55, var(--lg-rim-b))` }}
               />
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute -left-8 -top-10 h-24 w-24 rounded-full opacity-45 blur-2xl transition-opacity group-hover:opacity-80"
-                style={{ background: accent }}
+                /* Blur radius is a token, not a utility: in a theme where
+                   nothing else blurs, this reads as a hard-cut corner of ink
+                   instead — same element, same accent, different material. */
+                className="pointer-events-none absolute -left-8 -top-10 h-24 w-24 rounded-full opacity-45 transition-opacity group-hover:opacity-80"
+                style={{ background: accent, filter: 'blur(var(--lg-bloom-blur))' }}
               />
               <img
                 src={proj.image}
@@ -152,7 +155,7 @@ function Note({ text }) {
   return (
     <p
       className="rounded-xl border-l-2 py-1 pl-3 text-[14px] leading-relaxed text-white/60"
-      style={{ borderColor: 'rgba(167,88,255,0.6)' }}
+      style={{ borderColor: 'var(--lg-quote-line)', borderLeftWidth: 'max(2px, var(--lg-border))' }}
     >
       {text}
     </p>
@@ -186,8 +189,8 @@ function Avatar() {
       aria-hidden="true"
       className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full"
       style={{
-        background: 'radial-gradient(circle at 32% 28%, #ff6ade 0%, #a758ff 46%, #3c3aa8 100%)',
-        boxShadow: '0 0 16px -4px rgba(167,88,255,0.95), inset 0 1px 0 rgba(255,255,255,.35)',
+        background: 'var(--lg-avatar-fill)',
+        boxShadow: 'var(--lg-avatar-shadow)',
       }}
     />
   );
@@ -297,7 +300,7 @@ function UserMessage({ text }) {
       <div className="lg-surface relative max-w-[86%] rounded-[20px] rounded-br-[8px] px-4 py-2.5 md:max-w-[75%]">
         <span
           className="lg-hairline"
-          style={{ background: 'linear-gradient(160deg, rgba(255,255,255,.22), rgba(255,255,255,.04))' }}
+          style={{ background: 'linear-gradient(160deg, var(--lg-rim-a), var(--lg-rim-b))' }}
         />
         <p className="whitespace-pre-wrap text-[15.5px] leading-[1.55] text-white/95">{text}</p>
       </div>

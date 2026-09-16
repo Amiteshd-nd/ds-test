@@ -42,9 +42,9 @@ export default function SuggestionRail({ onPick, variant = 'grid' }) {
           >
             <span
               className="lg-hairline"
-              style={{ background: 'linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.03))' }}
+              style={{ background: 'linear-gradient(180deg, var(--lg-rim-a), var(--lg-rim-b))' }}
             />
-            <span className="mt-0.5 shrink-0 text-white/45 transition-colors group-hover:text-[#c98bff]">
+            <span className="mt-0.5 shrink-0 text-white/45 transition-colors group-hover:text-[color:var(--lg-accent-soft)]">
               <Icon size={17} />
             </span>
             <span className="min-w-0">

@@ -1,20 +1,19 @@
-/* Liquid-glass material for the /home-2.2 chat surface.
+/* Primitives for the /home-2.2 chat surface — Layer 2 of the design system.
  *
  * Deliberately plain CSS: this file is imported straight from the page rather
  * than from index.css, so it never sees Tailwind's utility layer and must not
  * use @apply. Everything is prefixed `lg-` so it cannot collide with the
  * existing site styles, which stay untouched.
+ *
+ * Rule for this file: no colour, shadow, blur or radius literal ever appears
+ * here. Every visual value reads a token from design/themes.css, which is what
+ * makes the surface re-skinnable at runtime. If you need a value that has no
+ * token yet, add the token to *every* theme first. See design/README.md.
  */
 
 .lg-root {
-  --lg-ink: #060609;
-  --lg-warm: 255 122 61;
-  --lg-cool: 82 146 255;
-  --lg-violet: 167 88 255;
-  --lg-magenta: 255 74 214;
-
-  background: var(--lg-ink);
-  color: #ffffff;
+  background: var(--lg-bg);
+  color: var(--lg-ink);
 }
 
 /* dvh keeps the shell honest when mobile browser chrome collapses. */
@@ -27,28 +26,27 @@
 /* ---------------------------------------------------------------- surfaces */
 
 .lg-surface {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.015)),
-    rgba(13, 13, 18, 0.6);
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.07),
-    inset 0 -1px 0 0 rgba(0, 0, 0, 0.5),
-    0 20px 50px -20px rgba(0, 0, 0, 0.9);
+  background: var(--lg-surface-bg);
+  border: var(--lg-border) solid var(--lg-line);
+  backdrop-filter: var(--lg-surface-blur);
+  -webkit-backdrop-filter: var(--lg-surface-blur);
+  box-shadow: var(--lg-surface-shadow);
 }
 
 .lg-surface-flat {
-  background: rgba(255, 255, 255, 0.045);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  background: var(--lg-flat-bg);
+  border: var(--lg-border) solid var(--lg-line);
+  backdrop-filter: var(--lg-flat-blur);
+  -webkit-backdrop-filter: var(--lg-flat-blur);
+  box-shadow: var(--lg-flat-shadow);
 }
 
 /* A true 1px gradient edge. Two masks, one subtracted from the other, leaves
  * only the border ring painted — the trick real glass kits use for a rim light
- * that can be re-coloured per state. */
+ * that can be re-coloured per state. A theme with a real border has no use for
+ * it and switches it off through --lg-hairline-display. */
 .lg-hairline {
+  display: var(--lg-hairline-display);
   position: absolute;
   inset: 0;
   border-radius: inherit;
@@ -64,6 +62,7 @@
  * key light. Screen blend keeps it from muddying the fill underneath. */
 .lg-specular::after {
   content: '';
+  display: var(--lg-specular-display);
   position: absolute;
   inset: 0;
   border-radius: inherit;
@@ -115,19 +114,19 @@
 
 .lg-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+  scrollbar-color: var(--lg-scroll-thumb) transparent;
   overscroll-behavior: contain;
 }
 
 .lg-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
 .lg-scroll::-webkit-scrollbar-track { background: transparent; }
 .lg-scroll::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.13);
+  background: var(--lg-scroll-thumb);
   border-radius: 99px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
-.lg-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.24); background-clip: content-box; }
+.lg-scroll::-webkit-scrollbar-thumb:hover { background: var(--lg-scroll-thumb-hover); background-clip: content-box; }
 
 .lg-rail {
   scrollbar-width: none;
@@ -139,7 +138,7 @@
 /* ------------------------------------------------------------------ a11y */
 
 .lg-focus:focus-visible {
-  outline: 2px solid rgba(167, 88, 255, 0.85);
+  outline: 2px solid var(--lg-focus-ring);
   outline-offset: 2px;
 }
 

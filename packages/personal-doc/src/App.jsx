@@ -18,11 +18,16 @@ import TeluguStreaming from './pages/projects/TeluguStreaming';
 // bundle stay off the critical path for everyone landing on the classic home.
 const HomeV22 = lazy(() => import('./pages/HomeV22'));
 
+// Museum renders the same live canvases, so it is split out for the same reason.
+const Museum = lazy(() => import('./pages/Museum'));
+
 // Lazy-loaded from the game package so Phaser (~1MB) only downloads when the
 // game route is opened.
 const BangaloreTimes = lazy(() =>
   import('@cloud-march/game').then((m) => ({ default: m.BangaloreTimes })),
 );
+
+const FULL_SHELL_ROUTES = ['/home-2.2', '/museum'];
 
 // Initialize Google Analytics
 ReactGA.initialize('G-HN2NX8DVHC');
@@ -31,9 +36,9 @@ function App() {
   const location = useLocation();
   const isProjectPage = location.pathname.startsWith('/projects/');
   const isGamePage = location.pathname.startsWith('/game/');
-  // Home 2.2 is a full app shell with its own header, so the site chrome steps aside.
-  const isChatPage = location.pathname === '/home-2.2';
-  const hideChrome = isProjectPage || isGamePage || isChatPage;
+  // These bring their own header and dark shell, so the site chrome steps aside.
+  const isFullShell = FULL_SHELL_ROUTES.includes(location.pathname);
+  const hideChrome = isProjectPage || isGamePage || isFullShell;
 
   // Scroll to top on route change and send pageview to GA
   useEffect(() => {
@@ -58,6 +63,14 @@ function App() {
             element={
               <Suspense fallback={<div className="fixed inset-0 bg-[#060609]" />}>
                 <HomeV22 />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/museum"
+            element={
+              <Suspense fallback={<div className="fixed inset-0 bg-[#060609]" />}>
+                <Museum />
               </Suspense>
             }
           />

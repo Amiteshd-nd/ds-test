@@ -110,3 +110,29 @@ export const IconNew = (p) => (
   <Svg {...p}><path d="M5 19.5 19 5.5M9 4.5v3M7.5 6h3M17 15v2.5M15.8 16.2h2.5" /><path d="M12.5 7.5 16 11" /></Svg>
 );
 
+
+/* Theme switching. IconTheme is the trigger — the half-filled disc that means
+ * "appearance" everywhere from iOS to VS Code — and the two below are the
+ * themes themselves, drawn as what they are rather than as labels: a stack of
+ * refracting panes, and a slab with its shadow offset hard to one side. */
+
+export const IconTheme = (p) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M12 3.5a8.5 8.5 0 0 1 0 17Z" fill="currentColor" stroke="none" />
+  </Svg>
+);
+
+export const IconGlass = (p) => (
+  <Svg {...p}>
+    <path d="m12 3.5 8 4.2-8 4.2-8-4.2Z" />
+    <path d="m4 12 8 4.2 8-4.2M4 15.9l8 4.2 8-4.2" opacity="0.5" />
+  </Svg>
+);
+
+export const IconSlab = (p) => (
+  <Svg {...p}>
+    <rect x="3.5" y="3.5" width="12.5" height="12.5" rx="1" />
+    <path d="M20.5 8v12.5H8" />
+  </Svg>
+);

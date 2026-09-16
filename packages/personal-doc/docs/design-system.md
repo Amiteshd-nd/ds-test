@@ -1,0 +1,243 @@
+# Home 2.2 — a design system for a surface that can change its mind
+
+The `/home-2.2` page is Amitesh's portfolio rendered as a chat surface. As of
+this change it can also render as a **different design** — same components,
+same elements, same copy, different material — chosen by the visitor from a
+drawer in the header.
+
+This document is the reference: what the system is made of, why it is built
+this way, and what the rules are. The one-page working contract lives next to
+the code at [`src/design/README.md`](../src/design/README.md).
+
+---
+
+## 1. The premise
+
+Two ways to let a user change the look of a product:
+
+1. **Fork the UI.** Write the components twice, switch between trees.
+2. **Change the material.** Write the components once, express every visual
+   decision as a named value, and swap the values.
+
+The first is how most "theme" features die: two trees drift, a fix lands in one
+of them, and the second design quietly rots. The second is how design systems
+are supposed to work, and it is what is implemented here — strictly: no
+component outside `src/design/` branches on a theme id, or knows one exists.
+
+The constraint that produced it was explicit: **add a second look without
+changing the components or the elements.** That is a stronger constraint than it
+sounds, and it is what forced the interesting part of the architecture (§4).
+
+## 2. The two themes
+
+| | Liquid Glass (default) | Neo Brutalism |
+| --- | --- | --- |
+| Ground | near-black `#060609`, three bloom gradients, vignette | bone paper `#efede6`, cut colour shapes, print dot-grid |
+| Surface | translucent, `blur(20px) saturate(150%)` | opaque white, no backdrop work |
+| Edge | 1px masked gradient rim, cursor-tracked | 2px solid ink |
+| Shadow | soft, light-modelled, `0 20px 50px -20px` | offset, `4px 4px 0` |
+| Accent | violet → magenta → blue spectrum | one electric blue `#0a6cff` |
+| Type | medium weight, `-0.03em` | bold, `-0.02em` |
+| Material (cube) | physically-based refraction | the same simulation, posterised to six ink bands |
+
+The neo theme follows the reference the work was briefed against: white cards,
+black outlines, hard offset shadows, an electric blue primary, and yellow /
+violet shapes cut into the ground.
+
+**One deliberate departure from the reference.** The reference puts a
+full-bleed blue band behind its header and hero. Ink on `#0a6cff` measures
+about 3.4:1, which fails AA for the 11–16px copy that covers most of this
+surface, and there is no per-theme markup hook to give the header its own
+on-band colour without breaking rule §5.1. So the blue survives as fills,
+edges, the cube's ink and corner blocks — everywhere it never has small text on
+top of it — and the running text always sits on paper. The look holds; the
+contrast holds with it.
+
+## 3. The layers
+
+```
+                       data-lg-theme on <html>          ← one DOM write, ThemeProvider
+                                │
+   ┌────────────────────────────┴────────────────────────────┐
+   │  Layer 1   tokens            design/themes.css          │  ~60 custom properties,
+   │                                                         │  declared identically per theme
+   ├─────────────────────────────────────────────────────────┤
+   │  Layer 2   primitives        styles/liquid-glass.css    │  .lg-surface, .lg-hairline,
+   │                              + inline style={{ }}       │  .lg-focus, .lg-scroll …
+   ├─────────────────────────────────────────────────────────┤
+   │  Layer 3   utility remap     --color-white, per theme   │  retargets Tailwind's
+   │                              + the opacity floor        │  white-alpha utilities
+   └─────────────────────────────────────────────────────────┘
+                                │
+                     components — unchanged, theme-blind
+```
+
+JavaScript participates in exactly one place: `useTheme()` hands the WebGL cube
+two numbers that CSS cannot deliver into a shader.
+
+## 4. The mechanism worth knowing about
+
+The components were full of Tailwind utilities like `text-white/45`,
+`bg-white/10`, `placeholder:text-white/35` — the correct vocabulary for a dark
+glass surface, and completely wrong for paper. Rewriting them was off the table.
+
+Tailwind v4 compiles those utilities to
+
+```css
+.text-white\/45 { color: color-mix(in oklab, var(--color-white) 45%, transparent) }
+```
+
+— a **variable**, not a baked hex. So:
+
+```css
+[data-lg-theme='neo'] .lg-root { --color-white: #0b0b0f; }
+```
+
+retargets every white-alpha utility in the subtree in one line. "White" stops
+meaning white and starts meaning *the ink of this surface*, which is what those
+utilities were always expressing.
+
+Two consequences, both handled:
+
+- **Things that must stay light.** The send button's icon and the prism well's
+  icon sit on a dark fill in every theme. They name `--lg-on-accent` /
+  `--lg-on-well` in an inline `style`, which beats the class.
+- **Alpha is not perceptually symmetric.** White at 28% on near-black is
+  readable fine print; ink at 28% on paper is a smudge. Light themes therefore
+  re-map the low-alpha ladder (`/20`…`/75`) to stronger values. This is the one
+  place the system reaches into Tailwind's generated class names, it is
+  quarantined to a single labelled block in `themes.css`, and it is what buys
+  the rest of the surface the right to keep its markup.
+
+Browsers without `color-mix()` fall back to Tailwind's baked `#fff` — i.e. to
+the behaviour that shipped before this change, not to a new bug.
+
+## 5. Rules
+
+### 5.1 No component knows a theme's name
+
+There is no `themeId === 'neo'` anywhere outside the design folder, and there
+never should be. A component that branches on a theme has to be edited for
+every future theme; a component that reads a token does not.
+
+### 5.2 No literals below Layer 1
+
+`liquid-glass.css` and every component `style` object read `var(--lg-…)`.
+Adding a value means adding a token to **every** theme first. A token declared
+in one theme and not the other does not fall back to something sensible — it
+inherits whatever the cascade last set, and breaks in one state nobody checks.
+
+### 5.3 Per-frame code reads the theme through a ref
+
+`GlassCube` takes `material` and stores it in a ref, exactly as it already did
+with `phase`. Making it an effect dependency would drop the WebGL context and
+restart the rigid-body simulation every time someone opened the drawer. The
+same instinct applies to anything else that owns a loop.
+
+### 5.4 Framer Motion resolves CSS variables for colours, not for transforms
+
+`animate={{ backgroundColor: 'var(--x)' }}` works; `animate={{ y: 'var(--x)' }}`
+is not reliable. Hover lifts stay plain numbers.
+
+### 5.5 Themes cross-fade, they do not cut
+
+`background-color`, `color` and `border-color` transition over 280ms on the
+root and both surface primitives — enough to read as a material change rather
+than a page reload. `box-shadow` and `backdrop-filter` are deliberately *not*
+transitioned: animating either across a page of glass is expensive and looks
+worse than the cut it replaces. Everything stops under
+`prefers-reduced-motion`.
+
+## 6. The control
+
+The Home button in the header became the appearance control, which is what the
+brief asked for and is also the better use of the slot — on a surface with its
+own shell, "go home" was the least interesting thing a visitor could do there.
+
+- **Trigger** — the same `PrismButton`, now icon-only: the half-filled disc
+  that means *appearance* from iOS to VS Code. No label; a tooltip on hover and
+  an `aria-label` for everyone else. The prism ring itself is tokenised, so in
+  the neo theme it becomes a hard four-stop wheel with no bloom.
+- **Drawer** — opens downward, right-aligned, spring-in. Each row is previewed
+  by its own three-colour swatch rather than described, because a swatch is the
+  only honest description of a theme.
+- **Semantics** — `role="menu"` with `menuitemradio` rows, `aria-expanded`,
+  `aria-controls`, Escape to close, click-away to close, focus-leaves to close
+  (but not on window blur, or alt-tabbing would dismiss it).
+- **Densities** — the full pill above `sm`, a plain round button below, which
+  is exactly the arrangement the header already used.
+
+Choice persists to `localStorage` under `ad:home-2.2:theme` and is applied in a
+layout effect, so a returning visitor never sees a frame of the wrong theme.
+The attribute is removed on unmount: the rest of the site is a separate design
+and must never inherit these tokens.
+
+## 7. The material
+
+The cube is the one live object on the page, so a flat theme cannot simply hide
+it. Instead the shader gets two new uniforms — `uFlat` and `uTint` — and one
+extra pass at the very end:
+
+```glsl
+float lum  = clamp(dot(col, vec3(0.299, 0.587, 0.114)), 0.0, 1.0);
+float band = floor(lum * 6.0 + 0.5) / 6.0;          // six flat steps
+vec3  ink  = uTint * (0.30 + 1.15 * band) + vec3(band * band * 0.55);
+col = mix(col, ink, uFlat);
+a   = mix(a, smoothstep(0.20, 0.42, a), uFlat);      // hard silhouette, no halo
+```
+
+The physics above it is untouched: the same refraction, the same quaternion
+integration, the same throwable rigid body. The poster pass is the last thing
+that happens to the pixel, the way a screen print is the last thing that
+happens to a photograph.
+
+## 8. Token reference
+
+Every theme declares all of these. Grouped as they appear in `themes.css`.
+
+**Ground** `--lg-bg` `--lg-wash` `--lg-vignette` `--lg-scrim`
+
+**Ink & accents** `--lg-ink` `--lg-on-accent` `--lg-on-well` `--lg-accent`
+`--lg-accent-soft` `--lg-accent-warm` `--lg-live` `--lg-live-glow`
+
+**Surfaces** `--lg-surface-bg` `--lg-surface-blur` `--lg-surface-shadow`
+`--lg-flat-bg` `--lg-flat-blur` `--lg-flat-shadow`
+
+**Edges** `--lg-border` `--lg-line` `--lg-rim-a` `--lg-rim-b` `--lg-rim-warm`
+`--lg-rim-cool` `--lg-rim-hot` `--lg-hairline-display` `--lg-specular-display`
+
+**Fills** `--lg-send-fill` `--lg-send-shadow` `--lg-busy-fill`
+`--lg-focus-bloom` `--lg-avatar-fill` `--lg-avatar-shadow` `--lg-bullet-fill`
+`--lg-bloom-blur` `--lg-quote-line`
+
+**Prism well** `--lg-spectrum` `--lg-spectrum-blur` `--lg-spectrum-blur-hover`
+`--lg-well-fill` `--lg-well-shadow`
+
+**A11y & motion** `--lg-focus-ring` `--lg-scroll-thumb`
+`--lg-scroll-thumb-hover` `--lg-lift`
+
+**Type** `--lg-tracking-tight` `--lg-weight-strong` `--lg-label-transform`
+`--lg-label-tracking`
+
+The rim stops (`--lg-rim-warm/cool/hot`) are bare channel triplets, e.g.
+`255 122 61`, because the prompt bar's conic rim mixes a spring-driven alpha
+into them with `rgb(… / a)` — a variable cannot be spliced into the middle of a
+legacy `rgba(r,g,b,a)`.
+
+## 9. Accessibility
+
+- Focus rings are tokenised and re-coloured per theme; every interactive
+  element keeps `.lg-focus`.
+- The drawer is keyboard-complete: Escape, click-away, focus-out, and radio
+  semantics that announce the current theme.
+- The light theme's alpha ladder is compressed (§4) so muted text keeps its
+  contrast on paper rather than inheriting a ratio tuned for black.
+- `prefers-reduced-motion` already stopped the canvas loop and the CSS
+  animations; it now also stops the theme cross-fade.
+- Nothing in the system communicates through colour alone — the active theme
+  carries a check mark as well as a highlight.
+
+## 10. Adding a theme
+
+See [`src/design/README.md`](../src/design/README.md). It is two files, and if
+a third file needs editing, the change belongs in a token instead.

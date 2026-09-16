@@ -1,0 +1,68 @@
+# Home 2.2 design system — working contract
+
+Short version for anyone (human or agent) changing this surface. The reasoning
+behind each rule is in [`docs/design-system.md`](../../docs/design-system.md).
+
+## What this is
+
+The `/home-2.2` chat surface is one set of components that can render as more
+than one design. Themes are **materials**, not variants: no component branches
+on the theme, no component is duplicated per theme, and no markup changes when
+the theme does. A theme is a block of CSS custom properties plus two numbers
+for the WebGL cube.
+
+Files:
+
+| File | Owns |
+| --- | --- |
+| `themes.js` | which themes exist; metadata; canvas `material` uniforms |
+| `themes.css` | every visual value, per theme (the tokens) |
+| `ThemeProvider.jsx` | state, persistence, the single `data-lg-theme` DOM write |
+| `useTheme.js` | the context + hook (split out for Fast Refresh) |
+| `ThemeSwitcher.jsx` | the header control: trigger, tooltip, drawer |
+| `../styles/liquid-glass.css` | the primitives (`.lg-surface`, `.lg-hairline`, …) |
+
+## The three layers
+
+1. **Tokens** — `themes.css`. Selected by `[data-lg-theme='<id>']` on `<html>`.
+2. **Primitives** — `liquid-glass.css`. Classes that read tokens. No literals.
+3. **Utility remap** — `--color-white` is rebound per theme inside `.lg-root`,
+   so Tailwind's `text-white/60`-style utilities follow the surface's ink.
+   A companion block re-maps the low-alpha steps for light themes, where the
+   same alpha reads far weaker than it does on black.
+
+## Rules
+
+- **Never** put a colour, shadow, blur or radius literal in a component or in
+  `liquid-glass.css`. Add a token, give it a value in **every** theme, then use
+  `var(--lg-…)`.
+- Inline `style` beats a utility class, so a value that must survive the ink
+  remap (`--lg-on-accent`, `--lg-on-well`) goes in `style`, not in a class.
+- The theme reaches JS only through `useTheme()`. Nothing imports a theme id to
+  branch on — `if (themeId === 'neo')` in a component is the failure mode this
+  system exists to prevent.
+- Anything driven per-frame (the cube) reads the theme through a **ref**, not a
+  dependency, so a theme change never tears down a running loop.
+- Framer resolves CSS variables for colours but not for transform numerics;
+  keep `x`/`y`/`scale` targets as plain numbers.
+
+## Adding a theme
+
+1. Add an entry to `THEMES` in `themes.js` (id, name, hint, icon key, 3-colour
+   swatch, `material: { flat, tint }`).
+2. Copy the `[data-lg-theme='neo']` block in `themes.css`, rename the selector,
+   and give **every** token a value. A missing token does not fall back to
+   something sensible — it inherits the previous theme and looks broken in one
+   state you will not find until later.
+3. If the theme is light, add its selector to the opacity-floor block too.
+4. If the icon key is new, add the icon to `components/chat/Icons.jsx` and map
+   it in `ThemeSwitcher.jsx`'s `THEME_ICONS`.
+
+Nothing else. If step 5 involves editing a component, the component is wrong.
+
+## Checking your work
+
+Both themes, at 375px and 1280px, in these four states: empty, typing, an
+answer streaming, an answer complete (cards + follow-ups + copy/retry). Then
+switch themes mid-stream — the cube must keep spinning and the answer must keep
+streaming.

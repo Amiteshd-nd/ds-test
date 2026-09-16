@@ -7,6 +7,7 @@ import vendingAnalytics from '../assets/images/vending-analytics.webp';
 import teluguStreaming from '../assets/images/telugu-streaming.webp';
 import behanceProfile from '../assets/images/behance-profile.webp';
 import askAmitesh from '../assets/icons/ask-amitesh.svg';
+import museumIcon from '../assets/icons/museum.svg';
 
 const Works = () => {
   const projects = [
@@ -17,6 +18,14 @@ const Works = () => {
       image: askAmitesh,
       gradient: 'violet',
       link: '/home-2.2',
+    },
+    {
+      title: 'Museum',
+      description:
+        'The rendering assets behind Home 2.2, each on its own plinth — live, interactive, and documented. A glass cube raymarched in WebGL, and the point-cloud material it replaced.',
+      image: museumIcon,
+      gradient: 'gray',
+      link: '/museum',
     },
     {
       title: 'Bangalore Times',

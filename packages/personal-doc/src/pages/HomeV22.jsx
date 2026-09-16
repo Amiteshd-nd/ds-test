@@ -2,13 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
-import DynamicMaterial from '../components/chat/DynamicMaterial';
+import GlassCube from '../components/chat/GlassCube';
 import PromptBar from '../components/chat/PromptBar';
-import PrismButton from '../components/chat/PrismButton';
 import SuggestionRail from '../components/chat/SuggestionRail';
 import TypedHeadline from '../components/chat/TypedHeadline';
 import Transcript from '../components/chat/Transcript';
-import { IconArrowDown, IconHome, IconNew } from '../components/chat/Icons';
+import { IconArrowDown, IconNew } from '../components/chat/Icons';
+import { ThemeProvider, ThemeSwitcher, useTheme } from '../design';
 import { respond } from '../lib/portfolioBrain';
 import '../styles/liquid-glass.css';
 
@@ -44,8 +44,20 @@ const PAGE_FADE = {
 
 const ORB_SPRING = { type: 'spring', stiffness: 220, damping: 30 };
 
+/* The page is wrapped rather than themed in place: ThemeProvider has to be
+ * above everything that reads a theme, and the surface's own header is one of
+ * those readers. */
 export default function HomeV22() {
+  return (
+    <ThemeProvider>
+      <ChatSurface />
+    </ThemeProvider>
+  );
+}
+
+function ChatSurface() {
   const reduce = useReducedMotion();
+  const { theme } = useTheme();
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -74,7 +86,7 @@ export default function HomeV22() {
 
   // Animating height needs real numbers, so the hero size is measured rather
   // than expressed as a clamp() the spring cannot interpolate.
-  const orbHeight = hasChat ? 66 : Math.round(Math.max(118, Math.min(250, vh * 0.24)));
+  const orbHeight = hasChat ? 86 : Math.round(Math.max(140, Math.min(268, vh * 0.26)));
   // Memoised for the same reason as PAGE_FADE: a fresh object every tick would
   // keep restarting the height spring.
   const orbStyle = useMemo(() => ({ height: orbHeight }), [orbHeight]);
@@ -248,7 +260,7 @@ export default function HomeV22() {
           <span
             aria-hidden="true"
             className="h-2 w-2 shrink-0 rounded-full"
-            style={{ background: '#5ee9a4', boxShadow: '0 0 10px 1px rgba(94,233,164,.8)' }}
+            style={{ background: 'var(--lg-live)', boxShadow: 'var(--lg-live-glow)' }}
           />
           <span className="truncate text-[13.5px] text-white/55">
             <span className="font-medium text-white/85">Ask Amitesh</span>
@@ -274,18 +286,10 @@ export default function HomeV22() {
             )}
           </AnimatePresence>
 
-          {/* Wrapper owns the breakpoint: PrismButton's own className lands on its
-              inner span, where the base `inline-flex` would beat a `hidden`. */}
-          <span className="hidden sm:block">
-            <PrismButton to="/" label="Home" icon={IconHome} />
-          </span>
-          <Link
-            to="/"
-            aria-label="Home"
-            className="lg-surface lg-focus grid h-10 w-10 place-items-center rounded-full text-white/80 sm:hidden"
-          >
-            <IconHome size={17} />
-          </Link>
+          {/* The appearance control. It keeps the prism pill the Home button
+              used — same component, same slot — and owns its own breakpoint
+              pair internally. */}
+          <ThemeSwitcher />
         </div>
       </header>
 
@@ -295,7 +299,7 @@ export default function HomeV22() {
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 top-0 z-20 h-24"
-          style={{ background: 'linear-gradient(180deg, #060609 18%, rgba(6,6,9,0.75) 55%, rgba(6,6,9,0) 100%)' }}
+          style={{ background: 'var(--lg-scrim)' }}
         />
       )}
 
@@ -335,7 +339,7 @@ export default function HomeV22() {
             transition={ORB_SPRING}
             className="relative w-full"
           >
-            <DynamicMaterial phase={phase} className="h-full w-full" />
+            <GlassCube phase={phase} material={theme.material} className="h-full w-full" />
             <AnimatePresence>
               {!atBottom && hasChat && (
                 <motion.button
@@ -360,7 +364,14 @@ export default function HomeV22() {
               read as the single, deliberate transition. */}
           {!hasChat && (
             <div className="lg-rise mb-4 mt-1">
-              <p className="mb-2 px-2 text-[12px] font-medium uppercase tracking-[0.14em] text-white/30">
+              <p
+                className="mb-2 px-2 text-[12px] text-white/30"
+                style={{
+                  fontWeight: 'var(--lg-weight-strong)',
+                  textTransform: 'var(--lg-label-transform)',
+                  letterSpacing: 'var(--lg-label-tracking)',
+                }}
+              >
                 Portfolio, as a conversation
               </p>
               <TypedHeadline onPick={(p) => setInput(p)} paused={input.length > 0} />
@@ -416,19 +427,11 @@ export default function HomeV22() {
 function BackgroundWash() {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0">
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(120% 70% at 18% 8%, rgba(167,88,255,0.13) 0%, rgba(0,0,0,0) 58%),' +
-            'radial-gradient(100% 60% at 88% 22%, rgba(82,146,255,0.10) 0%, rgba(0,0,0,0) 55%),' +
-            'radial-gradient(90% 55% at 50% 108%, rgba(255,74,214,0.09) 0%, rgba(0,0,0,0) 60%)',
-        }}
-      />
-      <div
-        className="absolute inset-0"
-        style={{ background: 'radial-gradient(130% 90% at 50% 50%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.55) 100%)' }}
-      />
+      {/* Two layers, both token-driven: a colour field and a texture over it.
+          Glass spends them on bloom and a vignette, neo on cut paper shapes
+          and a print dot grid — same two elements either way. */}
+      <div className="absolute inset-0" style={{ background: 'var(--lg-wash)' }} />
+      <div className="absolute inset-0" style={{ background: 'var(--lg-vignette)' }} />
     </div>
   );
 }

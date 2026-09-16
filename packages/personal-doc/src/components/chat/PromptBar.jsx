@@ -14,23 +14,23 @@ import { ICONS } from './iconMap';
 
 /* The prompt bar.
  *
- * The glow is the point of this component. Two coloured blobs live *outside*
- * the glass and bleed around its edge — warm tracking the cursor, cool mirrored
- * across the bar's centre — so the light appears to pass through the slab
- * rather than sit on it. Both ride springs, which is what gives the trail its
- * weight: the light has mass and arrives a beat after the pointer.
+ * A spring drives the rim light's conic angle so the bright arc of the 1px
+ * border faces the cursor. Angles are unwrapped before springing, otherwise
+ * crossing 0deg sends the highlight the long way round the bar. Proximity
+ * feeds a second spring that brightens the rim as the pointer approaches.
  *
- * A separate spring drives the rim light's conic angle so the bright arc of the
- * 1px border always faces the cursor. Angles are unwrapped before springing,
- * otherwise crossing 0deg sends the highlight the long way round the bar.
- *
- * With no fine pointer (touch) or after ~2.4s of stillness, a slow Lissajous
- * takes over so the material never looks dead.
+ * With no fine pointer (touch) or after ~2.4s of stillness, the highlight
+ * drifts slowly around the edge on its own so the bar never looks dead.
  */
 
-const WARM = '255,122,61';
-const COOL = '82,146,255';
-const BLOB = 460;
+/* The rim's chromatic stops come from the theme. They are written as bare
+ * channel triplets (`255 122 61`) so the alpha the spring is driving can be
+ * mixed in with `rgb(... / a)` — a var cannot be spliced into the middle of a
+ * legacy `rgba(r,g,b,a)`. A flat theme hides the rim outright through
+ * --lg-hairline-display, so its values there are only a fallback. */
+const WARM = 'var(--lg-rim-warm)';
+const COOL = 'var(--lg-rim-cool)';
+const HOT = 'var(--lg-rim-hot)';
 const IDLE_AFTER = 2400;
 
 export default function PromptBar({
@@ -59,26 +59,14 @@ export default function PromptBar({
 
   /* ------------------------------------------------------------ glow rig */
 
-  const warmX = useMotionValue(0);
-  const warmY = useMotionValue(0);
-  const coolX = useMotionValue(0);
-  const coolY = useMotionValue(0);
   const angle = useMotionValue(90);
   const heat = useMotionValue(0);
 
-  // Soft, slightly underdamped: the light overshoots a touch and settles.
-  const glowSpring = { stiffness: 130, damping: 20, mass: 0.9 };
-  const sWarmX = useSpring(warmX, glowSpring);
-  const sWarmY = useSpring(warmY, glowSpring);
-  const sCoolX = useSpring(coolX, { ...glowSpring, stiffness: 100, damping: 22 });
-  const sCoolY = useSpring(coolY, { ...glowSpring, stiffness: 100, damping: 22 });
   const sAngle = useSpring(angle, { stiffness: 90, damping: 20, mass: 0.7 });
   const sHeat = useSpring(heat, { stiffness: 160, damping: 26 });
 
-  const warmOpacity = useTransform(sHeat, [0, 1], [0.55, 1]);
-  const coolOpacity = useTransform(sHeat, [0, 1], [0.42, 0.9]);
   const rimAlpha = useTransform(sHeat, [0, 1], [0.55, 1]);
-  const rim = useMotionTemplate`conic-gradient(from ${sAngle}deg at 50% 50%, rgba(${WARM},${rimAlpha}) 0deg, rgba(255,255,255,0.75) 44deg, rgba(${COOL},${rimAlpha}) 108deg, rgba(255,255,255,0.14) 210deg, rgba(255,255,255,0.09) 360deg)`;
+  const rim = useMotionTemplate`conic-gradient(from ${sAngle}deg at 50% 50%, rgb(${WARM} / ${rimAlpha}) 0deg, rgb(${HOT} / 0.75) 44deg, rgb(${COOL} / ${rimAlpha}) 108deg, rgb(${HOT} / 0.14) 210deg, rgb(${HOT} / 0.09) 360deg)`;
 
   // Unwrap so the spring takes the short way round.
   const angleRef = useRef(90);
@@ -109,12 +97,6 @@ export default function PromptBar({
       const cx = r.width / 2;
       const cy = r.height / 2;
 
-      warmX.set(x);
-      warmY.set(y);
-      // Mirrored partner keeps both edges lit — the reference has warm on one
-      // flank and cool on the other, never both stacked.
-      coolX.set(cx * 2 - x);
-      coolY.set(cy * 2 - y);
       setAngle((Math.atan2(y - cy, x - cx) * 180) / Math.PI);
 
       // Proximity falloff measured to the rect, not its centre, so a wide bar
@@ -133,18 +115,12 @@ export default function PromptBar({
     if (!coarse) window.addEventListener('pointermove', onMove, { passive: true });
 
     if (!reduce) {
-      // Idle drift: a 2:3 Lissajous just inside the bar's bounds.
+      // Idle drift: with no pointer, walk the rim highlight slowly around the
+      // bar so the edge still has some life in it.
       const drift = (now) => {
         if (now - lastMove > IDLE_AFTER) {
-          const r = wrap.getBoundingClientRect();
           const t = now / 1000;
-          const x = r.width * (0.5 + Math.sin(t * 0.42) * 0.42);
-          const y = r.height * (0.5 + Math.sin(t * 0.63) * 0.55);
-          warmX.set(x);
-          warmY.set(y);
-          coolX.set(r.width - x);
-          coolY.set(r.height - y);
-          setAngle((Math.atan2(y - r.height / 2, x - r.width / 2) * 180) / Math.PI);
+          setAngle((Math.atan2(Math.sin(t * 0.63), Math.cos(t * 0.42)) * 180) / Math.PI);
           heat.set(0.34);
         }
         raf = requestAnimationFrame(drift);
@@ -156,7 +132,7 @@ export default function PromptBar({
       if (!coarse) window.removeEventListener('pointermove', onMove);
       cancelAnimationFrame(raf);
     };
-  }, [coolX, coolY, heat, reduce, setAngle, warmX, warmY]);
+  }, [heat, reduce, setAngle]);
 
   /* --------------------------------------------------------- textarea fit */
 
@@ -267,33 +243,8 @@ export default function PromptBar({
   const activeTone = TONES.find((t) => t.id === tone) || TONES[0];
   const DepthIcon = ICONS[activeDepth.icon];
 
-  const blobStyle = (x, y, opacity, colour) => ({
-    x,
-    y,
-    opacity,
-    left: -BLOB / 2,
-    top: -BLOB / 2,
-    width: BLOB,
-    height: BLOB,
-    background: `radial-gradient(circle, rgba(${colour},0.95) 0%, rgba(${colour},0.42) 28%, rgba(${colour},0.12) 48%, rgba(${colour},0) 70%)`,
-  });
-
   return (
     <div ref={wrapRef} className="relative w-full">
-      {/* Glow field. Sits behind the glass and spills past its edge. */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <div className="absolute inset-0">
-          <motion.div
-            className="absolute rounded-full blur-[46px] will-change-transform"
-            style={blobStyle(sWarmX, sWarmY, warmOpacity, WARM)}
-          />
-          <motion.div
-            className="absolute rounded-full blur-[54px] will-change-transform"
-            style={blobStyle(sCoolX, sCoolY, coolOpacity, COOL)}
-          />
-        </div>
-      </div>
-
       {/* The glass slab */}
       <div
         className={`lg-surface lg-specular relative z-10 w-full ${compact ? 'rounded-[24px]' : 'rounded-[26px]'}`}
@@ -369,7 +320,7 @@ export default function PromptBar({
                 aria-pressed={listening}
                 aria-label={listening ? 'Stop dictation' : 'Dictate your question'}
                 className={`lg-surface-flat lg-focus hidden h-9 items-center gap-2 rounded-full px-3.5 text-[13.5px] transition-colors sm:flex ${
-                  listening ? 'text-[#ff7a3d]' : 'text-white/70 hover:text-white'
+                  listening ? 'text-[color:var(--lg-accent-warm)]' : 'text-white/70 hover:text-white'
                 }`}
               >
                 <motion.span
@@ -391,12 +342,15 @@ export default function PromptBar({
               whileTap={{ scale: 0.92 }}
               animate={{ scale: !busy && !value.trim() ? 0.94 : 1 }}
               transition={{ type: 'spring', stiffness: 500, damping: 28 }}
-              className="lg-focus grid h-10 w-10 shrink-0 place-items-center rounded-full text-white transition-opacity disabled:opacity-35"
+              className="lg-focus grid h-10 w-10 shrink-0 place-items-center rounded-full transition-opacity disabled:opacity-35"
+              /* One of only two places that must stay light-on-fill in every
+                 theme, so it names --lg-on-accent instead of inheriting the
+                 remapped `text-white`. */
               style={{
-                background: busy
-                  ? 'rgba(255,255,255,0.14)'
-                  : 'linear-gradient(135deg, #ff4ad6 0%, #a758ff 52%, #5292ff 100%)',
-                boxShadow: busy ? 'none' : '0 6px 22px -8px rgba(167,88,255,0.95)',
+                color: 'var(--lg-on-accent)',
+                background: busy ? 'var(--lg-busy-fill)' : 'var(--lg-send-fill)',
+                boxShadow: busy ? 'none' : 'var(--lg-send-shadow)',
+                border: 'var(--lg-border) solid var(--lg-line)',
               }}
             >
               {busy ? <IconStop size={16} /> : <IconSend size={17} />}
@@ -414,7 +368,7 @@ export default function PromptBar({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="pointer-events-none absolute inset-0 z-0 rounded-[26px]"
-            style={{ boxShadow: '0 0 0 1px rgba(255,255,255,0.10), 0 24px 70px -30px rgba(167,88,255,0.8)' }}
+            style={{ boxShadow: 'var(--lg-focus-bloom)' }}
           />
         )}
       </AnimatePresence>
@@ -468,7 +422,7 @@ function MenuChip({ label, icon, open, onToggle, onDismiss, accent, items, activ
             >
               <span
                 className="lg-hairline"
-                style={{ background: 'linear-gradient(180deg, rgba(255,255,255,.2), rgba(255,255,255,.04))' }}
+                style={{ background: 'linear-gradient(180deg, var(--lg-rim-a), var(--lg-rim-b))' }}
               />
               {items.map((item) => {
                 const Icon = ICONS[item.icon];
@@ -485,7 +439,7 @@ function MenuChip({ label, icon, open, onToggle, onDismiss, accent, items, activ
                     }`}
                   >
                     {Icon && (
-                      <span className={on ? 'text-[#c98bff]' : 'text-white/55'}>
+                      <span className={on ? 'text-[color:var(--lg-accent-soft)]' : 'text-white/55'}>
                         <Icon size={17} />
                       </span>
                     )}
@@ -493,7 +447,7 @@ function MenuChip({ label, icon, open, onToggle, onDismiss, accent, items, activ
                       <span className="block truncate text-[14px] font-medium text-white">{item.label}</span>
                       <span className="block truncate text-[12.5px] text-white/45">{item.hint}</span>
                     </span>
-                    {on && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#c98bff]" />}
+                    {on && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--lg-accent-soft)]" />}
                   </button>
                 );
               })}

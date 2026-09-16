@@ -56,7 +56,10 @@ export default function TypedHeadline({ onPick, paused }) {
       aria-label={`Use this prompt: ${phrase}`}
       className="lg-focus group block w-full rounded-2xl px-2 py-1 text-left"
     >
-      <span className="block text-[25px] font-medium leading-[1.22] tracking-[-0.03em] text-white sm:text-[30px] md:text-[35px]">
+      <span
+        className="block text-[25px] leading-[1.22] text-white sm:text-[30px] md:text-[35px]"
+        style={{ fontWeight: 'var(--lg-weight-strong)', letterSpacing: 'var(--lg-tracking-tight)' }}
+      >
         {typed}
         {!reduce && <span className="lg-caret h-[0.95em]" />}
         <span className="text-white/25 transition-colors group-hover:text-white/35">{ghost}</span>

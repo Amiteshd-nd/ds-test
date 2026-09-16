@@ -1,0 +1,245 @@
+/* ===========================================================================
+ * Home 2.2 design tokens.
+ *
+ * Read design/README.md before editing. The short version:
+ *
+ *   Layer 1  tokens        — this file. Every theme declares the same keys.
+ *   Layer 2  primitives    — liquid-glass.css. Consumes tokens, never literals.
+ *   Layer 3  utility remap — `--color-white` is rebound per theme so Tailwind's
+ *                            `text-white/60`-style utilities follow the ink of
+ *                            the surface instead of being literally white.
+ *
+ * Themes are selected by `data-lg-theme` on <html> (ThemeProvider owns that
+ * write). Tokens sit on the document so portals and tooltips inherit them;
+ * the Layer 3 remap is scoped to `.lg-root` so it can never leak into the rest
+ * of the site, which is a different, untouched design.
+ *
+ * Every theme MUST declare every token. A missing key does not fall back to a
+ * sensible default, it falls back to the *other* theme's cascade position and
+ * looks broken in one specific state you will not notice until later.
+ * ======================================================================== */
+
+/* --------------------------------------------------------------- 1. glass */
+/* Also the unthemed default, so a missing/failed attribute renders the
+ * original surface rather than nothing. */
+
+:root,
+[data-lg-theme='glass'] {
+  /* ground */
+  --lg-bg: #060609;
+  --lg-wash:
+    radial-gradient(120% 70% at 18% 8%, rgba(167, 88, 255, 0.13) 0%, rgba(0, 0, 0, 0) 58%),
+    radial-gradient(100% 60% at 88% 22%, rgba(82, 146, 255, 0.10) 0%, rgba(0, 0, 0, 0) 55%),
+    radial-gradient(90% 55% at 50% 108%, rgba(255, 74, 214, 0.09) 0%, rgba(0, 0, 0, 0) 60%);
+  --lg-vignette: radial-gradient(130% 90% at 50% 50%, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.55) 100%);
+  --lg-scrim: linear-gradient(180deg, #060609 18%, rgba(6, 6, 9, 0.75) 55%, rgba(6, 6, 9, 0) 100%);
+
+  /* ink & accents */
+  --lg-ink: #ffffff;
+  --lg-on-accent: #ffffff;
+  --lg-on-well: #ffffff;
+  --lg-accent: #a758ff;
+  --lg-accent-soft: #c98bff;
+  --lg-accent-warm: #ff7a3d;
+  --lg-live: #5ee9a4;
+  --lg-live-glow: 0 0 10px 1px rgba(94, 233, 164, 0.8);
+
+  /* surfaces */
+  --lg-surface-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.015)),
+    rgba(13, 13, 18, 0.6);
+  --lg-surface-blur: blur(20px) saturate(150%);
+  --lg-surface-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.07),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.5),
+    0 20px 50px -20px rgba(0, 0, 0, 0.9);
+  --lg-flat-bg: rgba(255, 255, 255, 0.045);
+  --lg-flat-blur: blur(14px) saturate(140%);
+  --lg-flat-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+
+  /* edges — in glass the border is absent and a gradient rim does the work */
+  --lg-border: 0px;
+  --lg-line: transparent;
+  --lg-rim-a: rgba(255, 255, 255, 0.22);
+  --lg-rim-b: rgba(255, 255, 255, 0.04);
+  /* bare channels: the prompt bar's conic rim mixes its own alpha in */
+  --lg-rim-warm: 255 122 61;
+  --lg-rim-cool: 82 146 255;
+  --lg-rim-hot: 255 255 255;
+  --lg-hairline-display: block;
+  --lg-specular-display: block;
+
+  /* fills */
+  --lg-send-fill: linear-gradient(135deg, #ff4ad6 0%, #a758ff 52%, #5292ff 100%);
+  --lg-send-shadow: 0 6px 22px -8px rgba(167, 88, 255, 0.95);
+  --lg-busy-fill: rgba(255, 255, 255, 0.14);
+  --lg-focus-bloom: 0 0 0 1px rgba(255, 255, 255, 0.10), 0 24px 70px -30px rgba(167, 88, 255, 0.8);
+  --lg-avatar-fill: radial-gradient(circle at 32% 28%, #ff6ade 0%, #a758ff 46%, #3c3aa8 100%);
+  --lg-avatar-shadow: 0 0 16px -4px rgba(167, 88, 255, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  --lg-bullet-fill: linear-gradient(135deg, #ff4ad6, #5292ff);
+  --lg-bloom-blur: 24px;
+  --lg-quote-line: rgba(167, 88, 255, 0.6);
+
+  /* the prism well on the theme trigger */
+  --lg-spectrum: conic-gradient(from 0deg, #ff2d55, #ff9500, #ffd60a, #34c759, #32ade6, #5e5ce6, #bf5af2, #ff2d55);
+  --lg-spectrum-blur: 6px;
+  --lg-spectrum-blur-hover: 9px;
+  --lg-well-fill: radial-gradient(120% 120% at 50% 0%, #26262c 0%, #121216 60%, #0d0d10 100%);
+  --lg-well-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -2px 6px rgba(0, 0, 0, 0.7);
+
+  /* a11y + motion */
+  --lg-focus-ring: rgba(167, 88, 255, 0.85);
+  --lg-scroll-thumb: rgba(255, 255, 255, 0.13);
+  --lg-scroll-thumb-hover: rgba(255, 255, 255, 0.24);
+  --lg-lift: -2px;
+
+  /* type */
+  --lg-tracking-tight: -0.03em;
+  --lg-weight-strong: 500;
+  --lg-label-transform: uppercase;
+  --lg-label-tracking: 0.14em;
+}
+
+/* ----------------------------------------------------------------- 2. neo */
+/* Neo-brutalism: paper, ink, a single electric accent, and shadows that are
+ * offsets rather than light. Nothing blurs, nothing glows — every token that
+ * models light in the glass theme becomes a flat geometric fact here.
+ *
+ * Ground stays paper-light behind *all* running text on purpose. The obvious
+ * move is the reference's full-bleed blue band, but ink on #0a6cff measures
+ * ~3.4:1 — under AA for the 13-16px copy that covers most of this surface.
+ * The blue survives as fills, edges and corner blocks instead, where it never
+ * has small text on top of it. */
+
+[data-lg-theme='neo'] {
+  /* ground */
+  --lg-bg: #efede6;
+  --lg-wash:
+    radial-gradient(circle at 6% 6%, #f6a93b 0 min(20vw, 190px), rgba(0, 0, 0, 0) min(20vw, 190px)),
+    radial-gradient(circle at 97% 12%, #d98cf2 0 min(16vw, 150px), rgba(0, 0, 0, 0) min(16vw, 150px)),
+    radial-gradient(circle at 96% 92%, #0a6cff 0 min(18vw, 170px), rgba(0, 0, 0, 0) min(18vw, 170px));
+  /* the dot grid — a printed sheet, not a vignette */
+  --lg-vignette: radial-gradient(rgba(11, 11, 15, 0.16) 1.2px, rgba(0, 0, 0, 0) 1.2px) 0 0 / 22px 22px;
+  --lg-scrim: linear-gradient(180deg, #efede6 30%, rgba(239, 237, 230, 0.86) 62%, rgba(239, 237, 230, 0) 100%);
+
+  /* ink & accents */
+  --lg-ink: #0b0b0f;
+  --lg-on-accent: #ffffff;
+  --lg-on-well: #ffffff;
+  --lg-accent: #0a6cff;
+  --lg-accent-soft: #0a6cff;
+  --lg-accent-warm: #ff4d1f;
+  --lg-live: #16c46a;
+  --lg-live-glow: 0 0 0 2px #0b0b0f;
+
+  /* surfaces — opaque paper, no backdrop work at all */
+  --lg-surface-bg: #ffffff;
+  --lg-surface-blur: none;
+  --lg-surface-shadow: 4px 4px 0 0 #0b0b0f;
+  --lg-flat-bg: #ffffff;
+  --lg-flat-blur: none;
+  --lg-flat-shadow: 2px 2px 0 0 #0b0b0f;
+
+  /* edges — the border is the whole idea, so the gradient rim switches off */
+  --lg-border: 2px;
+  --lg-line: #0b0b0f;
+  --lg-rim-a: transparent;
+  --lg-rim-b: transparent;
+  --lg-rim-warm: 246 169 59;
+  --lg-rim-cool: 10 108 255;
+  --lg-rim-hot: 11 11 15;
+  --lg-hairline-display: none;
+  --lg-specular-display: none;
+
+  /* fills */
+  --lg-send-fill: #0a6cff;
+  --lg-send-shadow: 3px 3px 0 0 #0b0b0f;
+  --lg-busy-fill: #f6a93b;
+  --lg-focus-bloom: 0 0 0 2px #0b0b0f;
+  --lg-avatar-fill: #f6a93b;
+  --lg-avatar-shadow: 0 0 0 2px #0b0b0f;
+  --lg-bullet-fill: #0a6cff;
+  --lg-bloom-blur: 0px;
+  --lg-quote-line: #0b0b0f;
+
+  --lg-spectrum: conic-gradient(from 0deg, #0a6cff 0 25%, #f6a93b 0 50%, #d98cf2 0 75%, #16c46a 0);
+  --lg-spectrum-blur: 0px;
+  --lg-spectrum-blur-hover: 0px;
+  --lg-well-fill: #0b0b0f;
+  --lg-well-shadow: none;
+
+  /* a11y + motion */
+  --lg-focus-ring: #0a6cff;
+  --lg-scroll-thumb: #0b0b0f;
+  --lg-scroll-thumb-hover: #0a6cff;
+  --lg-lift: -3px;
+
+  /* type */
+  --lg-tracking-tight: -0.02em;
+  --lg-weight-strong: 700;
+  --lg-label-transform: uppercase;
+  --lg-label-tracking: 0.12em;
+}
+
+/* ------------------------------------------------- 3. the utility remap */
+/* Tailwind v4 compiles `text-white/60` to
+ *     color: color-mix(in oklab, var(--color-white) 60%, transparent)
+ * so rebinding --color-white inside this subtree retargets every white-alpha
+ * utility in one move — which is what lets a light theme exist without
+ * rewriting a single className. The two places that must stay literally white
+ * (the send icon, the prism well icon) name --lg-on-accent / --lg-on-well
+ * explicitly and are unaffected.
+ *
+ * Scoped to .lg-root: the rest of the site is a separate design and must not
+ * see this. Browsers without color-mix() fall back to Tailwind's baked #fff,
+ * which is the pre-existing behaviour, not a regression. */
+
+[data-lg-theme='neo'] .lg-root {
+  --color-white: #0b0b0f;
+}
+
+/* ------------------------------------------ 3b. the opacity floor (light) */
+/* Alpha is not perceptually symmetric across grounds. White at 28% over near
+ * black still reads as text; ink at 28% over paper is a smudge — the eye is
+ * far more forgiving of light-on-dark than of dark-on-light at the same alpha.
+ * So a light theme cannot simply inherit the dark theme's tint ladder, it has
+ * to compress it: the same six semantic steps, re-mapped to alphas that hold
+ * their contrast on paper.
+ *
+ * Targeting Tailwind's generated class names is deliberate and confined to
+ * this block. It is the one place the system reaches into the utility layer,
+ * and it is what buys the rest of the surface the right to keep its markup. */
+
+[data-lg-theme='neo'] .lg-root .text-white\/20 { color: color-mix(in oklab, var(--color-white) 42%, transparent); }
+[data-lg-theme='neo'] .lg-root .text-white\/25 { color: color-mix(in oklab, var(--color-white) 46%, transparent); }
+[data-lg-theme='neo'] .lg-root .text-white\/28 { color: color-mix(in oklab, var(--color-white) 52%, transparent); }
+[data-lg-theme='neo'] .lg-root .text-white\/30 { color: color-mix(in oklab, var(--color-white) 54%, transparent); }
+[data-lg-theme='neo'] .lg-root .text-white\/35 { color: color-mix(in oklab, var(--color-white) 58%, transparent); }
+[data-lg-theme='neo'] .lg-root .text-white\/40 { color: color-mix(in oklab, var(--color-white) 62%, transparent); }
+[data-lg-theme='neo'] .lg-root .text-white\/45 { color: color-mix(in oklab, var(--color-white) 64%, transparent); }
+[data-lg-theme='neo'] .lg-root .text-white\/50 { color: color-mix(in oklab, var(--color-white) 68%, transparent); }
+[data-lg-theme='neo'] .lg-root .text-white\/55 { color: color-mix(in oklab, var(--color-white) 72%, transparent); }
+[data-lg-theme='neo'] .lg-root .text-white\/60 { color: color-mix(in oklab, var(--color-white) 76%, transparent); }
+[data-lg-theme='neo'] .lg-root .text-white\/70 { color: color-mix(in oklab, var(--color-white) 82%, transparent); }
+[data-lg-theme='neo'] .lg-root .text-white\/75 { color: color-mix(in oklab, var(--color-white) 86%, transparent); }
+
+/* Hover states resolve to the full ink, which is already the rule. */
+
+/* ------------------------------------------------------ 4. theme switching */
+/* Tokens are interpolatable, so a change of theme cross-fades the whole
+ * surface rather than cutting. Only the cheap properties are transitioned —
+ * animating box-shadow or backdrop-filter across a page of glass is not. */
+
+.lg-root,
+.lg-root .lg-surface,
+.lg-root .lg-surface-flat {
+  transition: background-color 0.28s ease, color 0.28s ease, border-color 0.28s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lg-root,
+  .lg-root .lg-surface,
+  .lg-root .lg-surface-flat {
+    transition: none;
+  }
+}
