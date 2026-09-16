@@ -59,6 +59,34 @@ const PROJECTS = [
     port: 6177,
   },
   {
+    id: 'trimension',
+    name: 'trimension',
+    tag: 'Agent-native CAD · Rust/Wasm + Vite',
+    desc:
+      'DXF in, 3D out. Four viewports — plan, both elevations, two-point perspective — ' +
+      'drawn by a Rust/wgpu renderer in the browser. Needs the Wasm bundle built first: ' +
+      'see packages/trimension/README.md.',
+    cwd: path.join(ROOT, 'packages/trimension/apps/web'),
+    bin: 'vite',
+    args: ['--port', '6178', '--strictPort'],
+    port: 6178,
+    // The web app imports a wasm-bindgen bundle that is a build artifact, not checked in.
+    // Without this the hub would "start" fine and the page would fail to resolve an
+    // import — a blank screen and a stack trace in the browser rather than in the logs,
+    // which is the worst place to discover a missing build step.
+    requires: {
+      path: 'packages/trimension/apps/web/wasm/trimension.js',
+      hint:
+        'The Wasm bundle has not been built.\n\n' +
+        '  cd packages/trimension\n' +
+        '  export RUSTUP_HOME="$PWD/.toolchain/rustup" CARGO_HOME="$PWD/.toolchain/cargo"\n' +
+        '  export PATH="$PWD/.toolchain/cargo/bin:$PATH"\n' +
+        '  cargo build -p tri-wasm --target wasm32-unknown-unknown --release\n' +
+        '  wasm-bindgen --target web --out-dir apps/web/wasm --out-name trimension \\\n' +
+        '    target/wasm32-unknown-unknown/release/tri_wasm.wasm\n',
+    },
+  },
+  {
     id: 'blockmodel',
     name: 'blockmodel',
     tag: 'Prototype · Next.js',
@@ -123,6 +151,18 @@ async function startProject(id) {
   const p = byId.get(id);
   const rec = record(id);
   if (rec.child) return; // already running/starting
+
+  // Some projects need a build artifact that is not checked in. Say so plainly rather
+  // than starting a dev server that will serve a broken page.
+  if (p.requires && !fs.existsSync(path.join(ROOT, p.requires.path))) {
+    rec.status = 'error';
+    rec.logs = [
+      `✖ Can't start ${p.name} — a required build output is missing.\n`,
+      `  Expected: ${p.requires.path}\n\n`,
+      p.requires.hint,
+    ];
+    return;
+  }
 
   // If the port is already taken (e.g. a leftover server from a previous run),
   // bail with a clear message. Otherwise Next silently moves to the next free
