@@ -130,6 +130,13 @@ export const IconGlass = (p) => (
   </Svg>
 );
 
+export const IconPixel = (p) => (
+  <Svg {...p}>
+    <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" fill="currentColor" stroke="none" />
+    <rect x="14" y="14" width="6" height="6" />
+  </Svg>
+);
+
 export const IconSlab = (p) => (
   <Svg {...p}>
     <rect x="3.5" y="3.5" width="12.5" height="12.5" rx="1" />

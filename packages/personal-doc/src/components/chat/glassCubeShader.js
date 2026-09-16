@@ -28,6 +28,8 @@ uniform float uEnergy;  // conversation intensity
 uniform float uGrab;    // 0 idle, 1 held
 uniform float uFlat;    // 0 refractive glass, 1 posterised ink
 uniform vec3  uTint;    // the ink the flat pass is printed in
+uniform float uBands;   // luminance steps the flat pass quantises to
+uniform float uPixel;   // 0 off, else blocks across the canvas' short side
 
 out vec4 outColor;
 
@@ -115,7 +117,22 @@ float leave(vec3 ro, vec3 rd) {
 }
 
 void main() {
-  vec2 uv = (gl_FragCoord.xy * 2.0 - uRes) / min(uRes.x, uRes.y);
+  /* Pixel grid.
+   *
+   * Snapping the ray's origin — not the finished image — is what makes this a
+   * real low-resolution render rather than a blur: every block traces exactly
+   * one ray, so edges land on block boundaries and the refraction inside each
+   * block is a single honest sample. The grid is counted across the short side
+   * rather than sized in device pixels, so the cube keeps the same apparent
+   * resolution on any display density.
+   */
+  vec2 frag = gl_FragCoord.xy;
+  if (uPixel > 0.0) {
+    float block = min(uRes.x, uRes.y) / uPixel;
+    frag = (floor(frag / block) + 0.5) * block;
+  }
+
+  vec2 uv = (frag * 2.0 - uRes) / min(uRes.x, uRes.y);
 
   vec3 ro = vec3(0.0, 0.0, 3.4);
   vec3 rd = normalize(vec3(uv * 0.52, -1.0));
@@ -192,16 +209,17 @@ void main() {
   /* Poster pass.
    *
    * A flat theme cannot simply hide the cube — it is the one live object on
-   * the page — so the same physics is re-inked instead of re-rendered. Six
-   * luminance steps turn continuous refraction into flat bands, the bands are
-   * printed in the theme's ink, and the alpha ramp is tightened to a near-hard
-   * silhouette. The simulation above is untouched: this is the last thing that
+   * the page — so the same physics is re-inked instead of re-rendered. A
+   * handful of luminance steps turn continuous refraction into flat bands, the
+   * bands are printed in the theme's ink, and the alpha ramp is tightened to a
+   * near-hard silhouette. Fewer bands read as older hardware. The simulation above is untouched: this is the last thing that
    * happens to the pixel, the way a screen print is the last thing that
    * happens to a photograph.
    */
   if (uFlat > 0.0) {
     float lum = clamp(dot(col, vec3(0.299, 0.587, 0.114)), 0.0, 1.0);
-    float band = floor(lum * 6.0 + 0.5) / 6.0;
+    float steps = max(uBands, 1.0);
+    float band = floor(lum * steps + 0.5) / steps;
     vec3 ink = uTint * (0.30 + 1.15 * band) + vec3(band * band * 0.55);
     col = mix(col, ink, uFlat);
     a = mix(a, smoothstep(0.20, 0.42, a), uFlat);  // drop the soft halo: ink has an edge

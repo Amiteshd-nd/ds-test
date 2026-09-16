@@ -36,6 +36,22 @@ export function ThemeProvider({ children }) {
     document.documentElement.setAttribute('data-lg-theme', themeId);
   }, [themeId]);
 
+  /* A theme may bring its own typeface. Loading it here rather than from
+   * themes.css means a face is fetched the first time someone actually picks
+   * the theme wearing it, and never for the visitors who do not. The link is
+   * left in place afterwards — re-selecting a theme should be instant, and one
+   * stylesheet per theme is a smaller cost than a re-fetch. */
+  useEffect(() => {
+    const href = getTheme(themeId).fonts;
+    if (!href || document.querySelector(`link[data-lg-font="${themeId}"]`)) return;
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    link.dataset.lgFont = themeId;
+    document.head.appendChild(link);
+  }, [themeId]);
+
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, themeId);

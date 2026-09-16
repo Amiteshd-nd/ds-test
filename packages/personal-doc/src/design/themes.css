@@ -93,7 +93,11 @@
   --lg-scroll-thumb-hover: rgba(255, 255, 255, 0.24);
   --lg-lift: -2px;
 
-  /* type */
+  /* type — `inherit` keeps the site's own face; a theme that ships a typeface
+     names it here and lists the stylesheet in themes.js */
+  --lg-font: inherit;
+  --lg-font-display: inherit;
+  --lg-ligatures: normal;
   --lg-tracking-tight: -0.03em;
   --lg-weight-strong: 500;
   --lg-label-transform: uppercase;
@@ -175,13 +179,110 @@
   --lg-lift: -3px;
 
   /* type */
+  --lg-font: inherit;
+  --lg-font-display: inherit;
+  --lg-ligatures: normal;
   --lg-tracking-tight: -0.02em;
   --lg-weight-strong: 700;
   --lg-label-transform: uppercase;
   --lg-label-tracking: 0.12em;
 }
 
-/* ------------------------------------------------- 3. the utility remap */
+/* ----------------------------------------------------------------- 3. gba */
+/* A 16-bit handheld held in sunlight: one flat yellow field, sprites and UI
+ * cut out of it with a dark plum outline, and everything lit by exactly two
+ * tones — a highlight half and a shadow half, split on a hard edge. That split
+ * is the whole grammar of the era's art, so every gradient in this theme is a
+ * two-stop with both stops at the same position. Nothing feathers.
+ *
+ * The cream panels carry a double ring — plum outside, bone inside — which is
+ * how the reference draws a window frame, and it costs nothing here because
+ * --lg-surface-shadow can hold an inset and an offset at once.
+ */
+
+[data-lg-theme='gba'] {
+  /* ground */
+  --lg-bg: #fbdd65;
+  --lg-wash:
+    radial-gradient(circle at 8% 96%, #ffffff 0 min(17vw, 160px), rgba(0, 0, 0, 0) min(17vw, 160px)),
+    radial-gradient(circle at 24% 104%, #ffffff 0 min(15vw, 140px), rgba(0, 0, 0, 0) min(15vw, 140px)),
+    radial-gradient(circle at 92% 98%, #ffffff 0 min(16vw, 150px), rgba(0, 0, 0, 0) min(16vw, 150px)),
+    radial-gradient(circle at 76% 106%, #ffffff 0 min(13vw, 120px), rgba(0, 0, 0, 0) min(13vw, 120px)),
+    radial-gradient(circle at 3% 5%, #ffffff 0 min(9vw, 84px), rgba(0, 0, 0, 0) min(9vw, 84px)),
+    radial-gradient(circle at 98% 3%, #ffffff 0 min(8vw, 76px), rgba(0, 0, 0, 0) min(8vw, 76px));
+  /* scanlines: the handheld's own screen, not a filter laid over the design */
+  --lg-vignette: repeating-linear-gradient(
+    180deg,
+    rgba(43, 26, 47, 0.07) 0 2px,
+    rgba(0, 0, 0, 0) 2px 4px
+  );
+  --lg-scrim: linear-gradient(180deg, #fbdd65 32%, rgba(251, 221, 101, 0.88) 64%, rgba(251, 221, 101, 0) 100%);
+
+  /* ink & accents */
+  --lg-ink: #2b1a2f;
+  --lg-on-accent: #ffffff;
+  --lg-on-well: #ffffff;
+  --lg-accent: #3e9bd8;
+  --lg-accent-soft: #2f86c6;
+  --lg-accent-warm: #e6892b;
+  --lg-live: #57c93a;
+  --lg-live-glow: 0 0 0 2px #2b1a2f;
+
+  /* surfaces — cream window panels, blue control pills */
+  --lg-surface-bg: #f7dfa2;
+  --lg-surface-blur: none;
+  --lg-surface-shadow: inset 0 0 0 3px #fff6dc, 5px 5px 0 0 #2b1a2f;
+  --lg-flat-bg: linear-gradient(180deg, #5cb4e8 0 46%, #3e9bd8 46%);
+  --lg-flat-blur: none;
+  --lg-flat-shadow: inset 0 0 0 2px #2b1a2f, 3px 3px 0 0 #2b1a2f;
+
+  /* edges */
+  --lg-border: 3px;
+  --lg-line: #2b1a2f;
+  --lg-rim-a: transparent;
+  --lg-rim-b: transparent;
+  --lg-rim-warm: 230 137 43;
+  --lg-rim-cool: 62 155 216;
+  --lg-rim-hot: 43 26 47;
+  --lg-hairline-display: none;
+  --lg-specular-display: none;
+
+  /* fills */
+  --lg-send-fill: linear-gradient(180deg, #5cb4e8 0 46%, #3e9bd8 46%);
+  --lg-send-shadow: 3px 3px 0 0 #2b1a2f;
+  --lg-busy-fill: #e23b2e;
+  --lg-focus-bloom: 0 0 0 3px #2b1a2f;
+  --lg-avatar-fill: #e23b2e;
+  --lg-avatar-shadow: 0 0 0 3px #2b1a2f;
+  --lg-bullet-fill: #e23b2e;
+  --lg-bloom-blur: 0px;
+  --lg-quote-line: #3e9bd8;
+
+  --lg-spectrum: conic-gradient(from 0deg, #e23b2e 0 25%, #f4a62a 0 50%, #57c93a 0 75%, #3e9bd8 0);
+  --lg-spectrum-blur: 0px;
+  --lg-spectrum-blur-hover: 0px;
+  --lg-well-fill: #2b1a2f;
+  --lg-well-shadow: none;
+
+  /* a11y + motion */
+  --lg-focus-ring: #e23b2e;
+  --lg-scroll-thumb: #2b1a2f;
+  --lg-scroll-thumb-hover: #3e9bd8;
+  --lg-lift: -3px;
+
+  /* type — Pixelify Sans stays readable at body sizes, which Press Start-style
+     faces do not; Silkscreen carries the display line. Both load only while
+     this theme is selected (see `fonts` in themes.js). */
+  --lg-font: 'Pixelify Sans', 'Outfit', sans-serif;
+  --lg-font-display: 'Silkscreen', 'Pixelify Sans', monospace;
+  --lg-ligatures: none;
+  --lg-tracking-tight: 0.01em;
+  --lg-weight-strong: 700;
+  --lg-label-transform: uppercase;
+  --lg-label-tracking: 0.2em;
+}
+
+/* ------------------------------------------------- 4. the utility remap */
 /* Tailwind v4 compiles `text-white/60` to
  *     color: color-mix(in oklab, var(--color-white) 60%, transparent)
  * so rebinding --color-white inside this subtree retargets every white-alpha
@@ -198,7 +299,11 @@
   --color-white: #0b0b0f;
 }
 
-/* ------------------------------------------ 3b. the opacity floor (light) */
+[data-lg-theme='gba'] .lg-root {
+  --color-white: #2b1a2f;
+}
+
+/* ------------------------------------------ 4b. the opacity floor (light) */
 /* Alpha is not perceptually symmetric across grounds. White at 28% over near
  * black still reads as text; ink at 28% over paper is a smudge — the eye is
  * far more forgiving of light-on-dark than of dark-on-light at the same alpha.
@@ -208,24 +313,27 @@
  *
  * Targeting Tailwind's generated class names is deliberate and confined to
  * this block. It is the one place the system reaches into the utility layer,
- * and it is what buys the rest of the surface the right to keep its markup. */
+ * and it is what buys the rest of the surface the right to keep its markup.
+ *
+ * Every light theme joins the :is() list. `:is()` takes the specificity of its
+ * strongest argument, so adding one never quietly outranks the others. */
 
-[data-lg-theme='neo'] .lg-root .text-white\/20 { color: color-mix(in oklab, var(--color-white) 42%, transparent); }
-[data-lg-theme='neo'] .lg-root .text-white\/25 { color: color-mix(in oklab, var(--color-white) 46%, transparent); }
-[data-lg-theme='neo'] .lg-root .text-white\/28 { color: color-mix(in oklab, var(--color-white) 52%, transparent); }
-[data-lg-theme='neo'] .lg-root .text-white\/30 { color: color-mix(in oklab, var(--color-white) 54%, transparent); }
-[data-lg-theme='neo'] .lg-root .text-white\/35 { color: color-mix(in oklab, var(--color-white) 58%, transparent); }
-[data-lg-theme='neo'] .lg-root .text-white\/40 { color: color-mix(in oklab, var(--color-white) 62%, transparent); }
-[data-lg-theme='neo'] .lg-root .text-white\/45 { color: color-mix(in oklab, var(--color-white) 64%, transparent); }
-[data-lg-theme='neo'] .lg-root .text-white\/50 { color: color-mix(in oklab, var(--color-white) 68%, transparent); }
-[data-lg-theme='neo'] .lg-root .text-white\/55 { color: color-mix(in oklab, var(--color-white) 72%, transparent); }
-[data-lg-theme='neo'] .lg-root .text-white\/60 { color: color-mix(in oklab, var(--color-white) 76%, transparent); }
-[data-lg-theme='neo'] .lg-root .text-white\/70 { color: color-mix(in oklab, var(--color-white) 82%, transparent); }
-[data-lg-theme='neo'] .lg-root .text-white\/75 { color: color-mix(in oklab, var(--color-white) 86%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/20 { color: color-mix(in oklab, var(--color-white) 42%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/25 { color: color-mix(in oklab, var(--color-white) 46%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/28 { color: color-mix(in oklab, var(--color-white) 52%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/30 { color: color-mix(in oklab, var(--color-white) 54%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/35 { color: color-mix(in oklab, var(--color-white) 58%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/40 { color: color-mix(in oklab, var(--color-white) 62%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/45 { color: color-mix(in oklab, var(--color-white) 64%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/50 { color: color-mix(in oklab, var(--color-white) 68%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/55 { color: color-mix(in oklab, var(--color-white) 72%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/60 { color: color-mix(in oklab, var(--color-white) 76%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/70 { color: color-mix(in oklab, var(--color-white) 82%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/75 { color: color-mix(in oklab, var(--color-white) 86%, transparent); }
 
 /* Hover states resolve to the full ink, which is already the rule. */
 
-/* ------------------------------------------------------ 4. theme switching */
+/* ------------------------------------------------------ 5. theme switching */
 /* Tokens are interpolatable, so a change of theme cross-fades the whole
  * surface rather than cutting. Only the cheap properties are transitioned —
  * animating box-shadow or backdrop-filter across a page of glass is not. */

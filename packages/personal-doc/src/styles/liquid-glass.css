@@ -14,6 +14,13 @@
 .lg-root {
   background: var(--lg-bg);
   color: var(--lg-ink);
+  /* `inherit` in most themes, i.e. the site's own face. A theme that ships a
+   * typeface sets it here once and it reaches every child. */
+  font-family: var(--lg-font);
+  /* Some display faces ship an fi/fl ligature that is unreadable at UI sizes —
+   * Pixelify Sans draws "first" as something closer to "Arst". A face that does
+   * turns ligatures off through its own token rather than being ruled out. */
+  font-variant-ligatures: var(--lg-ligatures);
 }
 
 /* dvh keeps the shell honest when mobile browser chrome collapses. */

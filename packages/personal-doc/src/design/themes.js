@@ -6,7 +6,9 @@
  *
  * What does live here is everything CSS cannot express:
  *   - metadata for the theme picker (name, hint, swatch)
- *   - `material`, the handful of numbers the WebGL cube needs as uniforms.
+ *   - `material`, the handful of numbers the WebGL cube needs as uniforms
+ *   - `fonts`, a stylesheet the provider loads only while the theme is active,
+ *     so a face nobody has selected is never downloaded.
  *
  * Adding a theme is two edits: an entry here and a token block in themes.css.
  * Nothing else in the app should ever need to know a theme by name.
@@ -22,8 +24,8 @@ export const THEMES = [
     icon: 'glass',
     swatch: ['#0c0c14', '#a758ff', '#5292ff'],
     /* flat 0 = the cube renders as the physically-based glass it was written
-     * to be. tint is unused at flat 0 but kept whole for uniform shape. */
-    material: { flat: 0, tint: [1, 1, 1] },
+     * to be. The rest is unused at flat 0 but kept whole for uniform shape. */
+    material: { flat: 0, tint: [1, 1, 1], bands: 6, pixel: 0 },
   },
   {
     id: 'neo',
@@ -31,9 +33,20 @@ export const THEMES = [
     hint: 'Flat ink, hard shadows',
     icon: 'slab',
     swatch: ['#ffffff', '#0a6cff', '#f6a93b'],
-    /* flat 1 posterises the cube to four luminance steps and tints it, so the
+    /* flat 1 posterises the cube's luminance into bands and tints them, so the
      * same shader reads as printed ink rather than refracted light. */
-    material: { flat: 1, tint: [0.04, 0.42, 1.0] },
+    material: { flat: 1, tint: [0.04, 0.42, 1.0], bands: 6, pixel: 0 },
+  },
+  {
+    id: 'gba',
+    name: '16-Bit Handheld',
+    hint: 'Chunky pixels, sunlit',
+    icon: 'pixel',
+    swatch: ['#fbdd65', '#3e9bd8', '#e23b2e'],
+    /* Four bands and a 56-block grid: the cube is re-rendered at handheld
+     * resolution rather than filtered down to look like it was. */
+    material: { flat: 1, tint: [0.22, 0.58, 0.84], bands: 4, pixel: 56 },
+    fonts: 'https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Silkscreen:wght@400;700&display=swap',
   },
 ];
 

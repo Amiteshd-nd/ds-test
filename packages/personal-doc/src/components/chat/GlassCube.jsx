@@ -43,7 +43,7 @@ const ENERGY = { idle: 0.55, typing: 0.85, thinking: 1.5, answering: 0.95 };
 
 /* The theme's ink, defaulted to "none" so the component still renders as pure
  * glass when nobody passes one. */
-const GLASS = { flat: 0, tint: [1, 1, 1] };
+const GLASS = { flat: 0, tint: [1, 1, 1], bands: 6, pixel: 0 };
 
 /* ------------------------------------------------------------ quaternions */
 
@@ -159,6 +159,8 @@ function GlassCube({ phase = 'idle', material = GLASS, className = '', style }) 
       grab: gl.getUniformLocation(prog, 'uGrab'),
       flat: gl.getUniformLocation(prog, 'uFlat'),
       tint: gl.getUniformLocation(prog, 'uTint'),
+      bands: gl.getUniformLocation(prog, 'uBands'),
+      pixel: gl.getUniformLocation(prog, 'uPixel'),
     };
 
     const vao = gl.createVertexArray();
@@ -253,6 +255,8 @@ function GlassCube({ phase = 'idle', material = GLASS, className = '', style }) 
       const ink = materialRef.current || GLASS;
       gl.uniform1f(U.flat, ink.flat);
       gl.uniform3f(U.tint, ink.tint[0], ink.tint[1], ink.tint[2]);
+      gl.uniform1f(U.bands, ink.bands ?? GLASS.bands);
+      gl.uniform1f(U.pixel, ink.pixel ?? 0);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
 

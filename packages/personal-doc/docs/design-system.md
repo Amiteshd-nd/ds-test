@@ -28,23 +28,30 @@ The constraint that produced it was explicit: **add a second look without
 changing the components or the elements.** That is a stronger constraint than it
 sounds, and it is what forced the interesting part of the architecture (§4).
 
-## 2. The two themes
+## 2. The themes
 
-| | Liquid Glass (default) | Neo Brutalism |
-| --- | --- | --- |
-| Ground | near-black `#060609`, three bloom gradients, vignette | bone paper `#efede6`, cut colour shapes, print dot-grid |
-| Surface | translucent, `blur(20px) saturate(150%)` | opaque white, no backdrop work |
-| Edge | 1px masked gradient rim, cursor-tracked | 2px solid ink |
-| Shadow | soft, light-modelled, `0 20px 50px -20px` | offset, `4px 4px 0` |
-| Accent | violet → magenta → blue spectrum | one electric blue `#0a6cff` |
-| Type | medium weight, `-0.03em` | bold, `-0.02em` |
-| Material (cube) | physically-based refraction | the same simulation, posterised to six ink bands |
+| | Liquid Glass (default) | Neo Brutalism | 16-Bit Handheld |
+| --- | --- | --- | --- |
+| Ground | near-black `#060609`, three bloom gradients, vignette | bone paper `#efede6`, cut colour shapes, print dot-grid | sunlit yellow `#fbdd65`, cloud blobs, CRT scanlines |
+| Surface | translucent, `blur(20px) saturate(150%)` | opaque white, no backdrop work | cream panel, plum outline + bone inner ring |
+| Edge | 1px masked gradient rim, cursor-tracked | 2px solid ink | 3px solid plum |
+| Shadow | soft, light-modelled, `0 20px 50px -20px` | offset, `4px 4px 0` | offset, `5px 5px 0` |
+| Accent | violet → magenta → blue spectrum | one electric blue `#0a6cff` | handheld blue `#3e9bd8`, red, coin gold |
+| Gradients | smooth, many stops | none | two stops, both at the same position |
+| Type | medium weight, `-0.03em` | bold, `-0.02em` | Pixelify Sans, Silkscreen display, `0.2em` labels |
+| Material (cube) | physically-based refraction | the same simulation, six ink bands | four bands, re-rendered on a 56-block grid |
 
 The neo theme follows the reference the work was briefed against: white cards,
 black outlines, hard offset shadows, an electric blue primary, and yellow /
 violet shapes cut into the ground.
 
-**One deliberate departure from the reference.** The reference puts a
+The 16-bit theme's rule is that **nothing feathers**: every gradient in it is a
+two-stop with both stops at the same position, which is the shading grammar of
+the era's sprite art. Its cream panels carry a double ring — plum outside, bone
+inside — which is how the reference draws a window frame, and it costs nothing
+because `--lg-surface-shadow` can hold an inset and an offset at once.
+
+**One deliberate departure from the neo reference.** The reference puts a
 full-bleed blue band behind its header and hero. Ink on `#0a6cff` measures
 about 3.4:1, which fails AA for the 11–16px copy that covers most of this
 surface, and there is no per-theme markup hook to give the header its own
@@ -107,7 +114,9 @@ Two consequences, both handled:
   re-map the low-alpha ladder (`/20`…`/75`) to stronger values. This is the one
   place the system reaches into Tailwind's generated class names, it is
   quarantined to a single labelled block in `themes.css`, and it is what buys
-  the rest of the surface the right to keep its markup.
+  the rest of the surface the right to keep its markup. Every light theme joins
+  the block's `:is()` list — `:is()` takes the specificity of its strongest
+  argument, so adding one never quietly outranks the others.
 
 Browsers without `color-mix()` fall back to Tailwind's baked `#fff` — i.e. to
 the behaviour that shipped before this change, not to a new bug.
@@ -175,21 +184,51 @@ and must never inherit these tokens.
 ## 7. The material
 
 The cube is the one live object on the page, so a flat theme cannot simply hide
-it. Instead the shader gets two new uniforms — `uFlat` and `uTint` — and one
-extra pass at the very end:
+it. Instead it is re-inked. A theme's `material` in `themes.js` is four numbers
+that become shader uniforms:
+
+| | `flat` | `tint` | `bands` | `pixel` |
+| --- | --- | --- | --- | --- |
+| Glass | 0 | — | — | 0 |
+| Neo | 1 | blue | 6 | 0 |
+| 16-bit | 1 | handheld blue | 4 | 56 |
+
+**The poster pass** runs last, after the render:
 
 ```glsl
-float lum  = clamp(dot(col, vec3(0.299, 0.587, 0.114)), 0.0, 1.0);
-float band = floor(lum * 6.0 + 0.5) / 6.0;          // six flat steps
-vec3  ink  = uTint * (0.30 + 1.15 * band) + vec3(band * band * 0.55);
+float steps = max(uBands, 1.0);
+float lum   = clamp(dot(col, vec3(0.299, 0.587, 0.114)), 0.0, 1.0);
+float band  = floor(lum * steps + 0.5) / steps;
+vec3  ink   = uTint * (0.30 + 1.15 * band) + vec3(band * band * 0.55);
 col = mix(col, ink, uFlat);
 a   = mix(a, smoothstep(0.20, 0.42, a), uFlat);      // hard silhouette, no halo
 ```
 
-The physics above it is untouched: the same refraction, the same quaternion
-integration, the same throwable rigid body. The poster pass is the last thing
-that happens to the pixel, the way a screen print is the last thing that
-happens to a photograph.
+Fewer bands read as older hardware.
+
+**The pixel grid** runs first, and this is the part that matters. It snaps the
+*ray's origin*, not the finished image:
+
+```glsl
+vec2 frag = gl_FragCoord.xy;
+if (uPixel > 0.0) {
+  float block = min(uRes.x, uRes.y) / uPixel;
+  frag = (floor(frag / block) + 0.5) * block;
+}
+```
+
+Every block therefore traces exactly one ray: edges land on block boundaries
+and the refraction inside a block is a single honest sample. That is a genuine
+low-resolution render rather than a full-resolution render downsampled to look
+like one — the difference between a sprite and a blur. The grid is counted
+across the canvas' short side rather than sized in device pixels, so the cube
+keeps the same apparent resolution on any display density and as the canvas
+resizes between the hero and chat layouts.
+
+The physics above both passes is untouched: the same refraction, the same
+quaternion integration, the same throwable rigid body. They are the last things
+that happen to the pixel, the way a screen print is the last thing that happens
+to a photograph.
 
 ## 8. Token reference
 
@@ -216,8 +255,17 @@ Every theme declares all of these. Grouped as they appear in `themes.css`.
 **A11y & motion** `--lg-focus-ring` `--lg-scroll-thumb`
 `--lg-scroll-thumb-hover` `--lg-lift`
 
-**Type** `--lg-tracking-tight` `--lg-weight-strong` `--lg-label-transform`
+**Type** `--lg-font` `--lg-font-display` `--lg-ligatures`
+`--lg-tracking-tight` `--lg-weight-strong` `--lg-label-transform`
 `--lg-label-tracking`
+
+A theme that ships its own typeface names it in `--lg-font` and lists the
+stylesheet as `fonts` in `themes.js`; `ThemeProvider` injects the `<link>` the
+first time that theme is selected, so a face nobody picks is never downloaded.
+`--lg-ligatures` exists because faces built for pixel grids often ship an
+`fi`/`fl` ligature that is unreadable at UI sizes — Pixelify Sans draws "first"
+as something closer to "Arst". A face like that turns ligatures off through its
+own token instead of being ruled out.
 
 The rim stops (`--lg-rim-warm/cool/hot`) are bare channel triplets, e.g.
 `255 122 61`, because the prompt bar's conic rim mixes a spring-driven alpha

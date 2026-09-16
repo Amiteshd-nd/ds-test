@@ -58,7 +58,11 @@ export default function TypedHeadline({ onPick, paused }) {
     >
       <span
         className="block text-[25px] leading-[1.22] text-white sm:text-[30px] md:text-[35px]"
-        style={{ fontWeight: 'var(--lg-weight-strong)', letterSpacing: 'var(--lg-tracking-tight)' }}
+        style={{
+          fontFamily: 'var(--lg-font-display)',
+          fontWeight: 'var(--lg-weight-strong)',
+          letterSpacing: 'var(--lg-tracking-tight)',
+        }}
       >
         {typed}
         {!reduce && <span className="lg-caret h-[0.95em]" />}

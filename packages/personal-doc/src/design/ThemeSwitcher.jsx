@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import PrismButton from '../components/chat/PrismButton';
-import { IconCheck, IconGlass, IconSlab, IconTheme } from '../components/chat/Icons';
+import { IconCheck, IconGlass, IconPixel, IconSlab, IconTheme } from '../components/chat/Icons';
 import { useTheme } from './useTheme';
 
 /* The appearance control.
@@ -17,7 +17,7 @@ import { useTheme } from './useTheme';
  * a two-state switch would have to be rebuilt the moment a third arrives.
  */
 
-const THEME_ICONS = { glass: IconGlass, slab: IconSlab };
+const THEME_ICONS = { glass: IconGlass, slab: IconSlab, pixel: IconPixel };
 
 const DRAWER = {
   initial: { opacity: 0, y: -8, scale: 0.97 },

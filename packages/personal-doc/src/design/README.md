@@ -15,7 +15,7 @@ Files:
 
 | File | Owns |
 | --- | --- |
-| `themes.js` | which themes exist; metadata; canvas `material` uniforms |
+| `themes.js` | which themes exist; metadata; canvas `material`; optional `fonts` |
 | `themes.css` | every visual value, per theme (the tokens) |
 | `ThemeProvider.jsx` | state, persistence, the single `data-lg-theme` DOM write |
 | `useTheme.js` | the context + hook (split out for Fast Refresh) |
@@ -48,13 +48,17 @@ Files:
 
 ## Adding a theme
 
-1. Add an entry to `THEMES` in `themes.js` (id, name, hint, icon key, 3-colour
-   swatch, `material: { flat, tint }`).
-2. Copy the `[data-lg-theme='neo']` block in `themes.css`, rename the selector,
+1. Add an entry to `THEMES` in `themes.js`: id, name, hint (keep it under ~24
+   characters or the drawer truncates it), icon key, 3-colour swatch, and
+   `material: { flat, tint, bands, pixel }` — see §7 of the docs for what those
+   four do to the cube. Add `fonts` if the theme ships a typeface; the provider
+   loads it only while that theme is selected.
+2. Copy the `[data-lg-theme='gba']` block in `themes.css`, rename the selector,
    and give **every** token a value. A missing token does not fall back to
    something sensible — it inherits the previous theme and looks broken in one
    state you will not find until later.
-3. If the theme is light, add its selector to the opacity-floor block too.
+3. If the theme is light, add its selector to the `:is()` list on the
+   opacity-floor block, and rebind `--color-white` to its ink.
 4. If the icon key is new, add the icon to `components/chat/Icons.jsx` and map
    it in `ThemeSwitcher.jsx`'s `THEME_ICONS`.
 
@@ -62,7 +66,11 @@ Nothing else. If step 5 involves editing a component, the component is wrong.
 
 ## Checking your work
 
-Both themes, at 375px and 1280px, in these four states: empty, typing, an
+Every theme, at 375px and 1280px, in these four states: empty, typing, an
 answer streaming, an answer complete (cards + follow-ups + copy/retry). Then
 switch themes mid-stream — the cube must keep spinning and the answer must keep
 streaming.
+
+Read the running text, do not just look at it. A theme that ships a typeface
+can ship a broken ligature with it (`--lg-ligatures`), and muted copy that
+survived on black can fall under contrast on paper (the opacity floor).
