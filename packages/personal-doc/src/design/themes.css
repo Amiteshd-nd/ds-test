@@ -78,6 +78,7 @@
   --lg-avatar-fill: radial-gradient(circle at 32% 28%, #ff6ade 0%, #a758ff 46%, #3c3aa8 100%);
   --lg-avatar-shadow: 0 0 16px -4px rgba(167, 88, 255, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.35);
   --lg-bullet-fill: linear-gradient(135deg, #ff4ad6, #5292ff);
+  --lg-media-filter: none;
   --lg-bloom-blur: 24px;
   --lg-bloom-saturation: 1;
   --lg-quote-line: rgba(167, 88, 255, 0.6);
@@ -173,6 +174,7 @@
   --lg-avatar-fill: #f6a93b;
   --lg-avatar-shadow: 0 0 0 2px #0b0b0f;
   --lg-bullet-fill: #0a6cff;
+  --lg-media-filter: none;
   --lg-bloom-blur: 0px;
   --lg-bloom-saturation: 1;
   --lg-quote-line: #0b0b0f;
@@ -274,6 +276,7 @@
   --lg-avatar-fill: #e23b2e;
   --lg-avatar-shadow: 0 0 0 3px #2b1a2f;
   --lg-bullet-fill: #e23b2e;
+  --lg-media-filter: none;
   --lg-bloom-blur: 0px;
   --lg-bloom-saturation: 1;
   --lg-quote-line: #3e9bd8;
@@ -379,6 +382,7 @@
   --lg-avatar-fill: #f472b6;
   --lg-avatar-shadow: 0 0 0 3px #000000;
   --lg-bullet-fill: #2196f3;
+  --lg-media-filter: none;
   --lg-bloom-blur: 0px;
   --lg-bloom-saturation: 1;
   --lg-quote-line: #000000;
@@ -499,6 +503,7 @@
   --lg-avatar-fill: #ff00ff;
   --lg-avatar-shadow: 0 0 0 3px #000000;
   --lg-bullet-fill: #000000;
+  --lg-media-filter: none;
   --lg-bloom-blur: 0px;
   --lg-bloom-saturation: 1;
   --lg-quote-line: #000000;
@@ -613,6 +618,7 @@
   --lg-avatar-fill: #111827;
   --lg-avatar-shadow: none;
   --lg-bullet-fill: #9ca3af;
+  --lg-media-filter: none;
   --lg-bloom-blur: 0px;
   /* A project's accent colour is content, not theme — but a four-colour theme
      does not get a fifth colour through the back door, so it arrives in grey. */
@@ -737,6 +743,7 @@
   --lg-avatar-fill: #ff00ff;
   --lg-avatar-shadow: 0 0 0 3px #000000;
   --lg-bullet-fill: #0000ff;
+  --lg-media-filter: none;
   --lg-bloom-blur: 0px;
   --lg-bloom-saturation: 1.6;
   --lg-quote-line: #ff00ff;
@@ -800,21 +807,151 @@
   75% { translate: -1px -1.5px; }
 }
 
-[data-lg-theme='chaos'] .lg-root .lg-surface-flat:hover,
-[data-lg-theme='chaos'] .lg-root .lg-surface-flat:focus-visible,
-[data-lg-theme='chaos'] .lg-root [role='list'] > *:hover {
+:is([data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .lg-surface-flat:hover,
+:is([data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .lg-surface-flat:focus-visible,
+:is([data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root [role='list'] > *:hover {
   animation: lg-jitter 0.24s steps(2) infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-lg-theme='chaos'] .lg-root .lg-surface-flat:hover,
-  [data-lg-theme='chaos'] .lg-root .lg-surface-flat:focus-visible,
-  [data-lg-theme='chaos'] .lg-root [role='list'] > *:hover {
+  :is([data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .lg-surface-flat:hover,
+  :is([data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .lg-surface-flat:focus-visible,
+  :is([data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root [role='list'] > *:hover {
     animation: none;
   }
 }
 
-/* ------------------------------------------------- 8. the utility remap */
+/* ----------------------------------------------------------------- 8. raw */
+/* Anti-Polish / Raw, built to uistyleguide.com/style/anti-polish-raw-aesthetic:
+ * "celebrates imperfection and human touch with hand-drawn elements, scanned
+ * textures, and an unfinished aesthetic." Its CSS line is
+ * `background: url(paper-texture.png), filter: grayscale() contrast(),
+ * sketch-style fonts`, and its effects are "no smooth transitions, paper
+ * texture overlays, jitter".
+ *
+ * Three things here are taken verbatim from the reference implementation, all
+ * three measured off it rather than eyeballed: the 2px #1a1a1a edge, the ±0.5°
+ * tilt, and the hand-drawn corner —
+ *
+ *     border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px
+ *
+ * which is the oldest trick in this style and still the best one. Horizontal
+ * and vertical radii disagree at every corner, so the browser draws four
+ * different ellipse segments and the box stops looking machined. CSS scales
+ * the radii down proportionally when they exceed the box, so the same one
+ * value works on a 760px prompt bar and a 36px button.
+ *
+ * The paper is an inline SVG feTurbulence rather than an image: real grain, no
+ * asset, and it resolves at any density. The guide asks for a texture file; a
+ * data-URI filter is the same thing without a download.
+ *
+ * Readability note: the body face is a handwriting one, which the style
+ * requires and which costs something at 15px. Patrick Hand was chosen over the
+ * more expressive options because it holds up at body sizes — this surface is
+ * mostly running prose, and a theme that cannot be read is not a theme.
+ */
+
+[data-lg-theme='raw'] {
+  /* ground — paper, and the grain on it */
+  --lg-bg: #fafaf8;
+  --lg-wash:
+    radial-gradient(circle at 6% 8%, rgba(196, 167, 125, 0.34) 0 min(15vw, 150px), rgba(0, 0, 0, 0) min(15vw, 150px)),
+    radial-gradient(circle at 95% 92%, rgba(212, 196, 168, 0.4) 0 min(13vw, 130px), rgba(0, 0, 0, 0) min(13vw, 130px));
+  --lg-wash-blend: multiply;
+  --lg-vignette: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23p)' opacity='0.16'/%3E%3C/svg%3E");
+  --lg-scrim: linear-gradient(180deg, #fafaf8 34%, rgba(250, 250, 248, 0.9) 66%, rgba(250, 250, 248, 0) 100%);
+
+  /* ink & accents — the six, all of them earth */
+  --lg-ink: #1a1a1a;
+  --lg-on-accent: #fafaf8;
+  --lg-on-well: #fafaf8;
+  --lg-accent: #8b4513;
+  --lg-accent-soft: #8b4513;
+  --lg-accent-warm: #a9622a;
+  --lg-live: #8b4513;
+  --lg-live-glow: 0 0 0 2px #1a1a1a;
+
+  /* surfaces — cream paper, drawn edges, nothing cast */
+  --lg-surface-bg: #fffdf2;
+  --lg-surface-blur: none;
+  --lg-surface-shadow: none;
+  --lg-flat-bg: #d4c4a8;
+  --lg-flat-blur: none;
+  --lg-flat-shadow: none;
+
+  /* edges */
+  --lg-border: 2px;
+  --lg-line: #1a1a1a;
+  --lg-rim-a: transparent;
+  --lg-rim-b: transparent;
+  --lg-rim-warm: 139 69 19;
+  --lg-rim-cool: 196 167 125;
+  --lg-rim-hot: 26 26 26;
+  --lg-hairline-display: none;
+  --lg-specular-display: none;
+
+  /* fills */
+  --lg-send-fill: #1a1a1a;
+  --lg-send-shadow: none;
+  --lg-busy-fill: #c4a77d;
+  --lg-focus-bloom: 0 0 0 2px #8b4513;
+  --lg-avatar-fill: #c4a77d;
+  --lg-avatar-shadow: 0 0 0 2px #1a1a1a;
+  --lg-bullet-fill: #8b4513;
+  --lg-media-filter: grayscale(1) contrast(1.2) sepia(0.35);
+  --lg-bloom-blur: 10px;
+  --lg-bloom-saturation: 0.2;
+  --lg-quote-line: #8b4513;
+
+  /* a smudged pencil ring rather than a printed one */
+  --lg-spectrum: conic-gradient(from 20deg, #8b4513, #c4a77d, #d4c4a8, #4a4a4a, #8b4513);
+  --lg-spectrum-blur: 2px;
+  --lg-spectrum-blur-hover: 3px;
+  --lg-well-fill: #1a1a1a;
+  --lg-well-shadow: none;
+
+  /* a11y + motion — the guide asks for no smooth transitions */
+  --lg-focus-ring: #8b4513;
+  --lg-scroll-thumb: #c4a77d;
+  --lg-scroll-thumb-hover: #8b4513;
+  --lg-theme-transition: none;
+
+  /* layout */
+  --lg-measure: 720px;
+  --lg-measure-wide: 840px;
+  --lg-leading: 1.72;
+
+  /* type — the reference's own stack, Comic Sans fallback and all */
+  --lg-font: 'Patrick Hand', 'Comic Sans MS', cursive;
+  --lg-font-display: 'Patrick Hand', 'Comic Sans MS', cursive;
+  --lg-ligatures: normal;
+  --lg-tracking-tight: 0;
+  --lg-display-transform: none;
+  --lg-display-shadow: none;
+  --lg-weight-strong: 400;
+  --lg-label-transform: none;
+  --lg-label-tracking: 0.04em;
+}
+
+/* Hand-drawn corners and a drawn-by-eye tilt. Same two mechanisms the chaos
+ * theme uses — the radius layer and the independent `rotate` property — at a
+ * quarter of the volume. */
+
+[data-lg-theme='raw'] .lg-root [class*='rounded'] {
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+}
+
+/* The reference draws every card with the same corner. One hand does not, so
+   alternate items get the mirrored value — the same trick, read backwards. */
+[data-lg-theme='raw'] .lg-root [role='list'] > *:nth-child(2n) [class*='rounded'],
+[data-lg-theme='raw'] .lg-root [role='list'] > *:nth-child(2n)[class*='rounded'] {
+  border-radius: 15px 225px 15px 255px / 225px 15px 255px 15px;
+}
+
+[data-lg-theme='raw'] .lg-root [role='list'] > *:nth-child(2n + 1) { rotate: -0.5deg; }
+[data-lg-theme='raw'] .lg-root [role='list'] > *:nth-child(2n) { rotate: 0.5deg; }
+
+/* ------------------------------------------------- 9. the utility remap */
 /* Tailwind v4 compiles `text-white/60` to
  *     color: color-mix(in oklab, var(--color-white) 60%, transparent)
  * so rebinding --color-white inside this subtree retargets every white-alpha
@@ -848,7 +985,11 @@
   --color-white: #000000;
 }
 
-/* ------------------------------------------ 8b. the opacity floor (light) */
+[data-lg-theme='raw'] .lg-root {
+  --color-white: #1a1a1a;
+}
+
+/* ------------------------------------------ 9b. the opacity floor (light) */
 /* Alpha is not perceptually symmetric across grounds. White at 28% over near
  * black still reads as text; ink at 28% over paper is a smudge — the eye is
  * far more forgiving of light-on-dark than of dark-on-light at the same alpha.
@@ -863,22 +1004,22 @@
  * Every light theme joins the :is() list. `:is()` takes the specificity of its
  * strongest argument, so adding one never quietly outranks the others. */
 
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos']) .lg-root .text-white\/20 { color: color-mix(in oklab, var(--color-white) 42%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos']) .lg-root .text-white\/25 { color: color-mix(in oklab, var(--color-white) 46%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos']) .lg-root .text-white\/28 { color: color-mix(in oklab, var(--color-white) 52%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos']) .lg-root .text-white\/30 { color: color-mix(in oklab, var(--color-white) 54%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos']) .lg-root .text-white\/35 { color: color-mix(in oklab, var(--color-white) 58%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos']) .lg-root .text-white\/40 { color: color-mix(in oklab, var(--color-white) 62%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos']) .lg-root .text-white\/45 { color: color-mix(in oklab, var(--color-white) 64%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos']) .lg-root .text-white\/50 { color: color-mix(in oklab, var(--color-white) 68%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos']) .lg-root .text-white\/55 { color: color-mix(in oklab, var(--color-white) 72%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos']) .lg-root .text-white\/60 { color: color-mix(in oklab, var(--color-white) 76%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos']) .lg-root .text-white\/70 { color: color-mix(in oklab, var(--color-white) 82%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos']) .lg-root .text-white\/75 { color: color-mix(in oklab, var(--color-white) 86%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/20 { color: color-mix(in oklab, var(--color-white) 42%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/25 { color: color-mix(in oklab, var(--color-white) 46%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/28 { color: color-mix(in oklab, var(--color-white) 52%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/30 { color: color-mix(in oklab, var(--color-white) 54%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/35 { color: color-mix(in oklab, var(--color-white) 58%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/40 { color: color-mix(in oklab, var(--color-white) 62%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/45 { color: color-mix(in oklab, var(--color-white) 64%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/50 { color: color-mix(in oklab, var(--color-white) 68%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/55 { color: color-mix(in oklab, var(--color-white) 72%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/60 { color: color-mix(in oklab, var(--color-white) 76%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/70 { color: color-mix(in oklab, var(--color-white) 82%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/75 { color: color-mix(in oklab, var(--color-white) 86%, transparent); }
 
 /* Hover states resolve to the full ink, which is already the rule. */
 
-/* -------------------------------------------------- 8c. the radius override */
+/* -------------------------------------------------- 9c. the radius override */
 /* The second — and last — place the system touches the utility layer.
  *
  * Corner radius lives in the markup as `rounded-2xl`, `rounded-full`,
@@ -897,7 +1038,7 @@
   border-radius: 0;
 }
 
-/* ------------------------------------------------------ 9. theme switching */
+/* ----------------------------------------------------- 10. theme switching */
 /* Tokens are interpolatable, so a change of theme cross-fades the whole
  * surface rather than cutting. Only the cheap properties are transitioned —
  * animating box-shadow or backdrop-filter across a page of glass is not.
@@ -920,8 +1061,8 @@
  * Framer's spring-driven layout motion is JS and is unaffected; reduced-motion
  * is still what stops that. */
 
-[data-lg-theme='brutal'] .lg-root,
-[data-lg-theme='brutal'] .lg-root * {
+:is([data-lg-theme='brutal'], [data-lg-theme='raw']) .lg-root,
+:is([data-lg-theme='brutal'], [data-lg-theme='raw']) .lg-root * {
   transition: none;
 }
 

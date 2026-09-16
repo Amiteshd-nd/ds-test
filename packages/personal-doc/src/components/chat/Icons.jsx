@@ -137,6 +137,13 @@ export const IconPixel = (p) => (
   </Svg>
 );
 
+export const IconSketch = (p) => (
+  <Svg {...p}>
+    <path d="M4 17.5c3-1 4-6 7-6s2.5 5 5.5 3.5" />
+    <path d="M14.5 5.5 18 9 9.5 17.5 6 18l.5-3.5Z" />
+  </Svg>
+);
+
 export const IconChaos = (p) => (
   <Svg {...p}>
     <rect x="3" y="6" width="10" height="10" transform="rotate(-8 8 11)" />

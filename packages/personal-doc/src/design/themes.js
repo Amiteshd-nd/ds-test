@@ -95,6 +95,17 @@ export const THEMES = [
     material: { flat: 1, tint: [0.95, 0.05, 0.9], bands: 4, pixel: 0 },
     fonts: 'https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&display=swap',
   },
+  {
+    id: 'raw',
+    name: 'Anti-Polish / Raw',
+    hint: 'Paper, sketch, unfinished',
+    icon: 'sketch',
+    swatch: ['#fafaf8', '#8b4513', '#d4c4a8'],
+    /* Sepia and five bands: the cube reads as something photocopied rather
+     * than rendered, which is the only honest way for it to be here at all. */
+    material: { flat: 1, tint: [0.42, 0.32, 0.22], bands: 5, pixel: 0 },
+    fonts: 'https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap',
+  },
 ];
 
 export const DEFAULT_THEME = THEMES[0].id;

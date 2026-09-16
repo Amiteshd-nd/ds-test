@@ -39,6 +39,7 @@ sounds, and it is what forced the interesting part of the architecture (§4).
 | **Brutalism** | white, exposed 1px column rules | white, 4px black, **no shadow**, **radius 0**, **no transitions** | system mono + Helvetica 900, uppercase | four bands, near-black |
 | **Minimal & Direct** | white, nothing on it at all | white, 1px `#e5e7eb`, no shadow, **640px single column**, `1.75` leading | Inter, four colours total | eight bands, graphite |
 | **Maximalism** | `#ffff00`, multiply overprint, plaid stripes | white/colour-cycled, 4px black, `6px 6px 0`, **tilted ±1.6°**, radius 0 | Inter 900 uppercase, magenta offset shadow | four bands, pure magenta |
+| **Anti-Polish / Raw** | `#fafaf8` paper, SVG grain, kraft blobs | cream, 2px `#1a1a1a`, no shadow, **hand-drawn corners**, tilted ±0.5° | Patrick Hand, sentence case | five bands, sepia |
 
 The neo theme follows the reference the work was briefed against: white cards,
 black outlines, hard offset shadows, an electric blue primary, and yellow /
@@ -87,7 +88,16 @@ way to read it than by era:
 
 - **Surface** — glass, neo, gba, neub, brutal. What the material is made of.
 - **Layout** — minimal. How much room things get.
-- **Placement** — maximalism. Where things sit, and whether they sit straight.
+- **Placement** — maximalism, anti-polish. Where things sit, and whether they
+  sit straight.
+
+**Anti-Polish / Raw** is the one that proved the parts compose. It needed no
+new mechanism at all: the radius layer built for sharp corners carries its
+hand-drawn ones, the `rotate` layer built for chaos carries its ±0.5° tilt at a
+quarter of the volume, the jitter keyframe and the no-transitions reset are
+shared with the themes that asked for them first, and its paper grain is an
+inline `feTurbulence` in a token that already existed. One genuinely new token
+(`--lg-media-filter`) and the rest is reuse.
 
 **Minimal & Direct** is the odd one out, and usefully so. Every theme before it
 changed how the surface *looks*; this one changes how it is *laid out*. Its own
@@ -160,16 +170,26 @@ Two consequences, both handled:
 layer. Tailwind compiles the named steps (`rounded-2xl`) to `var(--radius-*)`,
 which could be rebound the way `--color-white` was, but `rounded-full` and
 `rounded-[26px]` compile to literals and would not follow. A theme rebinding
-only half of them would come out half-sharp, which looks like a bug rather than
-a decision. So a theme whose premise *is* sharp corners zeroes them outright:
+only half of them would come out half-rounded, which looks like a bug rather
+than a decision. So a theme whose premise *is* the corner overrides it
+outright:
 
 ```css
-[data-lg-theme='neub'] .lg-root [class*='rounded'] { border-radius: 0 }
+:is([data-lg-theme='neub'], …) .lg-root [class*='rounded'] { border-radius: 0 }
+
+[data-lg-theme='raw'] .lg-root [class*='rounded'] {
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+}
 ```
 
 The substring match catches every rounding utility regardless of spelling, and
-squares the circles too — avatar, status dot, icon wells — which is the correct
-reading of that style rather than a casualty of it.
+takes the circles with it — avatar, status dot, icon wells. That is the correct
+reading of both styles rather than a casualty of either: squares for the sharp
+themes, and for the hand-drawn one a corner where the horizontal and vertical
+radii disagree, so the browser draws four different ellipse segments and the
+box stops looking machined. CSS scales those radii down proportionally when
+they exceed the box, which is why one value works on a 760px prompt bar and a
+36px button.
 
 Browsers without `color-mix()` fall back to Tailwind's baked `#fff` — i.e. to
 the behaviour that shipped before this change, not to a new bug.
@@ -298,6 +318,7 @@ that become shader uniforms:
 | Brutalism | 1 | near-black | 4 | 0 |
 | Minimal | 1 | graphite | 8 | 0 |
 | Maximalism | 1 | pure magenta | 4 | 0 |
+| Anti-Polish | 1 | sepia | 5 | 0 |
 
 Minimal is the only flat theme that wants *more* bands, not fewer. Its
 restraint is about decoration, not about crudeness — eight steps is the
@@ -366,7 +387,13 @@ Every theme declares all of these. Grouped as they appear in `themes.css`.
 
 **Fills** `--lg-send-fill` `--lg-send-shadow` `--lg-busy-fill`
 `--lg-focus-bloom` `--lg-avatar-fill` `--lg-avatar-shadow` `--lg-bullet-fill`
-`--lg-bloom-blur` `--lg-bloom-saturation` `--lg-quote-line`
+`--lg-bloom-blur` `--lg-bloom-saturation` `--lg-media-filter` `--lg-quote-line`
+
+`--lg-media-filter` lands on the project thumbnails. Like
+`--lg-bloom-saturation` it is the system's answer to content a theme cannot
+choose: the artwork is fixed, but whether this surface shows it scanned and
+photocopied is a theme decision, and the anti-polish theme's own CSS line asks
+for exactly `grayscale() contrast()`.
 
 **Layout** `--lg-measure` `--lg-measure-wide` `--lg-leading`
 

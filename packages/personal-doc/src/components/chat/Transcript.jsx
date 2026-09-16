@@ -120,6 +120,10 @@ function Cards({ ids }) {
                    flat block across the artwork the moment a theme sharpened
                    it. The text beside it already carried this fix. */
                 className="relative h-14 w-14 shrink-0 rounded-xl object-cover"
+                /* Content the theme cannot choose, processed the way the theme
+                   processes everything else — a scanned-and-photocopied look is
+                   a filter over the artwork, not a different artwork. */
+                style={{ filter: 'var(--lg-media-filter)' }}
               />
               <span className="relative min-w-0 flex-1">
                 <span className="block truncate text-[14.5px] font-medium text-white">{proj.title}</span>
