@@ -37,6 +37,7 @@ sounds, and it is what forced the interesting part of the architecture (§4).
 | **16-Bit Handheld** | yellow `#fbdd65`, clouds, scanlines | cream, 3px plum + bone inner ring, offset `5px 5px 0` | Pixelify Sans / Silkscreen | four bands, 56-block pixel grid |
 | **Neubrutalism** | ivory `#fefce8`, four hard colour blocks | white, 3px black, offset `5px 5px 0`, **radius 0** | Inter 900 | five bands, saturated pink |
 | **Brutalism** | white, exposed 1px column rules | white, 4px black, **no shadow**, **radius 0**, **no transitions** | system mono + Helvetica 900, uppercase | four bands, near-black |
+| **Minimal & Direct** | white, nothing on it at all | white, 1px `#e5e7eb`, no shadow, **640px single column**, `1.75` leading | Inter, four colours total | eight bands, graphite |
 
 The neo theme follows the reference the work was briefed against: white cards,
 black outlines, hard offset shadows, an electric blue primary, and yellow /
@@ -79,6 +80,15 @@ on-band colour without breaking rule §5.1. So the blue survives as fills,
 edges, the cube's ink and corner blocks — everywhere it never has small text on
 top of it — and the running text always sits on paper. The look holds; the
 contrast holds with it.
+
+**Minimal & Direct** is the odd one out, and usefully so. Every theme before it
+changed how the surface *looks*; this one changes how it is *laid out*. Its own
+CSS line is `max-width: 640px, line-height: 1.75, single-column` — no colour in
+it at all — which is what finally made measure and leading into tokens rather
+than literals sitting in the markup. It also holds itself to exactly the four
+colours the guide lists: the "listening" state and the live dot are the same
+blue as everything else, because a fifth colour is the thing the style exists
+to remove.
 
 ## 3. The layers
 
@@ -241,6 +251,11 @@ that become shader uniforms:
 | 16-bit | 1 | handheld blue | 4 | 56 |
 | Neubrutalism | 1 | saturated pink | 5 | 0 |
 | Brutalism | 1 | near-black | 4 | 0 |
+| Minimal | 1 | graphite | 8 | 0 |
+
+Minimal is the only flat theme that wants *more* bands, not fewer. Its
+restraint is about decoration, not about crudeness — eight steps is the
+quietest the cube can be while still reading as a solid.
 
 Three bands was the first value tried for the neubrutalism cube, on the logic
 that "flat colours" means as few steps as possible. It was wrong in practice:
@@ -305,7 +320,21 @@ Every theme declares all of these. Grouped as they appear in `themes.css`.
 
 **Fills** `--lg-send-fill` `--lg-send-shadow` `--lg-busy-fill`
 `--lg-focus-bloom` `--lg-avatar-fill` `--lg-avatar-shadow` `--lg-bullet-fill`
-`--lg-bloom-blur` `--lg-quote-line`
+`--lg-bloom-blur` `--lg-bloom-saturation` `--lg-quote-line`
+
+**Layout** `--lg-measure` `--lg-measure-wide` `--lg-leading`
+
+The layout group arrived with the minimal theme and is the system's answer to a
+style whose argument is spacing rather than surface. `--lg-measure` is the
+column the conversation reads in, `--lg-measure-wide` the landing dock's; a
+theme that wants a single column sets both to the same value. These replaced
+`max-w-[720px]`, `max-w-[840px]` and `leading-[1.68]` — literals that had been
+sitting in the markup in violation of §5.2 since before there were themes.
+
+`--lg-bloom-saturation` is a smaller version of the same idea. A project's
+accent colour is *content*, not theme, so a theme cannot choose it — but it can
+decide how saturated content is allowed to be on its surface, which is how a
+four-colour theme avoids gaining a fifth through the back door.
 
 **Prism well** `--lg-spectrum` `--lg-spectrum-blur` `--lg-spectrum-blur-hover`
 `--lg-well-fill` `--lg-well-shadow`

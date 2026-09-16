@@ -38,7 +38,7 @@ function Paragraph({ text, limit }) {
   const words = text.split(' ');
   const shown = limit === undefined ? words.length : Math.min(limit, words.length);
   return (
-    <p className="text-[15.5px] leading-[1.68] text-white/80 md:text-[16px]">
+    <p className="text-[15.5px] text-white/80 md:text-[16px]" style={{ lineHeight: 'var(--lg-leading)' }}>
       {words.slice(0, shown).join(' ')}
     </p>
   );
@@ -104,14 +104,22 @@ function Cards({ ids }) {
                    nothing else blurs, this reads as a hard-cut corner of ink
                    instead — same element, same accent, different material. */
                 className="pointer-events-none absolute -left-8 -top-10 h-24 w-24 rounded-full opacity-45 transition-opacity group-hover:opacity-80"
-                style={{ background: accent, filter: 'blur(var(--lg-bloom-blur))' }}
+                style={{
+                  background: accent,
+                  filter: 'blur(var(--lg-bloom-blur)) saturate(var(--lg-bloom-saturation))',
+                }}
               />
               <img
                 src={proj.image}
                 alt=""
                 loading="lazy"
                 decoding="async"
-                className="h-14 w-14 shrink-0 rounded-xl object-cover"
+                /* `relative` so the thumbnail paints above the accent bloom.
+                   The bloom is absolutely positioned and would otherwise sit on
+                   top of it — invisible while the bloom was a 24px blur, and a
+                   flat block across the artwork the moment a theme sharpened
+                   it. The text beside it already carried this fix. */
+                className="relative h-14 w-14 shrink-0 rounded-xl object-cover"
               />
               <span className="relative min-w-0 flex-1">
                 <span className="block truncate text-[14.5px] font-medium text-white">{proj.title}</span>

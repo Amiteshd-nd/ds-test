@@ -86,3 +86,10 @@ survived on black can fall under contrast on paper (the opacity floor).
 Watch what a wider face does to fixed-width furniture, too: the monospace theme
 is what finally exposed a `line-clamp` that had never worked, and it needed the
 theme drawer 28px wider than proportional type did.
+
+Two component bugs have surfaced this way so far — that clamp, and an accent
+bloom painting over a thumbnail it was supposed to sit behind, which a 24px
+blur had hidden for as long as there was only one theme. Both were pre-existing
+and both were fixed for every theme. Expect a new theme to find one: rendering
+the same markup through a genuinely different set of values is the cheapest
+test this surface has.

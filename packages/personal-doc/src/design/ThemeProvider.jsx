@@ -43,12 +43,14 @@ export function ThemeProvider({ children }) {
    * stylesheet per theme is a smaller cost than a re-fetch. */
   useEffect(() => {
     const href = getTheme(themeId).fonts;
-    if (!href || document.querySelector(`link[data-lg-font="${themeId}"]`)) return;
+    // Keyed on the stylesheet, not the theme: two themes can want the same
+    // face, and keying on the id would inject the same <link> twice.
+    if (!href || document.querySelector(`link[data-lg-font="${CSS.escape(href)}"]`)) return;
 
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = href;
-    link.dataset.lgFont = themeId;
+    link.dataset.lgFont = href;
     document.head.appendChild(link);
   }, [themeId]);
 

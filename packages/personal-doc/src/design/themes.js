@@ -72,6 +72,18 @@ export const THEMES = [
     material: { flat: 1, tint: [0.08, 0.08, 0.1], bands: 4, pixel: 0 },
     /* No `fonts` on purpose — see the token block in themes.css. */
   },
+  {
+    id: 'min',
+    name: 'Minimal & Direct',
+    hint: 'One column, all whitespace',
+    icon: 'measure',
+    swatch: ['#ffffff', '#111827', '#3b82f6'],
+    /* Eight bands and a graphite ink: the quietest the cube can be while still
+     * being a solid. This is the only flat theme that wants *more* steps, not
+     * fewer — the style's restraint is about decoration, not about crudeness. */
+    material: { flat: 1, tint: [0.34, 0.38, 0.44], bands: 8, pixel: 0 },
+    fonts: 'https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&display=swap',
+  },
 ];
 
 export const DEFAULT_THEME = THEMES[0].id;

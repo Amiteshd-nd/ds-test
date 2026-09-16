@@ -310,7 +310,9 @@ function ChatSurface() {
           onScroll={onScroll}
           className="lg-scroll relative z-10 min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-6 md:px-7"
         >
-          <div className="mx-auto w-full max-w-[720px]">
+          {/* Measure is a token: a theme built on whitespace sets its own
+              column width rather than inheriting this one. */}
+          <div className="mx-auto w-full" style={{ maxWidth: 'var(--lg-measure)' }}>
             <Transcript
               messages={messages}
               thinking={thinking}
@@ -331,7 +333,10 @@ function ChatSurface() {
           className={`flex w-full flex-col justify-center px-4 md:px-7 ${hasChat ? '' : 'min-h-full py-4'}`}
           style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
         >
-        <div className={`mx-auto w-full ${hasChat ? 'max-w-[720px]' : 'max-w-[840px]'}`}>
+        <div
+          className="mx-auto w-full"
+          style={{ maxWidth: hasChat ? 'var(--lg-measure)' : 'var(--lg-measure-wide)' }}
+        >
           {/* the material — always directly above the field */}
           <motion.div
             animate={orbStyle}

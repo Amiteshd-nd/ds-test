@@ -6,6 +6,7 @@ import {
   IconBlocks,
   IconCheck,
   IconGlass,
+  IconMeasure,
   IconPixel,
   IconRaw,
   IconSlab,
@@ -31,6 +32,7 @@ const THEME_ICONS = {
   pixel: IconPixel,
   blocks: IconBlocks,
   raw: IconRaw,
+  measure: IconMeasure,
 };
 
 const DRAWER = {
