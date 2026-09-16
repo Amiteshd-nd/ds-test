@@ -117,6 +117,18 @@ export const THEMES = [
     material: { flat: 1, tint: [0.86, 0.15, 0.15], bands: 6, pixel: 0 },
     fonts: 'https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&display=swap',
   },
+  {
+    id: 'swiss',
+    name: 'Swiss International',
+    hint: 'Grid, air, numerals',
+    icon: 'swiss',
+    swatch: ['#f5f1e8', '#000000', '#b38b6d'],
+    /* Tan, six bands. The one object on the page is allowed to be an object;
+     * it just does not get to be louder than the grid it sits in. */
+    material: { flat: 1, tint: [0.7, 0.55, 0.43], bands: 6, pixel: 0 },
+    /* No `fonts`: index.css already loads Inter at 400-600, and the display
+     * line here wants 400. A Swiss headline is large, not heavy. */
+  },
 ];
 
 export const DEFAULT_THEME = THEMES[0].id;

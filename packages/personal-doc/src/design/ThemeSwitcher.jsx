@@ -13,6 +13,7 @@ import {
   IconRaw,
   IconSketch,
   IconSlab,
+  IconSwiss,
   IconTheme,
 } from '../components/chat/Icons';
 import { useTheme } from './useTheme';
@@ -39,6 +40,7 @@ const THEME_ICONS = {
   chaos: IconChaos,
   sketch: IconSketch,
   columns: IconColumns,
+  swiss: IconSwiss,
 };
 
 const DRAWER = {

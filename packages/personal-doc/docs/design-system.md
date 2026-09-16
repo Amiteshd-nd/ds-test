@@ -40,7 +40,8 @@ sounds, and it is what forced the interesting part of the architecture (§4).
 | **Minimal & Direct** | white, nothing on it at all | white, 1px `#e5e7eb`, no shadow, **640px single column**, `1.75` leading | Inter, four colours total | eight bands, graphite |
 | **Maximalism** | `#ffff00`, multiply overprint, plaid stripes | white/colour-cycled, 4px black, `6px 6px 0`, **tilted ±1.6°**, radius 0 | Inter 900 uppercase, magenta offset shadow | four bands, pure magenta |
 | **Anti-Polish / Raw** | `#fafaf8` paper, SVG grain, kraft blobs | cream, 2px `#1a1a1a`, no shadow, **hand-drawn corners**, tilted ±0.5° | Patrick Hand, sentence case | five bands, sepia |
-| **Magazine** | white page, nothing on it | boxless — a 2px black rule starts every panel, chips underlined, radius 0 | Inter 700, red caps kickers, **drop cap** | six bands, press red |
+| **Magazine** | white page, nothing on it | boxless — a 2px black rule ends every panel, chips underlined, radius 0 | Inter 700, red caps kickers, **drop cap** | six bands, press red |
+| **Swiss International** | bone `#f5f1e8`, nothing on it | white cards, 1px black, no shadow, **2rem grid**, 1120px wide, radius 0 | Inter **400** display, caps kickers, **numbered cards** | six bands, tan |
 
 The neo theme follows the reference the work was briefed against: white cards,
 black outlines, hard offset shadows, an electric blue primary, and yellow /
@@ -91,8 +92,16 @@ way to read it than by era:
 - **Layout** — minimal. How much room things get.
 - **Placement** — maximalism, anti-polish. Where things sit, and whether they
   sit straight.
-- **Structure** — magazine. What separates one thing from the next: a rule and
-  some space rather than a container.
+- **Structure** — magazine, swiss. What separates one thing from the next: a
+  rule and some space rather than a container.
+
+**Swiss and Minimal are opposite arguments**, which is why both earn a place.
+Minimal *removes* until one thing is left: pure white, a 640px single column,
+four colours. Swiss *organises* until everything has a place: bone paper, a
+1120px grid at the guide's own 2rem gap, cards numbered 01…06 by a CSS counter
+with no markup involved. The clearest tell between them and the magazine theme
+is weight — a Swiss headline is large, not heavy, which is what
+`--lg-display-weight` exists to say.
 
 **Anti-Polish / Raw** is the one that proved the parts compose. It needed no
 new mechanism at all: the radius layer built for sharp corners carries its
@@ -357,6 +366,7 @@ that become shader uniforms:
 | Maximalism | 1 | pure magenta | 4 | 0 |
 | Anti-Polish | 1 | sepia | 5 | 0 |
 | Magazine | 1 | press red | 6 | 0 |
+| Swiss | 1 | tan | 6 | 0 |
 
 Minimal is the only flat theme that wants *more* bands, not fewer. Its
 restraint is about decoration, not about crudeness — eight steps is the
@@ -455,7 +465,13 @@ four-colour theme avoids gaining a fifth through the back door.
 
 **Type** `--lg-font` `--lg-font-display` `--lg-ligatures`
 `--lg-tracking-tight` `--lg-display-transform` `--lg-display-shadow`
-`--lg-weight-strong` `--lg-label-transform` `--lg-label-tracking`
+`--lg-weight-strong` `--lg-display-weight` `--lg-label-transform`
+`--lg-label-tracking`
+
+`--lg-display-weight` is split from `--lg-weight-strong` because the Swiss
+theme wants a 400 headline over 500 labels. Every other theme declares the two
+equal, which is the point of declaring both rather than defaulting one to the
+other: a theme states its typography rather than inheriting it by accident.
 
 A theme that ships its own typeface names it in `--lg-font` and lists the
 stylesheet as `fonts` in `themes.js`; `ThemeProvider` injects the `<link>` the

@@ -137,6 +137,13 @@ export const IconPixel = (p) => (
   </Svg>
 );
 
+export const IconSwiss = (p) => (
+  <Svg {...p}>
+    <rect x="3.5" y="3.5" width="17" height="17" />
+    <path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17" />
+  </Svg>
+);
+
 export const IconColumns = (p) => (
   <Svg {...p}>
     <path d="M3.5 5h17" strokeWidth={2.6} />

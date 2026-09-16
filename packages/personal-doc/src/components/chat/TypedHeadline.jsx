@@ -60,7 +60,7 @@ export default function TypedHeadline({ onPick, paused }) {
         className="block text-[25px] leading-[1.22] text-white sm:text-[30px] md:text-[35px]"
         style={{
           fontFamily: 'var(--lg-font-display)',
-          fontWeight: 'var(--lg-weight-strong)',
+          fontWeight: 'var(--lg-display-weight)',
           letterSpacing: 'var(--lg-tracking-tight)',
           textTransform: 'var(--lg-display-transform)',
           textShadow: 'var(--lg-display-shadow)',

@@ -110,6 +110,7 @@
   --lg-display-transform: none;
   --lg-display-shadow: none;
   --lg-weight-strong: 500;
+  --lg-display-weight: 500;
   --lg-label-transform: uppercase;
   --lg-label-tracking: 0.14em;
 }
@@ -204,6 +205,7 @@
   --lg-display-transform: none;
   --lg-display-shadow: none;
   --lg-weight-strong: 700;
+  --lg-display-weight: 700;
   --lg-label-transform: uppercase;
   --lg-label-tracking: 0.12em;
 }
@@ -308,6 +310,7 @@
   --lg-display-transform: none;
   --lg-display-shadow: none;
   --lg-weight-strong: 700;
+  --lg-display-weight: 700;
   --lg-label-transform: uppercase;
   --lg-label-tracking: 0.2em;
 }
@@ -421,6 +424,7 @@
   --lg-display-transform: none;
   --lg-display-shadow: none;
   --lg-weight-strong: 900;
+  --lg-display-weight: 900;
   --lg-label-transform: uppercase;
   --lg-label-tracking: 0.08em;
 }
@@ -544,6 +548,7 @@
   --lg-display-transform: uppercase;
   --lg-display-shadow: none;
   --lg-weight-strong: 900;
+  --lg-display-weight: 900;
   --lg-label-transform: uppercase;
   --lg-label-tracking: 0.1em;
 }
@@ -652,6 +657,7 @@
   --lg-display-transform: none;
   --lg-display-shadow: none;
   --lg-weight-strong: 700;
+  --lg-display-weight: 700;
   --lg-label-transform: uppercase;
   --lg-label-tracking: 0.1em;
 }
@@ -781,6 +787,7 @@
   --lg-display-transform: uppercase;
   --lg-display-shadow: 4px 4px 0 #ff00ff;
   --lg-weight-strong: 900;
+  --lg-display-weight: 900;
   --lg-label-transform: uppercase;
   --lg-label-tracking: 0.06em;
 }
@@ -929,6 +936,7 @@
   --lg-display-transform: none;
   --lg-display-shadow: none;
   --lg-weight-strong: 400;
+  --lg-display-weight: 400;
   --lg-label-transform: none;
   --lg-label-tracking: 0.04em;
 }
@@ -1055,6 +1063,7 @@
   --lg-display-transform: none;
   --lg-display-shadow: none;
   --lg-weight-strong: 700;
+  --lg-display-weight: 700;
   --lg-label-transform: uppercase;
   --lg-label-tracking: 0.12em;
 }
@@ -1101,7 +1110,144 @@
   color: #dc2626;
 }
 
-/* ------------------------------------------------ 10. the utility remap */
+/* --------------------------------------------------------------- 10. swiss */
+/* Minimalism & Swiss Style, built to
+ * uistyleguide.com/style/minimalism-swiss-style: "rooted in the Swiss
+ * International Style of the 1950s … clarity, readability, objectivity.
+ * Grid-based layouts, sans-serif typography, generous white space." Its CSS
+ * line is `display: grid, gap: 2rem, font-family: sans-serif, max-width:
+ * 1200px`, and its effects are "subtle hover (200-250ms), sharp shadows if
+ * any". Three of those numbers appear here literally: the 2rem gap, the wide
+ * container, and a 220ms transition.
+ *
+ * It shares a neutral palette with two earlier themes and has to earn its own
+ * ground, so: paper is #f5f1e8 rather than white (the palette's own bone),
+ * cards are white *on* that paper, and the grid is wide where the minimal
+ * theme's column is narrow. Those are opposite arguments — minimal removes
+ * until one thing is left, Swiss organises until everything has a place.
+ *
+ * Two details carry more than their weight:
+ *
+ *   The headline is LIGHT. A Swiss headline is large, not heavy, and that is
+ *   the single clearest tell against the magazine theme's Inter 700. It is why
+ *   --lg-display-weight exists as a token separate from --lg-weight-strong:
+ *   the display line wants 400 while the labels still want 500.
+ *
+ *   The cards are numbered. The reference numbers everything — 01, 02, 03 —
+ *   and a CSS counter does it here without a line of markup.
+ */
+
+[data-lg-theme='swiss'] {
+  /* ground — paper, and nothing on it */
+  --lg-bg: #f5f1e8;
+  --lg-wash: none;
+  --lg-wash-blend: normal;
+  --lg-vignette: none;
+  --lg-scrim: linear-gradient(180deg, #f5f1e8 38%, rgba(245, 241, 232, 0.92) 70%, rgba(245, 241, 232, 0) 100%);
+
+  /* ink & accents */
+  --lg-ink: #000000;
+  --lg-on-accent: #ffffff;
+  --lg-on-well: #ffffff;
+  --lg-accent: #b38b6d;
+  /* the tan darkened to 4.8:1 for the places it has to be read rather than
+     seen; #b38b6d itself is 2.6:1 on white and is used only as a fill */
+  --lg-accent-soft: #8a6a4f;
+  --lg-accent-warm: #8a6a4f;
+  --lg-live: #b38b6d;
+  --lg-live-glow: none;
+
+  /* surfaces — white cards on bone, hairline, nothing cast */
+  --lg-surface-bg: #ffffff;
+  --lg-surface-blur: none;
+  --lg-surface-shadow: none;
+  --lg-flat-bg: #ffffff;
+  --lg-flat-blur: none;
+  --lg-flat-shadow: none;
+
+  /* edges */
+  --lg-border: 1px;
+  --lg-line: #000000;
+  --lg-rim-a: transparent;
+  --lg-rim-b: transparent;
+  --lg-rim-warm: 179 139 109;
+  --lg-rim-cool: 128 128 128;
+  --lg-rim-hot: 0 0 0;
+  --lg-hairline-display: none;
+  --lg-specular-display: none;
+
+  /* fills */
+  --lg-send-fill: #000000;
+  --lg-send-shadow: none;
+  --lg-busy-fill: #808080;
+  --lg-focus-bloom: 0 0 0 1px #000000;
+  --lg-avatar-fill: #b38b6d;
+  --lg-avatar-shadow: none;
+  --lg-bullet-fill: #000000;
+  --lg-media-filter: none;
+  --lg-bloom-blur: 0px;
+  --lg-bloom-saturation: 0.3;
+  --lg-quote-line: #b38b6d;
+
+  --lg-spectrum: conic-gradient(from 0deg, #000000 0 62%, #808080 0 80%, #b38b6d 0);
+  --lg-spectrum-blur: 0px;
+  --lg-spectrum-blur-hover: 0px;
+  --lg-well-fill: #000000;
+  --lg-well-shadow: none;
+
+  /* a11y + motion — the guide's own 200-250ms */
+  --lg-focus-ring: #000000;
+  --lg-scroll-thumb: #808080;
+  --lg-scroll-thumb-hover: #000000;
+  --lg-theme-transition: background-color 0.22s ease, color 0.22s ease, border-color 0.22s ease;
+
+  /* layout — wide where the minimal theme is narrow. The guide's 1200px is a
+     container, not a measure: running text still stops at a readable line
+     length, because legibility is the whole argument of this style. */
+  --lg-measure: 780px;
+  --lg-measure-wide: 1120px;
+  --lg-leading: 1.65;
+
+  /* type */
+  --lg-font: 'Inter', Helvetica, Arial, sans-serif;
+  --lg-font-display: 'Inter', Helvetica, Arial, sans-serif;
+  --lg-ligatures: normal;
+  --lg-tracking-tight: -0.03em;
+  --lg-display-transform: none;
+  --lg-display-shadow: none;
+  --lg-weight-strong: 500;
+  --lg-display-weight: 400;
+  --lg-label-transform: uppercase;
+  --lg-label-tracking: 0.14em;
+}
+
+/* ---- the grid, and the counting ----------------------------------------- */
+
+/* The guide's 2rem, replacing the surface's default 10px. */
+[data-lg-theme='swiss'] .lg-root [role='list'] {
+  counter-reset: lg-item;
+  gap: 2rem;
+}
+
+/* Numbered, the way the reference numbers everything. No markup involved —
+ * ::after is free on these cards, which carry .lg-surface but not
+ * .lg-specular. */
+[data-lg-theme='swiss'] .lg-root [role='list'] > * {
+  counter-increment: lg-item;
+}
+
+[data-lg-theme='swiss'] .lg-root [role='list'] > *::after {
+  content: counter(lg-item, decimal-leading-zero);
+  position: absolute;
+  top: 0.85rem;
+  right: 1rem;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: #808080;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------ 11. the utility remap */
 /* Tailwind v4 compiles `text-white/60` to
  *     color: color-mix(in oklab, var(--color-white) 60%, transparent)
  * so rebinding --color-white inside this subtree retargets every white-alpha
@@ -1139,11 +1285,12 @@
   --color-white: #1a1a1a;
 }
 
-[data-lg-theme='mag'] .lg-root {
+[data-lg-theme='mag'] .lg-root,
+[data-lg-theme='swiss'] .lg-root {
   --color-white: #000000;
 }
 
-/* ----------------------------------------- 10b. the opacity floor (light) */
+/* ----------------------------------------- 11b. the opacity floor (light) */
 /* Alpha is not perceptually symmetric across grounds. White at 28% over near
  * black still reads as text; ink at 28% over paper is a smudge — the eye is
  * far more forgiving of light-on-dark than of dark-on-light at the same alpha.
@@ -1166,22 +1313,22 @@
  * hard way: the magazine theme's kicker rule matched, computed, and was
  * silently overridden by this block because both landed on (0,3,0). */
 
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/20) { color: color-mix(in oklab, var(--color-white) 42%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/25) { color: color-mix(in oklab, var(--color-white) 46%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/28) { color: color-mix(in oklab, var(--color-white) 52%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/30) { color: color-mix(in oklab, var(--color-white) 54%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/35) { color: color-mix(in oklab, var(--color-white) 58%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/40) { color: color-mix(in oklab, var(--color-white) 62%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/45) { color: color-mix(in oklab, var(--color-white) 64%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/50) { color: color-mix(in oklab, var(--color-white) 68%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/55) { color: color-mix(in oklab, var(--color-white) 72%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/60) { color: color-mix(in oklab, var(--color-white) 76%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/70) { color: color-mix(in oklab, var(--color-white) 82%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/75) { color: color-mix(in oklab, var(--color-white) 86%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/20) { color: color-mix(in oklab, var(--color-white) 42%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/25) { color: color-mix(in oklab, var(--color-white) 46%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/28) { color: color-mix(in oklab, var(--color-white) 52%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/30) { color: color-mix(in oklab, var(--color-white) 54%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/35) { color: color-mix(in oklab, var(--color-white) 58%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/40) { color: color-mix(in oklab, var(--color-white) 62%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/45) { color: color-mix(in oklab, var(--color-white) 64%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/50) { color: color-mix(in oklab, var(--color-white) 68%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/55) { color: color-mix(in oklab, var(--color-white) 72%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/60) { color: color-mix(in oklab, var(--color-white) 76%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/70) { color: color-mix(in oklab, var(--color-white) 82%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/75) { color: color-mix(in oklab, var(--color-white) 86%, transparent); }
 
 /* Hover states resolve to the full ink, which is already the rule. */
 
-/* ------------------------------------------------- 10c. the radius override */
+/* ------------------------------------------------- 11c. the radius override */
 /* The second — and last — place the system touches the utility layer.
  *
  * Corner radius lives in the markup as `rounded-2xl`, `rounded-full`,
@@ -1196,11 +1343,11 @@
  * icon wells all become blocks, which is the correct reading of this style
  * rather than a casualty of it. */
 
-:is([data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='chaos'], [data-lg-theme='mag']) .lg-root [class*='rounded'] {
+:is([data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='chaos'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root [class*='rounded'] {
   border-radius: 0;
 }
 
-/* ----------------------------------------------------- 11. theme switching */
+/* ----------------------------------------------------- 12. theme switching */
 /* Tokens are interpolatable, so a change of theme cross-fades the whole
  * surface rather than cutting. Only the cheap properties are transitioned —
  * animating box-shadow or backdrop-filter across a page of glass is not.
