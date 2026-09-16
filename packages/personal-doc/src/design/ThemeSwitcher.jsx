@@ -2,7 +2,15 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 import PrismButton from '../components/chat/PrismButton';
-import { IconBlocks, IconCheck, IconGlass, IconPixel, IconSlab, IconTheme } from '../components/chat/Icons';
+import {
+  IconBlocks,
+  IconCheck,
+  IconGlass,
+  IconPixel,
+  IconRaw,
+  IconSlab,
+  IconTheme,
+} from '../components/chat/Icons';
 import { useTheme } from './useTheme';
 
 /* The appearance control.
@@ -17,7 +25,13 @@ import { useTheme } from './useTheme';
  * a two-state switch would have to be rebuilt the moment a third arrives.
  */
 
-const THEME_ICONS = { glass: IconGlass, slab: IconSlab, pixel: IconPixel, blocks: IconBlocks };
+const THEME_ICONS = {
+  glass: IconGlass,
+  slab: IconSlab,
+  pixel: IconPixel,
+  blocks: IconBlocks,
+  raw: IconRaw,
+};
 
 const DRAWER = {
   initial: { opacity: 0, y: -8, scale: 0.97 },
@@ -128,7 +142,9 @@ export default function ThemeSwitcher() {
               role="menu"
               aria-label="Appearance"
               {...DRAWER}
-              className="lg-surface absolute right-0 top-[calc(100%+10px)] z-40 w-[272px] max-w-[calc(100vw-2rem)] origin-top-right overflow-hidden rounded-2xl p-1.5"
+              /* 300px, not 272: the hint line has to survive a monospace theme,
+                 where the same 26 characters are about 30% wider. */
+              className="lg-surface absolute right-0 top-[calc(100%+10px)] z-40 w-[300px] max-w-[calc(100vw-2rem)] origin-top-right overflow-hidden rounded-2xl p-1.5"
             >
               <span
                 className="lg-hairline"

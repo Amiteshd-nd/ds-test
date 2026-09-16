@@ -115,7 +115,11 @@ function Cards({ ids }) {
               />
               <span className="relative min-w-0 flex-1">
                 <span className="block truncate text-[14.5px] font-medium text-white">{proj.title}</span>
-                <span className="mt-0.5 block text-[12.5px] leading-snug text-white/50 line-clamp-2">
+                {/* No `block` here: Tailwind's line-clamp needs display:-webkit-box
+                    and `block` outranks it, which left the clamp inert. It only
+                    became visible once a theme brought a wider face and the blurb
+                    wrapped to a third line. */}
+                <span className="mt-0.5 text-[12.5px] leading-snug text-white/50 line-clamp-2">
                   {proj.blurb}
                 </span>
               </span>

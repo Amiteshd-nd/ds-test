@@ -61,6 +61,17 @@ export const THEMES = [
     /* index.css loads Inter at 400-600; the display line here is 900. */
     fonts: 'https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&display=swap',
   },
+  {
+    id: 'brutal',
+    name: 'Brutalism',
+    hint: 'Raw, mono, no shadow',
+    icon: 'raw',
+    swatch: ['#ffffff', '#000000', '#ff0000'],
+    /* A black monolith on white. Four bands rather than the six a soft theme
+     * wants: enough for the form to read, few enough to stay crude. */
+    material: { flat: 1, tint: [0.08, 0.08, 0.1], bands: 4, pixel: 0 },
+    /* No `fonts` on purpose — see the token block in themes.css. */
+  },
 ];
 
 export const DEFAULT_THEME = THEMES[0].id;

@@ -30,17 +30,13 @@ sounds, and it is what forced the interesting part of the architecture (§4).
 
 ## 2. The themes
 
-| | Liquid Glass (default) | Neo Brutalism | 16-Bit Handheld | Neubrutalism |
+| | Ground | Surfaces & edges | Type | Material |
 | --- | --- | --- | --- | --- |
-| Ground | near-black `#060609`, bloom, vignette | bone `#efede6`, cut shapes, dot-grid | yellow `#fbdd65`, clouds, scanlines | ivory `#fefce8`, four hard colour blocks |
-| Surface | translucent, `blur(20px)` | opaque white | cream, plum + bone double ring | white, `3px` black |
-| Edge | 1px masked gradient rim | 2px solid ink | 3px solid plum | 3px solid black |
-| Shadow | soft, `0 20px 50px -20px` | offset, `4px 4px 0` | offset, `5px 5px 0` | offset, `5px 5px 0` |
-| Radius | as authored | as authored | as authored | **zero, everywhere** |
-| Accent | violet → magenta → blue | one electric blue | blue, red, coin gold | the guide's six primaries |
-| Gradients | smooth, many stops | none | two stops, same position | none |
-| Type | medium, `-0.03em` | bold, `-0.02em` | Pixelify Sans / Silkscreen | Inter 900 |
-| Material | physical refraction | six ink bands | four bands, 56-block grid | five bands, saturated pink |
+| **Liquid Glass** (default) | near-black `#060609`, bloom, vignette | translucent, `blur(20px)`, 1px gradient rim, soft `0 20px 50px` | Outfit, medium, `-0.03em` | physical refraction |
+| **Neo Brutalism** | bone `#efede6`, cut shapes, dot-grid | opaque white, 2px ink, offset `4px 4px 0` | Outfit, bold, `-0.02em` | six ink bands, blue |
+| **16-Bit Handheld** | yellow `#fbdd65`, clouds, scanlines | cream, 3px plum + bone inner ring, offset `5px 5px 0` | Pixelify Sans / Silkscreen | four bands, 56-block pixel grid |
+| **Neubrutalism** | ivory `#fefce8`, four hard colour blocks | white, 3px black, offset `5px 5px 0`, **radius 0** | Inter 900 | five bands, saturated pink |
+| **Brutalism** | white, exposed 1px column rules | white, 4px black, **no shadow**, **radius 0**, **no transitions** | system mono + Helvetica 900, uppercase | four bands, near-black |
 
 The neo theme follows the reference the work was briefed against: white cards,
 black outlines, hard offset shadows, an electric blue primary, and yellow /
@@ -52,15 +48,28 @@ the era's sprite art. Its cream panels carry a double ring — plum outside, bon
 inside — which is how the reference draws a window frame, and it costs nothing
 because `--lg-surface-shadow` can hold an inset and an offset at once.
 
-**Two brutalisms, on purpose.** `neo` is the paper-and-ink reading — one
-accent, a quiet ground, rounded as authored. `neub` is
-[uistyleguide.com's](https://www.uistyleguide.com/style/neubrutalism) 2020s
-product reading of the same idea — "think Figma and Notion" — which means a
-whole primary palette used at once, 3px black outlines on everything, `5px 5px
-0` shadows, and sharp corners. Two tokens deviate from that reference, both for
-contrast: the active-state pink is darkened to `#db2777` (5.0:1 on white, where
-the reference's `#f472b6` is 2.2:1), and the send button takes the reference's
-own black-on-white button rather than a mid-tone primary.
+**Three brutalisms, on purpose.** They are three readings of one movement, and
+the drawer is meant to let you feel the difference rather than read about it:
+
+- **Neo Brutalism** — the paper-and-ink reading. One accent, a quiet ground,
+  rounding as authored.
+- **Neubrutalism** — [the guide's](https://www.uistyleguide.com/style/neubrutalism)
+  2020s product reading, "think Figma and Notion": the whole primary palette at
+  once, 3px black outlines, `5px 5px 0` shadows, sharp corners. Two tokens
+  deviate from it for contrast — the active-state pink is darkened to `#db2777`
+  (5.0:1 on white against the reference's 2.2:1), and the send button takes the
+  reference's own black-on-white button rather than a mid-tone primary.
+- **Brutalism** — [the guide's](https://www.uistyleguide.com/style/brutalism)
+  raw reading, and the one the other two are softenings of. Take neubrutalism's
+  drop shadow and its warmth away and this is what is left: white, black,
+  hairline structure, unmixed primaries, and type nobody art-directed. Its CSS
+  line is `border-radius: 0px, transition: none, font-weight: 700+, border:
+  2-4px solid`, and all four are literal here.
+
+Brutalism is also the only theme that loads **no webfont at all**. "Default
+fonts" is in the style's own description, so it asks for the system's own mono
+and grotesque rather than downloading a face that imitates them. That is a
+design position, not an optimisation, and it should stay that way.
 
 **One deliberate departure from the neo reference.** The reference puts a
 full-bleed blue band behind its header and hero. Ink on `#0a6cff` measures
@@ -174,7 +183,7 @@ same instinct applies to anything else that owns a loop.
 `animate={{ backgroundColor: 'var(--x)' }}` works; `animate={{ y: 'var(--x)' }}`
 is not reliable. Hover lifts stay plain numbers.
 
-### 5.5 Themes cross-fade, they do not cut
+### 5.5 Themes cross-fade unless a theme refuses
 
 `background-color`, `color` and `border-color` transition over 280ms on the
 root and both surface primitives — enough to read as a material change rather
@@ -182,6 +191,18 @@ than a page reload. `box-shadow` and `backdrop-filter` are deliberately *not*
 transitioned: animating either across a page of glass is expensive and looks
 worse than the cut it replaces. Everything stops under
 `prefers-reduced-motion`.
+
+The duration is `--lg-theme-transition` rather than a fixed rule, because a
+theme is allowed to say no. `transition: none` is a stated requirement of the
+brutal theme, and a surface that cuts on every other state change should not
+dissolve into view. That theme also resets the utility layer's transitions
+across its whole subtree — `transition-colors` sits on most interactive
+elements, and a theme that declares no transitions has to mean it.
+
+The limit worth knowing: Framer's spring-driven layout motion is JavaScript and
+keeps running. Stopping it would mean branching a component on a theme id,
+which rule §5.1 forbids, so `prefers-reduced-motion` remains the only thing
+that halts it. A theme can flatten CSS, not physics.
 
 ## 6. The control
 
@@ -219,6 +240,7 @@ that become shader uniforms:
 | Neo | 1 | blue | 6 | 0 |
 | 16-bit | 1 | handheld blue | 4 | 56 |
 | Neubrutalism | 1 | saturated pink | 5 | 0 |
+| Brutalism | 1 | near-black | 4 | 0 |
 
 Three bands was the first value tried for the neubrutalism cube, on the logic
 that "flat colours" means as few steps as possible. It was wrong in practice:
@@ -289,11 +311,11 @@ Every theme declares all of these. Grouped as they appear in `themes.css`.
 `--lg-well-fill` `--lg-well-shadow`
 
 **A11y & motion** `--lg-focus-ring` `--lg-scroll-thumb`
-`--lg-scroll-thumb-hover` `--lg-lift`
+`--lg-scroll-thumb-hover` `--lg-theme-transition`
 
 **Type** `--lg-font` `--lg-font-display` `--lg-ligatures`
-`--lg-tracking-tight` `--lg-weight-strong` `--lg-label-transform`
-`--lg-label-tracking`
+`--lg-tracking-tight` `--lg-display-transform` `--lg-weight-strong`
+`--lg-label-transform` `--lg-label-tracking`
 
 A theme that ships its own typeface names it in `--lg-font` and lists the
 stylesheet as `fonts` in `themes.js`; `ThemeProvider` injects the `<link>` the

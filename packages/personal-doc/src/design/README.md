@@ -33,6 +33,8 @@ Files:
    built on sharp corners zeroes `border-radius` on every rounding utility.
    These three blocks are the *only* places the system touches Tailwind's
    generated class names. Do not add a fourth without reading §4 of the docs.
+   A theme may also reset transitions across its subtree, which overrides the
+   utility layer without naming any of it.
 
 ## Rules
 
@@ -62,7 +64,9 @@ Files:
    state you will not find until later.
 3. If the theme is light, add its selector to the `:is()` list on the
    opacity-floor block, and rebind `--color-white` to its ink. If it wants
-   sharp corners, copy the radius-override block.
+   sharp corners, join the `:is()` list on the radius override. If it wants no
+   motion, set `--lg-theme-transition: none` and add it to the transition
+   reset.
 4. If the icon key is new, add the icon to `components/chat/Icons.jsx` and map
    it in `ThemeSwitcher.jsx`'s `THEME_ICONS`.
 
@@ -78,3 +82,7 @@ streaming.
 Read the running text, do not just look at it. A theme that ships a typeface
 can ship a broken ligature with it (`--lg-ligatures`), and muted copy that
 survived on black can fall under contrast on paper (the opacity floor).
+
+Watch what a wider face does to fixed-width furniture, too: the monospace theme
+is what finally exposed a `line-clamp` that had never worked, and it needed the
+theme drawer 28px wider than proportional type did.
