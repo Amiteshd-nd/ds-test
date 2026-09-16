@@ -36,6 +36,11 @@ Files:
    A theme may also reset transitions across its subtree, which overrides the
    utility layer without naming any of it.
 
+   Separately, components carry `data-lg-*` hooks (`data-lg-block`,
+   `data-lg-kicker`) that name what content *is*, so a theme can style the lead
+   paragraph or a kicker. Those are the system's own — add one when a theme
+   needs to name a part of the content model, never to stand in for a token.
+
 ## Rules
 
 - **Never** put a colour, shadow, blur or radius literal in a component or in

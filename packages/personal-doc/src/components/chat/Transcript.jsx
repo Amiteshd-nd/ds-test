@@ -38,7 +38,14 @@ function Paragraph({ text, limit }) {
   const words = text.split(' ');
   const shown = limit === undefined ? words.length : Math.min(limit, words.length);
   return (
-    <p className="text-[15.5px] text-white/80 md:text-[16px]" style={{ lineHeight: 'var(--lg-leading)' }}>
+    /* data-lg-block is a hook for the design system, not a style. A theme that
+       wants a drop cap needs to name "the lead paragraph of an answer", which
+       no Tailwind class says and no token can express. */
+    <p
+      data-lg-block="p"
+      className="text-[15.5px] text-white/80 md:text-[16px]"
+      style={{ lineHeight: 'var(--lg-leading)' }}
+    >
       {words.slice(0, shown).join(' ')}
     </p>
   );

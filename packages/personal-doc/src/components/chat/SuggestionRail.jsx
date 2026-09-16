@@ -48,7 +48,10 @@ export default function SuggestionRail({ onPick, variant = 'grid' }) {
               <Icon size={17} />
             </span>
             <span className="min-w-0">
-              <span className="block text-[11px] font-medium uppercase tracking-[0.1em] text-white/35">
+              <span
+                data-lg-kicker=""
+                className="block text-[11px] font-medium uppercase tracking-[0.1em] text-white/35"
+              >
                 {s.label}
               </span>
               <span className="mt-1 block text-[14px] leading-snug text-white/85">{s.prompt}</span>

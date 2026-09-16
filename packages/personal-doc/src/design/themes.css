@@ -951,7 +951,152 @@
 [data-lg-theme='raw'] .lg-root [role='list'] > *:nth-child(2n + 1) { rotate: -0.5deg; }
 [data-lg-theme='raw'] .lg-root [role='list'] > *:nth-child(2n) { rotate: 0.5deg; }
 
-/* ------------------------------------------------- 9. the utility remap */
+/* ----------------------------------------------------------------- 9. mag */
+/* Editorial Grid / Magazine, built to
+ * uistyleguide.com/style/editorial-grid-magazine: "print magazine aesthetics
+ * with asymmetric grids, pull quotes, and editorial typography." Its CSS line
+ * is `display: grid with named areas, column-count for text, ::first-letter
+ * for drop caps`, and its palette is four: black, white, #dc2626, #6b7280.
+ *
+ * The reference is worth reading rather than paraphrasing: it has no boxes at
+ * all. Stories are separated by rules and space, kickers are red and set in
+ * caps above the headline, and nothing has a corner. So this theme spends its
+ * budget on rules rather than on containers — a hairline box holds the
+ * overlays together (a drawer floating over white needs an edge), and a heavy
+ * 2px black rule sits on top of every surface, which is the device the
+ * reference uses to start a column.
+ *
+ * Two structural hooks were added to the components for this theme, and they
+ * are the first of their kind: `data-lg-block` on the lead paragraph and
+ * `data-lg-kicker` on the two label elements. A drop cap has to name "the
+ * first paragraph of an answer" and a kicker has to name "the label above a
+ * card" — neither is something a token can say or a Tailwind class means.
+ * They are semantic hooks the design system owns, not utility-layer reaches.
+ *
+ * NOT implemented, on purpose: `column-count`. Multi-column body text is the
+ * signature of the style and it is actively wrong here — this transcript
+ * streams a word at a time, and text reflowing between two columns while it
+ * arrives is unreadable. The device assumes finished text. Everything else the
+ * guide asks for is present.
+ */
+
+[data-lg-theme='mag'] {
+  /* ground — a page, not a canvas */
+  --lg-bg: #ffffff;
+  --lg-wash: none;
+  --lg-wash-blend: normal;
+  --lg-vignette: none;
+  --lg-scrim: linear-gradient(180deg, #ffffff 38%, rgba(255, 255, 255, 0.92) 70%, rgba(255, 255, 255, 0) 100%);
+
+  /* ink & accents */
+  --lg-ink: #000000;
+  --lg-on-accent: #ffffff;
+  --lg-on-well: #ffffff;
+  --lg-accent: #dc2626;
+  --lg-accent-soft: #dc2626;
+  --lg-accent-warm: #dc2626;
+  --lg-live: #dc2626;
+  --lg-live-glow: none;
+
+  /* surfaces — see the rules block below; the box is only for overlays */
+  --lg-surface-bg: #ffffff;
+  --lg-surface-blur: none;
+  --lg-surface-shadow: none;
+  --lg-flat-bg: transparent;
+  --lg-flat-blur: none;
+  --lg-flat-shadow: none;
+
+  /* edges */
+  --lg-border: 1px;
+  --lg-line: #e5e7eb;
+  --lg-rim-a: transparent;
+  --lg-rim-b: transparent;
+  --lg-rim-warm: 220 38 38;
+  --lg-rim-cool: 107 114 128;
+  --lg-rim-hot: 0 0 0;
+  --lg-hairline-display: none;
+  --lg-specular-display: none;
+
+  /* fills */
+  --lg-send-fill: #dc2626;
+  --lg-send-shadow: none;
+  --lg-busy-fill: #6b7280;
+  --lg-focus-bloom: 0 0 0 1px #e5e7eb;
+  --lg-avatar-fill: #dc2626;
+  --lg-avatar-shadow: none;
+  --lg-bullet-fill: #dc2626;
+  --lg-media-filter: none;
+  --lg-bloom-blur: 0px;
+  --lg-bloom-saturation: 0.35;
+  --lg-quote-line: #dc2626;
+
+  --lg-spectrum: conic-gradient(from 0deg, #000000 0 50%, #dc2626 0);
+  --lg-spectrum-blur: 0px;
+  --lg-spectrum-blur-hover: 0px;
+  --lg-well-fill: #000000;
+  --lg-well-shadow: none;
+
+  /* a11y + motion */
+  --lg-focus-ring: #dc2626;
+  --lg-scroll-thumb: #000000;
+  --lg-scroll-thumb-hover: #dc2626;
+  --lg-theme-transition: background-color 0.28s ease, color 0.28s ease, border-color 0.28s ease;
+
+  /* layout */
+  --lg-measure: 720px;
+  --lg-measure-wide: 840px;
+  --lg-leading: 1.6;
+
+  /* type */
+  --lg-font: 'Inter', system-ui, sans-serif;
+  --lg-font-display: 'Inter', system-ui, sans-serif;
+  --lg-ligatures: normal;
+  --lg-tracking-tight: -0.025em;
+  --lg-display-transform: none;
+  --lg-display-shadow: none;
+  --lg-weight-strong: 700;
+  --lg-label-transform: uppercase;
+  --lg-label-tracking: 0.12em;
+}
+
+/* ---- the rules, which are the whole layout ------------------------------ */
+
+/* Every panel starts with a heavy rule, the way a column does in print. The
+ * hairline from --lg-line stays on the other three sides so an overlay
+ * floating over a white page still has an edge. */
+[data-lg-theme='mag'] .lg-root .lg-surface {
+  border-top: 2px solid #000000;
+}
+
+/* Chips are underlined, not boxed. */
+[data-lg-theme='mag'] .lg-root .lg-surface-flat {
+  border-width: 0 0 2px 0;
+  border-bottom-color: #000000;
+}
+
+/* A rule between stories. */
+[data-lg-theme='mag'] .lg-root [role='log'] > * + * {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1.5rem;
+}
+
+/* Kickers are red and in caps — the device the reference puts above every
+ * headline. */
+[data-lg-theme='mag'] .lg-root [data-lg-kicker] {
+  color: #dc2626;
+}
+
+/* The drop cap, on the lead paragraph of an answer only. */
+[data-lg-theme='mag'] .lg-root [data-lg-block='p']:first-child::first-letter {
+  float: left;
+  padding: 0.04em 0.09em 0 0;
+  font-size: 3.1em;
+  font-weight: 800;
+  line-height: 0.82;
+  color: #dc2626;
+}
+
+/* ------------------------------------------------ 10. the utility remap */
 /* Tailwind v4 compiles `text-white/60` to
  *     color: color-mix(in oklab, var(--color-white) 60%, transparent)
  * so rebinding --color-white inside this subtree retargets every white-alpha
@@ -989,7 +1134,11 @@
   --color-white: #1a1a1a;
 }
 
-/* ------------------------------------------ 9b. the opacity floor (light) */
+[data-lg-theme='mag'] .lg-root {
+  --color-white: #000000;
+}
+
+/* ----------------------------------------- 10b. the opacity floor (light) */
 /* Alpha is not perceptually symmetric across grounds. White at 28% over near
  * black still reads as text; ink at 28% over paper is a smudge — the eye is
  * far more forgiving of light-on-dark than of dark-on-light at the same alpha.
@@ -1002,24 +1151,32 @@
  * and it is what buys the rest of the surface the right to keep its markup.
  *
  * Every light theme joins the :is() list. `:is()` takes the specificity of its
- * strongest argument, so adding one never quietly outranks the others. */
+ * strongest argument, so adding one never quietly outranks the others.
+ *
+ * The utility class sits inside `:where()`, which contributes no specificity.
+ * That is deliberate and it is what makes this a *floor* rather than a
+ * ceiling: it still outranks the bare utility (0,2,0 against 0,1,0), but any
+ * theme rule that wants to colour one of these elements — a red kicker, say —
+ * outranks it in turn instead of tying and losing on source order. Found the
+ * hard way: the magazine theme's kicker rule matched, computed, and was
+ * silently overridden by this block because both landed on (0,3,0). */
 
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/20 { color: color-mix(in oklab, var(--color-white) 42%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/25 { color: color-mix(in oklab, var(--color-white) 46%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/28 { color: color-mix(in oklab, var(--color-white) 52%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/30 { color: color-mix(in oklab, var(--color-white) 54%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/35 { color: color-mix(in oklab, var(--color-white) 58%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/40 { color: color-mix(in oklab, var(--color-white) 62%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/45 { color: color-mix(in oklab, var(--color-white) 64%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/50 { color: color-mix(in oklab, var(--color-white) 68%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/55 { color: color-mix(in oklab, var(--color-white) 72%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/60 { color: color-mix(in oklab, var(--color-white) 76%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/70 { color: color-mix(in oklab, var(--color-white) 82%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw']) .lg-root .text-white\/75 { color: color-mix(in oklab, var(--color-white) 86%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/20) { color: color-mix(in oklab, var(--color-white) 42%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/25) { color: color-mix(in oklab, var(--color-white) 46%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/28) { color: color-mix(in oklab, var(--color-white) 52%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/30) { color: color-mix(in oklab, var(--color-white) 54%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/35) { color: color-mix(in oklab, var(--color-white) 58%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/40) { color: color-mix(in oklab, var(--color-white) 62%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/45) { color: color-mix(in oklab, var(--color-white) 64%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/50) { color: color-mix(in oklab, var(--color-white) 68%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/55) { color: color-mix(in oklab, var(--color-white) 72%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/60) { color: color-mix(in oklab, var(--color-white) 76%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/70) { color: color-mix(in oklab, var(--color-white) 82%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag']) .lg-root :where(.text-white\/75) { color: color-mix(in oklab, var(--color-white) 86%, transparent); }
 
 /* Hover states resolve to the full ink, which is already the rule. */
 
-/* -------------------------------------------------- 9c. the radius override */
+/* ------------------------------------------------- 10c. the radius override */
 /* The second — and last — place the system touches the utility layer.
  *
  * Corner radius lives in the markup as `rounded-2xl`, `rounded-full`,
@@ -1034,11 +1191,11 @@
  * icon wells all become blocks, which is the correct reading of this style
  * rather than a casualty of it. */
 
-:is([data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='chaos']) .lg-root [class*='rounded'] {
+:is([data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='chaos'], [data-lg-theme='mag']) .lg-root [class*='rounded'] {
   border-radius: 0;
 }
 
-/* ----------------------------------------------------- 10. theme switching */
+/* ----------------------------------------------------- 11. theme switching */
 /* Tokens are interpolatable, so a change of theme cross-fades the whole
  * surface rather than cutting. Only the cheap properties are transitioned —
  * animating box-shadow or backdrop-filter across a page of glass is not.

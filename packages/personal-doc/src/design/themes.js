@@ -106,6 +106,17 @@ export const THEMES = [
     material: { flat: 1, tint: [0.42, 0.32, 0.22], bands: 5, pixel: 0 },
     fonts: 'https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap',
   },
+  {
+    id: 'mag',
+    name: 'Magazine',
+    hint: 'Rules, kickers, drop caps',
+    icon: 'columns',
+    swatch: ['#ffffff', '#000000', '#dc2626'],
+    /* The press red, six bands. A magazine prints photographs, so the cube gets
+     * enough steps to still look photographed rather than stencilled. */
+    material: { flat: 1, tint: [0.86, 0.15, 0.15], bands: 6, pixel: 0 },
+    fonts: 'https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&display=swap',
+  },
 ];
 
 export const DEFAULT_THEME = THEMES[0].id;

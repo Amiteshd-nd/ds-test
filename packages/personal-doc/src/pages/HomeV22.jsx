@@ -370,6 +370,7 @@ function ChatSurface() {
           {!hasChat && (
             <div className="lg-rise mb-4 mt-1">
               <p
+                data-lg-kicker=""
                 className="mb-2 px-2 text-[12px] text-white/30"
                 style={{
                   fontWeight: 'var(--lg-weight-strong)',

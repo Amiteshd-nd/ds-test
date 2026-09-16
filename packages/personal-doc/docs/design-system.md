@@ -40,6 +40,7 @@ sounds, and it is what forced the interesting part of the architecture (§4).
 | **Minimal & Direct** | white, nothing on it at all | white, 1px `#e5e7eb`, no shadow, **640px single column**, `1.75` leading | Inter, four colours total | eight bands, graphite |
 | **Maximalism** | `#ffff00`, multiply overprint, plaid stripes | white/colour-cycled, 4px black, `6px 6px 0`, **tilted ±1.6°**, radius 0 | Inter 900 uppercase, magenta offset shadow | four bands, pure magenta |
 | **Anti-Polish / Raw** | `#fafaf8` paper, SVG grain, kraft blobs | cream, 2px `#1a1a1a`, no shadow, **hand-drawn corners**, tilted ±0.5° | Patrick Hand, sentence case | five bands, sepia |
+| **Magazine** | white page, nothing on it | boxless — a 2px black rule starts every panel, chips underlined, radius 0 | Inter 700, red caps kickers, **drop cap** | six bands, press red |
 
 The neo theme follows the reference the work was briefed against: white cards,
 black outlines, hard offset shadows, an electric blue primary, and yellow /
@@ -90,6 +91,8 @@ way to read it than by era:
 - **Layout** — minimal. How much room things get.
 - **Placement** — maximalism, anti-polish. Where things sit, and whether they
   sit straight.
+- **Structure** — magazine. What separates one thing from the next: a rule and
+  some space rather than a container.
 
 **Anti-Polish / Raw** is the one that proved the parts compose. It needed no
 new mechanism at all: the radius layer built for sharp corners carries its
@@ -164,7 +167,13 @@ Two consequences, both handled:
   quarantined to a single labelled block in `themes.css`, and it is what buys
   the rest of the surface the right to keep its markup. Every light theme joins
   the block's `:is()` list — `:is()` takes the specificity of its strongest
-  argument, so adding one never quietly outranks the others.
+  argument, so adding one never quietly outranks the others. The utility class
+  sits inside `:where()`, which contributes no specificity — deliberately, and
+  it is what makes this a *floor* rather than a ceiling. It still outranks the
+  bare utility, but a theme rule that wants to colour one of these elements
+  outranks it in turn. Found the hard way: the magazine theme's kicker rule
+  matched, computed, and lost on source order because both landed on the same
+  specificity.
 
 **Corner radius** is the second — and so far last — reach into the utility
 layer. Tailwind compiles the named steps (`rounded-2xl`) to `var(--radius-*)`,
@@ -230,6 +239,34 @@ display type on `#0000ff` at 2.4:1. The fix was not to move it but to change
 its kind — blue became a stripe set, and stripes tint evenly, so every word
 keeps the ground's contrast wherever it falls. Corner blobs are safe; anything
 crossing the reading column has to be a texture, not a shape.
+
+### 4c. Semantic hooks
+
+The magazine theme needed two things no token can say and no Tailwind class
+means: *the lead paragraph of an answer* (for a drop cap) and *the label above
+a card* (for a red kicker). Both got a `data-` attribute on the element that
+already existed:
+
+```jsx
+<p data-lg-block="p" …>          <span data-lg-kicker="" …>
+```
+
+```css
+[data-lg-theme='mag'] .lg-root [data-lg-block='p']:first-child::first-letter { … }
+[data-lg-theme='mag'] .lg-root [data-lg-kicker] { color: #dc2626 }
+```
+
+These are hooks the design system owns, describing what content *is*. That
+makes them categorically different from the utility-layer reaches in §4 — those
+target class names Tailwind generated and could rename; these target meaning
+the components declare. Add them freely when a theme needs to name a part of
+the content model. Do not add them to stand in for a token.
+
+**One deliberate omission.** The guide asks for `column-count` on body text,
+which is the signature of the style — and it is wrong here. This transcript
+streams a word at a time, and text reflowing between two columns as it arrives
+is unreadable. The device assumes finished text. Everything else the guide
+asks for is implemented; this one is a considered no, not an oversight.
 
 ## 5. Rules
 
@@ -319,6 +356,7 @@ that become shader uniforms:
 | Minimal | 1 | graphite | 8 | 0 |
 | Maximalism | 1 | pure magenta | 4 | 0 |
 | Anti-Polish | 1 | sepia | 5 | 0 |
+| Magazine | 1 | press red | 6 | 0 |
 
 Minimal is the only flat theme that wants *more* bands, not fewer. Its
 restraint is about decoration, not about crudeness — eight steps is the

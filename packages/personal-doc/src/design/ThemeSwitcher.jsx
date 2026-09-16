@@ -6,6 +6,7 @@ import {
   IconBlocks,
   IconChaos,
   IconCheck,
+  IconColumns,
   IconGlass,
   IconMeasure,
   IconPixel,
@@ -37,6 +38,7 @@ const THEME_ICONS = {
   measure: IconMeasure,
   chaos: IconChaos,
   sketch: IconSketch,
+  columns: IconColumns,
 };
 
 const DRAWER = {
