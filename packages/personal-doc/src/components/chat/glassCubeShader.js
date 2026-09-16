@@ -204,6 +204,10 @@ void main() {
     float g  = exp(-d * 4.0) * (0.40 + uEnergy * 0.15);
     col = mix(vec3(1.00, 0.52, 0.20), vec3(0.28, 0.62, 1.00), 0.5 + 0.5 * uv.x) * g;
     a   = clamp(g * 0.8, 0.0, 1.0);
+    // The halo is light bleeding around a refractive solid. A flat material is
+    // not emitting anything, so it does not get one — and on a light ground it
+    // read as a smudge rather than a glow.
+    a  *= 1.0 - uFlat;
   }
 
   /* Poster pass.

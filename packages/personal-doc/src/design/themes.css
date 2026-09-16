@@ -282,7 +282,110 @@
   --lg-label-tracking: 0.2em;
 }
 
-/* ------------------------------------------------- 4. the utility remap */
+/* ---------------------------------------------------------------- 4. neub */
+/* Neubrutalism, built to uistyleguide.com/style/neubrutalism: 3px black
+ * outlines, 5px hard shadows, flat saturated primaries, sharp corners, no
+ * gradients. Its own summary is "a modern, playful take on brutalism … think
+ * Figma and Notion", and that is the distance from theme 2: `neo` is the paper
+ * and ink reading of brutalism, one accent and a quiet ground; this is the
+ * 2020s product reading, a whole primary palette used at once.
+ *
+ * The guide's stated palette is #FFEB3B / #FF5252 / #2196F3 / #000000 /
+ * #4CAF50 / #FF9800, and the reference implementation grounds it on ivory
+ * rather than white. Two places deviate, both for contrast: the active-state
+ * pink is darkened to #db2777 (5.0:1 on white, where the reference's #f472b6
+ * is 2.2:1), and the send button takes the reference's own black-on-white
+ * button rather than a mid-tone primary.
+ */
+
+[data-lg-theme='neub'] {
+  /* ground */
+  --lg-bg: #fefce8;
+  /* Hard-edged blocks, not blobs — and capped in both axes, so they stay
+     roughly square rather than stretching into stripes on a wide screen.
+     They also scale with the viewport: at a fixed size they reach into the
+     720px reading column on a narrow window, and running text crossing a
+     block edge reads as an accident even when the contrast holds. */
+  --lg-wash:
+    linear-gradient(#f472b6 0 0) 0 0 / min(19vw, 240px) min(24vh, 210px) no-repeat,
+    linear-gradient(#67e8f9 0 0) 100% 8% / min(15vw, 180px) min(20vh, 180px) no-repeat,
+    linear-gradient(#4ade80 0 0) 0 100% / min(16vw, 200px) min(17vh, 150px) no-repeat,
+    linear-gradient(#fde047 0 0) 100% 100% / min(20vw, 260px) min(14vh, 120px) no-repeat;
+  --lg-vignette: none;
+  --lg-scrim: linear-gradient(180deg, #fefce8 34%, rgba(254, 252, 232, 0.9) 66%, rgba(254, 252, 232, 0) 100%);
+
+  /* ink & accents */
+  --lg-ink: #000000;
+  --lg-on-accent: #ffffff;
+  --lg-on-well: #ffffff;
+  --lg-accent: #2196f3;
+  --lg-accent-soft: #db2777;
+  --lg-accent-warm: #ff5252;
+  --lg-live: #4caf50;
+  --lg-live-glow: 0 0 0 3px #000000;
+
+  /* surfaces — white panels, yellow control chips, everything outlined */
+  --lg-surface-bg: #ffffff;
+  --lg-surface-blur: none;
+  --lg-surface-shadow: 5px 5px 0 0 #000000;
+  --lg-flat-bg: #fde047;
+  --lg-flat-blur: none;
+  --lg-flat-shadow: 3px 3px 0 0 #000000;
+
+  /* edges */
+  --lg-border: 3px;
+  --lg-line: #000000;
+  --lg-rim-a: transparent;
+  --lg-rim-b: transparent;
+  --lg-rim-warm: 255 152 0;
+  --lg-rim-cool: 33 150 243;
+  --lg-rim-hot: 0 0 0;
+  --lg-hairline-display: none;
+  --lg-specular-display: none;
+
+  /* fills */
+  --lg-send-fill: #000000;
+  --lg-send-shadow: 3px 3px 0 0 #000000;
+  --lg-busy-fill: #ff5252;
+  --lg-focus-bloom: 0 0 0 3px #000000;
+  --lg-avatar-fill: #f472b6;
+  --lg-avatar-shadow: 0 0 0 3px #000000;
+  --lg-bullet-fill: #2196f3;
+  --lg-bloom-blur: 0px;
+  --lg-quote-line: #000000;
+
+  /* the guide's six colours, unmixed */
+  --lg-spectrum: conic-gradient(
+    from 0deg,
+    #ffeb3b 0 16.66%,
+    #ff5252 0 33.33%,
+    #2196f3 0 50%,
+    #000000 0 66.66%,
+    #4caf50 0 83.33%,
+    #ff9800 0
+  );
+  --lg-spectrum-blur: 0px;
+  --lg-spectrum-blur-hover: 0px;
+  --lg-well-fill: #000000;
+  --lg-well-shadow: none;
+
+  /* a11y + motion */
+  --lg-focus-ring: #db2777;
+  --lg-scroll-thumb: #000000;
+  --lg-scroll-thumb-hover: #db2777;
+  --lg-lift: -3px;
+
+  /* type */
+  --lg-font: 'Inter', system-ui, sans-serif;
+  --lg-font-display: 'Inter', system-ui, sans-serif;
+  --lg-ligatures: normal;
+  --lg-tracking-tight: -0.03em;
+  --lg-weight-strong: 900;
+  --lg-label-transform: uppercase;
+  --lg-label-tracking: 0.08em;
+}
+
+/* ------------------------------------------------- 5. the utility remap */
 /* Tailwind v4 compiles `text-white/60` to
  *     color: color-mix(in oklab, var(--color-white) 60%, transparent)
  * so rebinding --color-white inside this subtree retargets every white-alpha
@@ -303,7 +406,11 @@
   --color-white: #2b1a2f;
 }
 
-/* ------------------------------------------ 4b. the opacity floor (light) */
+[data-lg-theme='neub'] .lg-root {
+  --color-white: #000000;
+}
+
+/* ------------------------------------------ 5b. the opacity floor (light) */
 /* Alpha is not perceptually symmetric across grounds. White at 28% over near
  * black still reads as text; ink at 28% over paper is a smudge — the eye is
  * far more forgiving of light-on-dark than of dark-on-light at the same alpha.
@@ -318,22 +425,41 @@
  * Every light theme joins the :is() list. `:is()` takes the specificity of its
  * strongest argument, so adding one never quietly outranks the others. */
 
-:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/20 { color: color-mix(in oklab, var(--color-white) 42%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/25 { color: color-mix(in oklab, var(--color-white) 46%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/28 { color: color-mix(in oklab, var(--color-white) 52%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/30 { color: color-mix(in oklab, var(--color-white) 54%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/35 { color: color-mix(in oklab, var(--color-white) 58%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/40 { color: color-mix(in oklab, var(--color-white) 62%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/45 { color: color-mix(in oklab, var(--color-white) 64%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/50 { color: color-mix(in oklab, var(--color-white) 68%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/55 { color: color-mix(in oklab, var(--color-white) 72%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/60 { color: color-mix(in oklab, var(--color-white) 76%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/70 { color: color-mix(in oklab, var(--color-white) 82%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba']) .lg-root .text-white\/75 { color: color-mix(in oklab, var(--color-white) 86%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub']) .lg-root .text-white\/20 { color: color-mix(in oklab, var(--color-white) 42%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub']) .lg-root .text-white\/25 { color: color-mix(in oklab, var(--color-white) 46%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub']) .lg-root .text-white\/28 { color: color-mix(in oklab, var(--color-white) 52%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub']) .lg-root .text-white\/30 { color: color-mix(in oklab, var(--color-white) 54%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub']) .lg-root .text-white\/35 { color: color-mix(in oklab, var(--color-white) 58%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub']) .lg-root .text-white\/40 { color: color-mix(in oklab, var(--color-white) 62%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub']) .lg-root .text-white\/45 { color: color-mix(in oklab, var(--color-white) 64%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub']) .lg-root .text-white\/50 { color: color-mix(in oklab, var(--color-white) 68%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub']) .lg-root .text-white\/55 { color: color-mix(in oklab, var(--color-white) 72%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub']) .lg-root .text-white\/60 { color: color-mix(in oklab, var(--color-white) 76%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub']) .lg-root .text-white\/70 { color: color-mix(in oklab, var(--color-white) 82%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub']) .lg-root .text-white\/75 { color: color-mix(in oklab, var(--color-white) 86%, transparent); }
 
 /* Hover states resolve to the full ink, which is already the rule. */
 
-/* ------------------------------------------------------ 5. theme switching */
+/* -------------------------------------------------- 5c. the radius override */
+/* The second — and last — place the system touches the utility layer.
+ *
+ * Corner radius lives in the markup as `rounded-2xl`, `rounded-full`,
+ * `rounded-[26px]` and friends. Tailwind compiles the named steps to
+ * `var(--radius-*)`, which could be rebound like `--color-white` was, but the
+ * pill and the arbitrary-pixel ones compile to literals and would not follow —
+ * leaving a theme half-sharp, which looks like a bug rather than a decision.
+ *
+ * A theme whose whole premise is sharp corners therefore zeroes them outright.
+ * The attribute-substring match catches every rounding utility regardless of
+ * spelling, and squares the circles too: the avatar, the status dot and the
+ * icon wells all become blocks, which is the correct reading of this style
+ * rather than a casualty of it. */
+
+[data-lg-theme='neub'] .lg-root [class*='rounded'] {
+  border-radius: 0;
+}
+
+/* ------------------------------------------------------ 6. theme switching */
 /* Tokens are interpolatable, so a change of theme cross-fades the whole
  * surface rather than cutting. Only the cheap properties are transitioned —
  * animating box-shadow or backdrop-filter across a page of glass is not. */

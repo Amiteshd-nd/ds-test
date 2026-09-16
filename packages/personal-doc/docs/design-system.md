@@ -30,16 +30,17 @@ sounds, and it is what forced the interesting part of the architecture (§4).
 
 ## 2. The themes
 
-| | Liquid Glass (default) | Neo Brutalism | 16-Bit Handheld |
-| --- | --- | --- | --- |
-| Ground | near-black `#060609`, three bloom gradients, vignette | bone paper `#efede6`, cut colour shapes, print dot-grid | sunlit yellow `#fbdd65`, cloud blobs, CRT scanlines |
-| Surface | translucent, `blur(20px) saturate(150%)` | opaque white, no backdrop work | cream panel, plum outline + bone inner ring |
-| Edge | 1px masked gradient rim, cursor-tracked | 2px solid ink | 3px solid plum |
-| Shadow | soft, light-modelled, `0 20px 50px -20px` | offset, `4px 4px 0` | offset, `5px 5px 0` |
-| Accent | violet → magenta → blue spectrum | one electric blue `#0a6cff` | handheld blue `#3e9bd8`, red, coin gold |
-| Gradients | smooth, many stops | none | two stops, both at the same position |
-| Type | medium weight, `-0.03em` | bold, `-0.02em` | Pixelify Sans, Silkscreen display, `0.2em` labels |
-| Material (cube) | physically-based refraction | the same simulation, six ink bands | four bands, re-rendered on a 56-block grid |
+| | Liquid Glass (default) | Neo Brutalism | 16-Bit Handheld | Neubrutalism |
+| --- | --- | --- | --- | --- |
+| Ground | near-black `#060609`, bloom, vignette | bone `#efede6`, cut shapes, dot-grid | yellow `#fbdd65`, clouds, scanlines | ivory `#fefce8`, four hard colour blocks |
+| Surface | translucent, `blur(20px)` | opaque white | cream, plum + bone double ring | white, `3px` black |
+| Edge | 1px masked gradient rim | 2px solid ink | 3px solid plum | 3px solid black |
+| Shadow | soft, `0 20px 50px -20px` | offset, `4px 4px 0` | offset, `5px 5px 0` | offset, `5px 5px 0` |
+| Radius | as authored | as authored | as authored | **zero, everywhere** |
+| Accent | violet → magenta → blue | one electric blue | blue, red, coin gold | the guide's six primaries |
+| Gradients | smooth, many stops | none | two stops, same position | none |
+| Type | medium, `-0.03em` | bold, `-0.02em` | Pixelify Sans / Silkscreen | Inter 900 |
+| Material | physical refraction | six ink bands | four bands, 56-block grid | five bands, saturated pink |
 
 The neo theme follows the reference the work was briefed against: white cards,
 black outlines, hard offset shadows, an electric blue primary, and yellow /
@@ -50,6 +51,16 @@ two-stop with both stops at the same position, which is the shading grammar of
 the era's sprite art. Its cream panels carry a double ring — plum outside, bone
 inside — which is how the reference draws a window frame, and it costs nothing
 because `--lg-surface-shadow` can hold an inset and an offset at once.
+
+**Two brutalisms, on purpose.** `neo` is the paper-and-ink reading — one
+accent, a quiet ground, rounded as authored. `neub` is
+[uistyleguide.com's](https://www.uistyleguide.com/style/neubrutalism) 2020s
+product reading of the same idea — "think Figma and Notion" — which means a
+whole primary palette used at once, 3px black outlines on everything, `5px 5px
+0` shadows, and sharp corners. Two tokens deviate from that reference, both for
+contrast: the active-state pink is darkened to `#db2777` (5.0:1 on white, where
+the reference's `#f472b6` is 2.2:1), and the send button takes the reference's
+own black-on-white button rather than a mid-tone primary.
 
 **One deliberate departure from the neo reference.** The reference puts a
 full-bleed blue band behind its header and hero. Ink on `#0a6cff` measures
@@ -73,7 +84,7 @@ contrast holds with it.
    │                              + inline style={{ }}       │  .lg-focus, .lg-scroll …
    ├─────────────────────────────────────────────────────────┤
    │  Layer 3   utility remap     --color-white, per theme   │  retargets Tailwind's
-   │                              + the opacity floor        │  white-alpha utilities
+   │                              + opacity floor + radius   │  white-alpha utilities
    └─────────────────────────────────────────────────────────┘
                                 │
                      components — unchanged, theme-blind
@@ -117,6 +128,21 @@ Two consequences, both handled:
   the rest of the surface the right to keep its markup. Every light theme joins
   the block's `:is()` list — `:is()` takes the specificity of its strongest
   argument, so adding one never quietly outranks the others.
+
+**Corner radius** is the second — and so far last — reach into the utility
+layer. Tailwind compiles the named steps (`rounded-2xl`) to `var(--radius-*)`,
+which could be rebound the way `--color-white` was, but `rounded-full` and
+`rounded-[26px]` compile to literals and would not follow. A theme rebinding
+only half of them would come out half-sharp, which looks like a bug rather than
+a decision. So a theme whose premise *is* sharp corners zeroes them outright:
+
+```css
+[data-lg-theme='neub'] .lg-root [class*='rounded'] { border-radius: 0 }
+```
+
+The substring match catches every rounding utility regardless of spelling, and
+squares the circles too — avatar, status dot, icon wells — which is the correct
+reading of that style rather than a casualty of it.
 
 Browsers without `color-mix()` fall back to Tailwind's baked `#fff` — i.e. to
 the behaviour that shipped before this change, not to a new bug.
@@ -192,6 +218,16 @@ that become shader uniforms:
 | Glass | 0 | — | — | 0 |
 | Neo | 1 | blue | 6 | 0 |
 | 16-bit | 1 | handheld blue | 4 | 56 |
+| Neubrutalism | 1 | saturated pink | 5 | 0 |
+
+Three bands was the first value tried for the neubrutalism cube, on the logic
+that "flat colours" means as few steps as possible. It was wrong in practice:
+below about five steps the bevels stop separating and the cube reads as a blob
+rather than a solid. Flatness is a property of the *shading*, not of the form.
+
+A flat material also loses the miss-path halo — `a *= 1.0 - uFlat`. The halo is
+light bleeding around a refractive solid; a printed one is not emitting
+anything, and on a light ground it read as a smudge rather than a glow.
 
 **The poster pass** runs last, after the render:
 

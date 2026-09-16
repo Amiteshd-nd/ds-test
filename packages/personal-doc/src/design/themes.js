@@ -48,6 +48,19 @@ export const THEMES = [
     material: { flat: 1, tint: [0.22, 0.58, 0.84], bands: 4, pixel: 56 },
     fonts: 'https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Silkscreen:wght@400;700&display=swap',
   },
+  {
+    id: 'neub',
+    name: 'Neubrutalism',
+    hint: 'Primary colours, no radius',
+    icon: 'blocks',
+    swatch: ['#fde047', '#f472b6', '#2196f3'],
+    /* Five bands and a saturated ink. Three was truer to "flat colours" on
+     * paper and wrong in practice: with so few steps the cube's bevels stop
+     * separating and it reads as a blob rather than a solid. */
+    material: { flat: 1, tint: [0.86, 0.22, 0.56], bands: 5, pixel: 0 },
+    /* index.css loads Inter at 400-600; the display line here is 900. */
+    fonts: 'https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&display=swap',
+  },
 ];
 
 export const DEFAULT_THEME = THEMES[0].id;

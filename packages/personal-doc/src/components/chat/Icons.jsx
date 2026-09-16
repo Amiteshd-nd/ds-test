@@ -137,6 +137,15 @@ export const IconPixel = (p) => (
   </Svg>
 );
 
+export const IconBlocks = (p) => (
+  <Svg {...p}>
+    <rect x="3.5" y="3.5" width="9" height="9" />
+    <rect x="15" y="3.5" width="5.5" height="5.5" fill="currentColor" stroke="none" />
+    <rect x="3.5" y="15" width="5.5" height="5.5" fill="currentColor" stroke="none" />
+    <rect x="11.5" y="11.5" width="9" height="9" />
+  </Svg>
+);
+
 export const IconSlab = (p) => (
   <Svg {...p}>
     <rect x="3.5" y="3.5" width="12.5" height="12.5" rx="1" />

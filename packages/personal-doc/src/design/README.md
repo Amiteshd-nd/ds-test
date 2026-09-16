@@ -28,8 +28,11 @@ Files:
 2. **Primitives** — `liquid-glass.css`. Classes that read tokens. No literals.
 3. **Utility remap** — `--color-white` is rebound per theme inside `.lg-root`,
    so Tailwind's `text-white/60`-style utilities follow the surface's ink.
-   A companion block re-maps the low-alpha steps for light themes, where the
-   same alpha reads far weaker than it does on black.
+   Two companion blocks: the low-alpha steps are re-mapped for light themes,
+   where the same alpha reads far weaker than it does on black, and a theme
+   built on sharp corners zeroes `border-radius` on every rounding utility.
+   These three blocks are the *only* places the system touches Tailwind's
+   generated class names. Do not add a fourth without reading §4 of the docs.
 
 ## Rules
 
@@ -58,7 +61,8 @@ Files:
    something sensible — it inherits the previous theme and looks broken in one
    state you will not find until later.
 3. If the theme is light, add its selector to the `:is()` list on the
-   opacity-floor block, and rebind `--color-white` to its ink.
+   opacity-floor block, and rebind `--color-white` to its ink. If it wants
+   sharp corners, copy the radius-override block.
 4. If the icon key is new, add the icon to `components/chat/Icons.jsx` and map
    it in `ThemeSwitcher.jsx`'s `THEME_ICONS`.
 
