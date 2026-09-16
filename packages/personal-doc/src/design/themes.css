@@ -1061,11 +1061,16 @@
 
 /* ---- the rules, which are the whole layout ------------------------------ */
 
-/* Every panel starts with a heavy rule, the way a column does in print. The
- * hairline from --lg-line stays on the other three sides so an overlay
- * floating over a white page still has an edge. */
+/* Every panel is closed by a heavy rule along its foot, which is where print
+ * puts the rule under a standfirst or a column. The hairline from --lg-line
+ * stays on the other three sides so an overlay floating over a white page
+ * still has an edge.
+ *
+ * Bottom rather than top so the panel and the chips inside it agree: the chips
+ * are underlined, and a panel ruled along its head reads as a different
+ * device sitting above one ruled along its foot. */
 [data-lg-theme='mag'] .lg-root .lg-surface {
-  border-top: 2px solid #000000;
+  border-bottom: 2px solid #000000;
 }
 
 /* Chips are underlined, not boxed. */
