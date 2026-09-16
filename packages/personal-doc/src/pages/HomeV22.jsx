@@ -436,7 +436,10 @@ function BackgroundWash() {
           Glass spends them on bloom and a vignette, neo on cut paper shapes
           and a print dot grid — same two elements either way. */}
       <div className="absolute inset-0" style={{ background: 'var(--lg-wash)' }} />
-      <div className="absolute inset-0" style={{ background: 'var(--lg-vignette)' }} />
+      <div
+        className="absolute inset-0"
+        style={{ background: 'var(--lg-vignette)', mixBlendMode: 'var(--lg-wash-blend)' }}
+      />
     </div>
   );
 }

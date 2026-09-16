@@ -84,6 +84,17 @@ export const THEMES = [
     material: { flat: 1, tint: [0.34, 0.38, 0.44], bands: 8, pixel: 0 },
     fonts: 'https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&display=swap',
   },
+  {
+    id: 'chaos',
+    name: 'Maximalism',
+    hint: 'Stickers, tilt, overprint',
+    icon: 'chaos',
+    swatch: ['#ffff00', '#ff00ff', '#00ff00'],
+    /* Pure magenta, four bands. The loudest ink in the set, and the cube is the
+     * one thing on this surface that was already moving. */
+    material: { flat: 1, tint: [0.95, 0.05, 0.9], bands: 4, pixel: 0 },
+    fonts: 'https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&display=swap',
+  },
 ];
 
 export const DEFAULT_THEME = THEMES[0].id;

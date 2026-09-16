@@ -38,6 +38,7 @@ sounds, and it is what forced the interesting part of the architecture (§4).
 | **Neubrutalism** | ivory `#fefce8`, four hard colour blocks | white, 3px black, offset `5px 5px 0`, **radius 0** | Inter 900 | five bands, saturated pink |
 | **Brutalism** | white, exposed 1px column rules | white, 4px black, **no shadow**, **radius 0**, **no transitions** | system mono + Helvetica 900, uppercase | four bands, near-black |
 | **Minimal & Direct** | white, nothing on it at all | white, 1px `#e5e7eb`, no shadow, **640px single column**, `1.75` leading | Inter, four colours total | eight bands, graphite |
+| **Maximalism** | `#ffff00`, multiply overprint, plaid stripes | white/colour-cycled, 4px black, `6px 6px 0`, **tilted ±1.6°**, radius 0 | Inter 900 uppercase, magenta offset shadow | four bands, pure magenta |
 
 The neo theme follows the reference the work was briefed against: white cards,
 black outlines, hard offset shadows, an electric blue primary, and yellow /
@@ -80,6 +81,13 @@ on-band colour without breaking rule §5.1. So the blue survives as fills,
 edges, the cube's ink and corner blocks — everywhere it never has small text on
 top of it — and the running text always sits on paper. The look holds; the
 contrast holds with it.
+
+The set now covers three different kinds of argument, which is the more useful
+way to read it than by era:
+
+- **Surface** — glass, neo, gba, neub, brutal. What the material is made of.
+- **Layout** — minimal. How much room things get.
+- **Placement** — maximalism. Where things sit, and whether they sit straight.
 
 **Minimal & Direct** is the odd one out, and usefully so. Every theme before it
 changed how the surface *looks*; this one changes how it is *laid out*. Its own
@@ -165,6 +173,43 @@ reading of that style rather than a casualty of it.
 
 Browsers without `color-mix()` fall back to Tailwind's baked `#fff` — i.e. to
 the behaviour that shipped before this change, not to a new bug.
+
+### 4b. Placement, and why it is `rotate` and not `transform`
+
+The maximalism theme tilts things. The obvious way to write that is
+
+```css
+transform: rotate(-1.6deg);   /* wrong */
+```
+
+and it would have worked on about half the surface. Framer writes `transform`
+**inline** on every element it animates, and an inline style beats any rule —
+so a transform-based tilt lands on the plain elements and silently does nothing
+on the animated ones, which is the worst kind of bug: a theme that looks
+finished and is half-applied. The independent `rotate` property composes with
+an inline `transform` instead of being overwritten by it:
+
+```css
+[data-lg-theme='chaos'] .lg-root [role='list'] > *:nth-child(3n + 1) { rotate: -1.6deg }
+```
+
+Verified rather than assumed — those buttons compute `rotate: -1.6deg` with
+`transform: none` at rest, and keep the rotation when Framer writes a transform
+on hover.
+
+Two more notes on that block. The variety comes from `nth-child` cycling angle
+and fill, so one component renders as a collage; it is keyed to `[role="list"]`,
+an ARIA attribute, rather than to a generated class name. And the jitter fires
+on hover and focus only — a permanent shake across a page of controls is where
+this style stops being a joke and starts being an accessibility problem — with
+an explicit `prefers-reduced-motion` opt-out on top.
+
+The other thing this theme taught, the hard way: **a decorative blob cannot
+know where the text will land.** A blue circle parked mid-canvas put black
+display type on `#0000ff` at 2.4:1. The fix was not to move it but to change
+its kind — blue became a stripe set, and stripes tint evenly, so every word
+keeps the ground's contrast wherever it falls. Corner blobs are safe; anything
+crossing the reading column has to be a texture, not a shape.
 
 ## 5. Rules
 
@@ -252,6 +297,7 @@ that become shader uniforms:
 | Neubrutalism | 1 | saturated pink | 5 | 0 |
 | Brutalism | 1 | near-black | 4 | 0 |
 | Minimal | 1 | graphite | 8 | 0 |
+| Maximalism | 1 | pure magenta | 4 | 0 |
 
 Minimal is the only flat theme that wants *more* bands, not fewer. Its
 restraint is about decoration, not about crudeness — eight steps is the
@@ -307,7 +353,7 @@ to a photograph.
 
 Every theme declares all of these. Grouped as they appear in `themes.css`.
 
-**Ground** `--lg-bg` `--lg-wash` `--lg-vignette` `--lg-scrim`
+**Ground** `--lg-bg` `--lg-wash` `--lg-wash-blend` `--lg-vignette` `--lg-scrim`
 
 **Ink & accents** `--lg-ink` `--lg-on-accent` `--lg-on-well` `--lg-accent`
 `--lg-accent-soft` `--lg-accent-warm` `--lg-live` `--lg-live-glow`
@@ -343,8 +389,8 @@ four-colour theme avoids gaining a fifth through the back door.
 `--lg-scroll-thumb-hover` `--lg-theme-transition`
 
 **Type** `--lg-font` `--lg-font-display` `--lg-ligatures`
-`--lg-tracking-tight` `--lg-display-transform` `--lg-weight-strong`
-`--lg-label-transform` `--lg-label-tracking`
+`--lg-tracking-tight` `--lg-display-transform` `--lg-display-shadow`
+`--lg-weight-strong` `--lg-label-transform` `--lg-label-tracking`
 
 A theme that ships its own typeface names it in `--lg-font` and lists the
 stylesheet as `fonts` in `themes.js`; `ThemeProvider` injects the `<link>` the

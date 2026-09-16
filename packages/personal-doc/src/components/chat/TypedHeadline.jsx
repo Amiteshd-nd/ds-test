@@ -63,6 +63,7 @@ export default function TypedHeadline({ onPick, paused }) {
           fontWeight: 'var(--lg-weight-strong)',
           letterSpacing: 'var(--lg-tracking-tight)',
           textTransform: 'var(--lg-display-transform)',
+          textShadow: 'var(--lg-display-shadow)',
         }}
       >
         {typed}

@@ -66,7 +66,10 @@ Files:
    opacity-floor block, and rebind `--color-white` to its ink. If it wants
    sharp corners, join the `:is()` list on the radius override. If it wants no
    motion, set `--lg-theme-transition: none` and add it to the transition
-   reset.
+   reset. If it needs *placement* — tilt, per-item variety, jitter — write it
+   as a theme-scoped block using the independent `rotate`/`translate`
+   properties, never `transform`: Framer writes `transform` inline and would
+   overwrite you on exactly the animated half of the surface.
 4. If the icon key is new, add the icon to `components/chat/Icons.jsx` and map
    it in `ThemeSwitcher.jsx`'s `THEME_ICONS`.
 

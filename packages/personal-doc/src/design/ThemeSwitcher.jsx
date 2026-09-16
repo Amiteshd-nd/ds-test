@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import PrismButton from '../components/chat/PrismButton';
 import {
   IconBlocks,
+  IconChaos,
   IconCheck,
   IconGlass,
   IconMeasure,
@@ -33,6 +34,7 @@ const THEME_ICONS = {
   blocks: IconBlocks,
   raw: IconRaw,
   measure: IconMeasure,
+  chaos: IconChaos,
 };
 
 const DRAWER = {
