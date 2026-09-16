@@ -34,6 +34,19 @@ viewport.
 Known findings — including two decisions a drafter would dispute that are not yet fully
 traceable — are listed in ARCHITECTURE.md §1 and §2.
 
+## Running it
+
+From the repo root, `pnpm dev` opens the [hub](http://localhost:8787) — trimension is
+listed there; hit **Play**. The hub checks the Wasm bundle exists first and tells you how
+to build it if not, because it is a build artifact and is not checked in.
+
+Directly:
+
+```bash
+corepack pnpm --filter @trimension/web dev   # shell on :6178
+cargo run -p tri-server                      # session server on :8788
+```
+
 ## Quick start
 
 ```bash

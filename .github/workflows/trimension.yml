@@ -29,22 +29,68 @@ jobs:
         with:
           workspaces: packages/trimension
 
-      - run: cargo fmt --all -- --check
-      - run: cargo clippy --workspace --all-targets -- -D warnings
+      # The wasm32 half of the test suite runs through wasm-bindgen-test-runner, which
+      # ships in wasm-bindgen-cli. Its version must match the wasm-bindgen *library*
+      # exactly or the generated glue and the runner disagree, so the version is read
+      # from Cargo.lock rather than written here — a hardcoded version in YAML silently
+      # drifts the first time someone bumps the dependency.
+      #
+      # Swatinem/rust-cache caches ~/.cargo/bin, so this compiles once and is restored
+      # thereafter.
+      - name: Install wasm-bindgen-test-runner
+        run: |
+          version=$(awk '/^name = "wasm-bindgen"$/{getline; gsub(/[",]/,"",$3); print $3; exit}' Cargo.lock)
+          if [ -z "$version" ]; then
+            echo '::error::could not read the wasm-bindgen version from Cargo.lock'
+            exit 1
+          fi
+          echo "wasm-bindgen library version: $version"
+          if [ "$(wasm-bindgen --version 2>/dev/null | awk '{print $2}')" = "$version" ]; then
+            echo "matching wasm-bindgen-cli already present (restored from cache)"
+          else
+            cargo install wasm-bindgen-cli --version "$version" --locked
+          fi
+          wasm-bindgen-test-runner --version
 
-      # PRD §4.2: all three compile targets.
-      - name: All targets + tests
-        run: cargo xtask test-all
-
-      # I6 guard. Headless wgpu on CI needs a software adapter.
+      # A software Vulkan adapter, so the renderer tests have a GPU to run on.
+      #
+      # This has to come *before* the test steps. It used to sit after them, which meant
+      # `cargo test` ran with no adapter, every GPU test took its skip path, and the job
+      # went green having exercised none of the renderer.
       - name: Install lavapipe (headless Vulkan)
         run: |
           sudo apt-get update
           sudo apt-get install -y mesa-vulkan-drivers vulkan-tools
+          vulkaninfo --summary | head -20 || true
+
+      # Fail here, with the adapter list in the log, rather than letting the renderer
+      # tests take their skip path and report a green build that tested nothing.
+      - name: Verify a GPU adapter exists
+        run: cargo run -p tri-render --example gpu_check
+        env:
+          WGPU_BACKEND: vulkan
+
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+
+      # PRD §4.2: all three compile targets, plus the native and wasm32 test suites.
+      #
+      # TRIMENSION_REQUIRE_GPU turns the renderer tests' "no adapter, skipping" path into
+      # a failure. Locally a skip is the right behaviour; in CI it is how the I6 guard
+      # quietly stops guarding anything.
+      - name: All targets + tests
+        run: cargo xtask test-all
+        env:
+          WGPU_BACKEND: vulkan
+          TRIMENSION_REQUIRE_GPU: '1'
+
+      # I6 guard, run explicitly so it is visible as its own step.
       - name: Render parity (I6)
         run: cargo xtask parity
         env:
           WGPU_BACKEND: vulkan
+          TRIMENSION_REQUIRE_GPU: '1'
+
 
       # I3 guard: registry and generated schemas must not drift.
       - name: Schema drift (I3)

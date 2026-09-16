@@ -48,13 +48,24 @@ fn fitted_camera(doc: &Document, w: u32, h: u32) -> Camera {
     }
 }
 
-/// Whether this machine can run wgpu at all. On a CI box with no GPU and no lavapipe the
-/// GPU tests skip loudly rather than failing — but the scene-parity test, which is the
-/// real guarantee, always runs.
+/// Whether this machine can run wgpu at all.
+///
+/// On a developer laptop without a working adapter the GPU tests skip rather than fail,
+/// so the scene-parity tests — which are the real guarantee — still run. In CI that
+/// leniency is a trap: with no adapter every GPU test takes the skip path and the job
+/// goes green having exercised none of the renderer. `TRIMENSION_REQUIRE_GPU=1` turns
+/// the skip into a failure, and CI sets it.
 fn gpu() -> Option<Renderer> {
     match pollster::block_on(Renderer::headless()) {
         Ok(r) => Some(r),
         Err(e) => {
+            if std::env::var_os("TRIMENSION_REQUIRE_GPU").is_some() {
+                panic!(
+                    "TRIMENSION_REQUIRE_GPU is set but no wgpu adapter is available: {e}\n\
+                     On a headless Linux runner install mesa-vulkan-drivers (lavapipe) and \
+                     set WGPU_BACKEND=vulkan."
+                );
+            }
             eprintln!("SKIPPING GPU test: {e}");
             None
         }

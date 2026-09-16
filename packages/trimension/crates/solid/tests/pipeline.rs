@@ -608,7 +608,13 @@ fn both_fixtures_render_in_perspective_3d() {
                 let ink = img.ink_fraction(s.background_srgb(), 4);
                 assert!(ink > 0.001, "{name}: the 3D render is blank ({ink})");
             }
-            Err(e) => eprintln!("SKIPPING GPU render for {name}: {e}"),
+            Err(e) => {
+                assert!(
+                    std::env::var_os("TRIMENSION_REQUIRE_GPU").is_none(),
+                    "TRIMENSION_REQUIRE_GPU is set but no wgpu adapter is available: {e}"
+                );
+                eprintln!("SKIPPING GPU render for {name}: {e}");
+            }
         }
     }
 }

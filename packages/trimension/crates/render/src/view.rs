@@ -73,7 +73,18 @@ impl Renderer {
         compatible: Option<&wgpu::Surface<'_>>,
     ) -> Result<Renderer, RenderError> {
         // Chosen below once the adapter is known.
-        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor::new_without_display_handle());
+        // `_from_env` rather than the plain constructor, which takes
+        // `Backends::default()` and never reads `WGPU_BACKEND` at all — so CI setting
+        // that variable did nothing. It happened to work anyway, because the default is
+        // "all backends" and lavapipe was found regardless, but an env var that is
+        // silently ignored is worse than no env var.
+        //
+        // Note: on macOS, setting `WGPU_BACKEND=vulkan` still yields the Metal adapter,
+        // so the filtering is not as strict as the name suggests. Treat this as "the
+        // variable is now read", not as a way to guarantee a particular backend. The
+        // `gpu_check` example is what actually verifies an adapter exists.
+        let instance =
+            wgpu::Instance::new(wgpu::InstanceDescriptor::new_without_display_handle_from_env());
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::default(),

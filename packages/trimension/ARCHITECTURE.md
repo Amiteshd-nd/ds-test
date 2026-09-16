@@ -44,7 +44,18 @@ discipline)? Anything conventional is a finding.
    background from the scene through the sRGB transfer function, and the tests are now
    bounded on both sides. Worth recording as a class: a one-sided assertion on a metric
    nobody has eyeballed is not a test.
-3. **`tri-geom2d` has no tests of its own.** Its healing, pairing and profile logic is
+3. **CI was not running what it claimed to.** The first push failed on
+   `wasm-bindgen-test-runner` being absent — the workflow never installed it, and it only
+   worked locally because it had been installed by hand. Fixing that exposed two worse
+   problems in the steps that had never run: lavapipe was installed *after* the tests, so
+   `cargo test` had no adapter and every renderer test took its skip path; and
+   `WGPU_BACKEND` was being ignored outright, because `InstanceDescriptor::
+   new_without_display_handle()` does not read the environment. A green build would have
+   meant "the renderer was never exercised". There is now a `gpu_check` example that fails
+   with the adapter list before any test runs, and `TRIMENSION_REQUIRE_GPU` turns a skip
+   into a failure. General lesson: a test that can skip itself needs a CI mode where
+   skipping is an error.
+4. **`tri-geom2d` has no tests of its own.** Its healing, pairing and profile logic is
    covered — 26 tests — but they live in `tri-solid`'s suite because that is where the
    pipeline is assembled. Coverage is real; the placement is wrong, and a change to
    `geom2d` alone shows a green `cargo test -p tri-geom2d`. Move them.

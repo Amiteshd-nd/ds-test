@@ -586,7 +586,13 @@ fn render_view_returns_a_png_the_caller_can_actually_look_at() {
                 &r.png_base64[..8]
             );
         }
-        Err(e) => eprintln!("SKIPPING GPU test: {e}"),
+        Err(e) => {
+            assert!(
+                std::env::var_os("TRIMENSION_REQUIRE_GPU").is_none(),
+                "TRIMENSION_REQUIRE_GPU is set but no wgpu adapter is available: {e}"
+            );
+            eprintln!("SKIPPING GPU test: {e}");
+        }
     }
 }
 
@@ -606,7 +612,13 @@ fn render_view_clamps_absurd_sizes() {
             assert_eq!(r.width, 2048);
             assert_eq!(r.height, 64);
         }
-        Err(e) => eprintln!("SKIPPING GPU test: {e}"),
+        Err(e) => {
+            assert!(
+                std::env::var_os("TRIMENSION_REQUIRE_GPU").is_none(),
+                "TRIMENSION_REQUIRE_GPU is set but no wgpu adapter is available: {e}"
+            );
+            eprintln!("SKIPPING GPU test: {e}");
+        }
     }
 }
 

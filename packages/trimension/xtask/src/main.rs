@@ -29,6 +29,36 @@ fn main() -> ExitCode {
     }
 }
 
+/// Is `wasm-bindgen-test-runner` callable?
+fn runner_available() -> bool {
+    Command::new("wasm-bindgen-test-runner")
+        .arg("--version")
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false)
+}
+
+/// The wasm-bindgen version the workspace actually resolved to, read from `Cargo.lock`.
+///
+/// Read rather than hardcoded: the CLI must match the library exactly, and a constant
+/// here would go stale the first time the dependency is bumped.
+fn locked_wasm_bindgen_version() -> Option<String> {
+    let lock = std::fs::read_to_string("Cargo.lock").ok()?;
+    let mut lines = lock.lines();
+    while let Some(line) = lines.next() {
+        if line.trim() == r#"name = "wasm-bindgen""# {
+            let version = lines.next()?.trim();
+            return version
+                .strip_prefix("version = \"")
+                .and_then(|v| v.strip_suffix('"'))
+                .map(str::to_owned);
+        }
+    }
+    None
+}
+
 fn run(args: &[&str]) -> bool {
     run_env(args, &[])
 }
@@ -75,6 +105,22 @@ fn test_all() -> bool {
 /// guarantee rather than a claim. Needs `wasm-bindgen-cli` matching the `wasm-bindgen`
 /// version in VERSIONS.md, and node on PATH.
 fn test_wasm() -> bool {
+    if !runner_available() {
+        eprintln!(
+            "\n\
+             wasm-bindgen-test-runner is not on PATH, so the wasm32 tests cannot run.\n\
+             \n\
+             Cargo reports this as \"could not execute process ... (os error 2)\", which\n\
+             is not obviously about a missing tool, so this check exists to say it plainly.\n\
+             \n\
+             Install it at the SAME version as the wasm-bindgen library — the glue and the\n\
+             runner must match exactly:\n\
+             \n    cargo install wasm-bindgen-cli --version {} --locked\n",
+            locked_wasm_bindgen_version().unwrap_or_else(|| "<see Cargo.lock>".into())
+        );
+        return false;
+    }
+
     run_env(
         &[
             "test",
