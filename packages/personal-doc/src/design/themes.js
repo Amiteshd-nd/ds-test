@@ -129,6 +129,19 @@ export const THEMES = [
     /* No `fonts`: index.css already loads Inter at 400-600, and the display
      * line here wants 400. A Swiss headline is large, not heavy. */
   },
+  {
+    id: 'real',
+    name: 'Realism',
+    hint: 'Keycaps, paper, metal',
+    icon: 'keycap',
+    swatch: ['#d6d7d9', '#f3f1ed', '#f0621b'],
+    /* flat 0 — the only theme besides glass to keep the refraction, and the
+     * one place where that is the *point*. Every other theme re-inks the cube
+     * because a flat surface cannot host a physically-rendered object; this
+     * one is built on the opposite premise, so the cube stays a real material
+     * and becomes the glass paperweight on the desk. */
+    material: { flat: 0, tint: [1, 1, 1], bands: 6, pixel: 0 },
+  },
 ];
 
 export const DEFAULT_THEME = THEMES[0].id;

@@ -1247,7 +1247,169 @@
   pointer-events: none;
 }
 
-/* ------------------------------------------------ 11. the utility remap */
+/* ---------------------------------------------------------------- 11. real */
+/* Realism. No style guide for this one — it is built from the reference
+ * images: a machined keyboard with moulded keycaps and one orange accent key,
+ * a sheet of paper, brushed aluminium, and glossy moulded beads.
+ *
+ * Every other theme in this set flattens. This one is the only one that adds
+ * depth back, and the rule it follows is the one skeuomorphism actually ran
+ * on: a surface is lit from above, so the top edge catches light, the bottom
+ * edge falls into shadow, and the object casts onto whatever is beneath it.
+ * Three shadows do that work everywhere here — an inset highlight along the
+ * top, an inset core shadow along the bottom, and a real cast shadow below.
+ *
+ *   The plate is aluminium: a vertical sheen with a fine brushed grain.
+ *   The panels are paper: warm white, fibre grain, a tight contact shadow
+ *     under a broad ambient one — which is what makes a sheet look like it is
+ *     resting on the desk rather than painted onto it.
+ *   The chips are keycaps: a moulded gradient, a 2px sidewall, and a press
+ *     that actually travels (see the :active rule below).
+ *   The send key is the orange one.
+ *
+ * The cube keeps `flat: 0`. It is the only theme besides glass to do that and
+ * the only one where it is the point: this theme is built on real materials,
+ * and the one genuinely physically-rendered object on the page should stay
+ * one. It becomes the glass paperweight on the desk.
+ *
+ * On the icons: nothing is imported. The 3D icon sets that exist (3dicons is
+ * CC0, jolloficons is MIT) are 200-odd large decorative renders — rocket,
+ * bulb, trophy — with no UI glyphs in them at all, and a 3/4-angle raster at
+ * 17px reads as mud. Atlas Icons is MIT and excellent but is a line set. So
+ * the glyphs stay the ones we have and get engraved into the key instead: a
+ * white drop-shadow one pixel below the stroke, which is how a legend stamped
+ * into a moulded cap catches the same overhead light as everything else.
+ */
+
+[data-lg-theme='real'] {
+  /* ground — the anodised plate */
+  --lg-bg: #d6d7d9;
+  --lg-wash:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 38%, rgba(0, 0, 0, 0.06) 100%),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.022) 0 1px, rgba(255, 255, 255, 0.03) 1px 3px);
+  --lg-wash-blend: normal;
+  --lg-vignette: radial-gradient(120% 80% at 50% 0%, rgba(255, 255, 255, 0.5) 0%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.1) 100%);
+  --lg-scrim: linear-gradient(180deg, #d6d7d9 34%, rgba(214, 215, 217, 0.9) 66%, rgba(214, 215, 217, 0) 100%);
+
+  /* ink & accents */
+  --lg-ink: #1c1d1f;
+  --lg-on-accent: #ffffff;
+  --lg-on-well: #f2f2f2;
+  --lg-accent: #f0621b;
+  --lg-accent-soft: #c94b0d;
+  --lg-accent-warm: #f0621b;
+  --lg-live: #4ad06a;
+  --lg-live-glow: 0 0 6px 1px rgba(74, 208, 106, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+
+  /* surfaces — a sheet of paper, resting on the plate */
+  --lg-surface-bg:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23f)' opacity='0.05'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #fdfcfa 0%, #f5f3ef 100%);
+  --lg-surface-blur: none;
+  --lg-surface-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05),
+    0 1px 1px rgba(0, 0, 0, 0.16),
+    0 8px 18px -6px rgba(0, 0, 0, 0.26);
+
+  /* flat surfaces — moulded keycaps */
+  --lg-flat-bg: linear-gradient(180deg, #ffffff 0%, #f2f0ed 52%, #e4e1dc 100%);
+  --lg-flat-blur: none;
+  --lg-flat-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.07),
+    0 2px 0 #bdb9b3,
+    0 3px 5px rgba(0, 0, 0, 0.26);
+
+  /* edges */
+  --lg-border: 1px;
+  --lg-line: #c7c3bd;
+  --lg-rim-a: rgba(255, 255, 255, 0.9);
+  --lg-rim-b: rgba(0, 0, 0, 0.06);
+  --lg-rim-warm: 240 98 27;
+  --lg-rim-cool: 176 178 181;
+  --lg-rim-hot: 255 255 255;
+  --lg-hairline-display: block;
+  --lg-specular-display: block;
+
+  /* fills */
+  --lg-send-fill: linear-gradient(180deg, #ff9450 0%, #f0621b 55%, #d44f0c 100%);
+  --lg-send-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.18),
+    0 2px 0 #a73d08,
+    0 3px 6px rgba(0, 0, 0, 0.32);
+  --lg-busy-fill: linear-gradient(180deg, #e9e6e1 0%, #d6d2cc 100%);
+  --lg-focus-bloom: 0 0 0 2px rgba(240, 98, 27, 0.45), 0 10px 22px -8px rgba(0, 0, 0, 0.35);
+  /* a moulded bead, lit from the same place as everything else */
+  --lg-avatar-fill: radial-gradient(circle at 34% 26%, #ffd0b0 0%, #f0621b 44%, #9c3a06 100%);
+  --lg-avatar-shadow: inset 0 -2px 3px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --lg-bullet-fill: radial-gradient(circle at 35% 28%, #ffffff 0%, #b9b5af 55%, #8d8984 100%);
+  --lg-media-filter: none;
+  --lg-bloom-blur: 22px;
+  --lg-bloom-saturation: 0.75;
+  --lg-quote-line: #f0621b;
+
+  /* the theme control's well becomes a machined knob */
+  --lg-spectrum: conic-gradient(
+    from 210deg,
+    #f4f4f4, #9d9d9d, #ffffff, #8e8e8e, #ededed, #a6a6a6, #f4f4f4
+  );
+  --lg-spectrum-blur: 0px;
+  --lg-spectrum-blur-hover: 1px;
+  --lg-well-fill: linear-gradient(180deg, #4a4b4d 0%, #2a2b2d 60%, #1b1c1e 100%);
+  --lg-well-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -2px 4px rgba(0, 0, 0, 0.7);
+
+  /* a11y + motion */
+  --lg-focus-ring: #f0621b;
+  --lg-scroll-thumb: #b0aca6;
+  --lg-scroll-thumb-hover: #8e8a85;
+  --lg-theme-transition: background-color 0.28s ease, color 0.28s ease, border-color 0.28s ease;
+
+  /* layout */
+  --lg-measure: 720px;
+  --lg-measure-wide: 860px;
+  --lg-leading: 1.68;
+
+  /* type — the platform's own face, the way a physical UI borrows the OS */
+  --lg-font: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  --lg-font-display: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  --lg-ligatures: normal;
+  --lg-tracking-tight: -0.02em;
+  --lg-display-transform: none;
+  --lg-display-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+  --lg-weight-strong: 600;
+  --lg-display-weight: 600;
+  --lg-label-transform: uppercase;
+  --lg-label-tracking: 0.1em;
+}
+
+/* ---- the physics --------------------------------------------------------- */
+
+/* A key that does not move when pressed is a picture of a key. The cap travels
+ * 2px down and its sidewall collapses to 0, so the cast shadow closes up
+ * underneath it — which is the whole of what a keypress looks like. */
+[data-lg-theme='real'] .lg-root .lg-surface-flat:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 2px 4px rgba(0, 0, 0, 0.16),
+    0 0 0 #bdb9b3,
+    0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* The legend is stamped into the cap, so it catches the same overhead light. */
+[data-lg-theme='real'] .lg-root svg {
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.75));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-lg-theme='real'] .lg-root .lg-surface-flat:active {
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------ 12. the utility remap */
 /* Tailwind v4 compiles `text-white/60` to
  *     color: color-mix(in oklab, var(--color-white) 60%, transparent)
  * so rebinding --color-white inside this subtree retargets every white-alpha
@@ -1290,7 +1452,11 @@
   --color-white: #000000;
 }
 
-/* ----------------------------------------- 11b. the opacity floor (light) */
+[data-lg-theme='real'] .lg-root {
+  --color-white: #1c1d1f;
+}
+
+/* ----------------------------------------- 12b. the opacity floor (light) */
 /* Alpha is not perceptually symmetric across grounds. White at 28% over near
  * black still reads as text; ink at 28% over paper is a smudge — the eye is
  * far more forgiving of light-on-dark than of dark-on-light at the same alpha.
@@ -1313,22 +1479,22 @@
  * hard way: the magazine theme's kicker rule matched, computed, and was
  * silently overridden by this block because both landed on (0,3,0). */
 
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/20) { color: color-mix(in oklab, var(--color-white) 42%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/25) { color: color-mix(in oklab, var(--color-white) 46%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/28) { color: color-mix(in oklab, var(--color-white) 52%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/30) { color: color-mix(in oklab, var(--color-white) 54%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/35) { color: color-mix(in oklab, var(--color-white) 58%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/40) { color: color-mix(in oklab, var(--color-white) 62%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/45) { color: color-mix(in oklab, var(--color-white) 64%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/50) { color: color-mix(in oklab, var(--color-white) 68%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/55) { color: color-mix(in oklab, var(--color-white) 72%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/60) { color: color-mix(in oklab, var(--color-white) 76%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/70) { color: color-mix(in oklab, var(--color-white) 82%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss']) .lg-root :where(.text-white\/75) { color: color-mix(in oklab, var(--color-white) 86%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/20) { color: color-mix(in oklab, var(--color-white) 42%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/25) { color: color-mix(in oklab, var(--color-white) 46%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/28) { color: color-mix(in oklab, var(--color-white) 52%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/30) { color: color-mix(in oklab, var(--color-white) 54%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/35) { color: color-mix(in oklab, var(--color-white) 58%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/40) { color: color-mix(in oklab, var(--color-white) 62%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/45) { color: color-mix(in oklab, var(--color-white) 64%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/50) { color: color-mix(in oklab, var(--color-white) 68%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/55) { color: color-mix(in oklab, var(--color-white) 72%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/60) { color: color-mix(in oklab, var(--color-white) 76%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/70) { color: color-mix(in oklab, var(--color-white) 82%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/75) { color: color-mix(in oklab, var(--color-white) 86%, transparent); }
 
 /* Hover states resolve to the full ink, which is already the rule. */
 
-/* ------------------------------------------------- 11c. the radius override */
+/* ------------------------------------------------- 12c. the radius override */
 /* The second — and last — place the system touches the utility layer.
  *
  * Corner radius lives in the markup as `rounded-2xl`, `rounded-full`,
@@ -1347,7 +1513,7 @@
   border-radius: 0;
 }
 
-/* ----------------------------------------------------- 12. theme switching */
+/* ----------------------------------------------------- 13. theme switching */
 /* Tokens are interpolatable, so a change of theme cross-fades the whole
  * surface rather than cutting. Only the cheap properties are transitioned —
  * animating box-shadow or backdrop-filter across a page of glass is not.

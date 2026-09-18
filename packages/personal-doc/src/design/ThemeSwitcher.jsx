@@ -8,6 +8,7 @@ import {
   IconCheck,
   IconColumns,
   IconGlass,
+  IconKeycap,
   IconMeasure,
   IconPixel,
   IconRaw,
@@ -41,6 +42,7 @@ const THEME_ICONS = {
   sketch: IconSketch,
   columns: IconColumns,
   swiss: IconSwiss,
+  keycap: IconKeycap,
 };
 
 const DRAWER = {
