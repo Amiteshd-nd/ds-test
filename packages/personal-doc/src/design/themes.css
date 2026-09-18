@@ -1386,16 +1386,71 @@
 
 /* ---- the physics --------------------------------------------------------- */
 
-/* A key that does not move when pressed is a picture of a key. The cap travels
- * 2px down and its sidewall collapses to 0, so the cast shadow closes up
- * underneath it — which is the whole of what a keypress looks like. */
+/* A key that does not move when pressed is a picture of a key.
+ *
+ * Written with the independent `translate` property rather than `transform`,
+ * for the reason the maximalism theme documents: Framer owns `transform`
+ * inline on every element it drives, and a transform here would work on the
+ * plain buttons and silently do nothing on the animated ones.
+ *
+ * Down is faster than up. A cap is driven down by a finger and returned by a
+ * spring, and those are not the same force — 32ms falling against 90ms
+ * rising is the cheapest way to make a button feel sprung rather than
+ * switched. The `:active` rule carries its own transition-duration, so the
+ * fast time applies going in and the slow one applies coming out. */
+[data-lg-theme='real'] .lg-root .lg-surface-flat,
+[data-lg-theme='real'] .lg-root [data-lg-key] {
+  transition:
+    translate 90ms cubic-bezier(0.22, 0.9, 0.32, 1),
+    box-shadow 90ms cubic-bezier(0.22, 0.9, 0.32, 1),
+    filter 120ms ease;
+}
+
+/* A keycap does not move when a cursor is merely over it. It does catch a
+ * little more light. */
+[data-lg-theme='real'] .lg-root .lg-surface-flat:hover {
+  filter: brightness(1.03);
+}
+
+/* Pressed: the cap travels 2px, its 2px sidewall collapses to nothing so the
+ * cast shadow closes up underneath, the inner shadow deepens because the
+ * recess now occludes itself, and the whole face darkens slightly — less of
+ * the overhead light reaches a surface that has dropped below its neighbours. */
 [data-lg-theme='real'] .lg-root .lg-surface-flat:active {
-  transform: translateY(2px);
+  translate: 0 2px;
+  transition-duration: 32ms;
+  filter: brightness(0.97);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    inset 0 2px 4px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 3px 5px rgba(0, 0, 0, 0.18),
     0 0 0 #bdb9b3,
-    0 1px 2px rgba(0, 0, 0, 0.3);
+    0 1px 2px rgba(0, 0, 0, 0.34);
+}
+
+/* The orange key travels the same way. Its sidewall is darker, so it collapses
+ * to a darker line. */
+[data-lg-theme='real'] .lg-root [data-lg-key='send']:active {
+  translate: 0 2px;
+  transition-duration: 32ms;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 3px 5px rgba(0, 0, 0, 0.3),
+    0 0 0 #a73d08,
+    0 1px 2px rgba(0, 0, 0, 0.36);
+}
+
+/* A sheet that lifts casts further. The suggestion cards rise 2px on hover
+ * (Framer drives that), and a shadow that does not change while its object
+ * moves is the single fastest way to break the illusion: it reads as a
+ * sticker sliding, not a card lifting. So the shadow softens, spreads and
+ * loses contact as the card comes off the plate. */
+[data-lg-theme='real'] .lg-root [role='list'] > *:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.05),
+    0 2px 3px rgba(0, 0, 0, 0.12),
+    0 16px 30px -8px rgba(0, 0, 0, 0.3);
+  transition: box-shadow 160ms ease;
 }
 
 /* The legend is stamped into the cap, so it catches the same overhead light. */
@@ -1404,8 +1459,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-lg-theme='real'] .lg-root .lg-surface-flat:active {
-    transform: none;
+  [data-lg-theme='real'] .lg-root .lg-surface-flat:active,
+  [data-lg-theme='real'] .lg-root [data-lg-key='send']:active {
+    translate: none;
   }
 }
 

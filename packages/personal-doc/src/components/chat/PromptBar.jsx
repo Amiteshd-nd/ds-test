@@ -339,6 +339,7 @@ export default function PromptBar({
               onClick={busy ? onStop : submit}
               disabled={!busy && !value.trim()}
               aria-label={busy ? 'Stop generating' : 'Send question'}
+              data-lg-key="send"
               whileTap={{ scale: 0.92 }}
               animate={{ scale: !busy && !value.trim() ? 0.94 : 1 }}
               transition={{ type: 'spring', stiffness: 500, damping: 28 }}
