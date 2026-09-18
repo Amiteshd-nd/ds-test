@@ -15,6 +15,7 @@ import {
   IconRaw,
   IconSketch,
   IconSlab,
+  IconSprite,
   IconSwiss,
   IconTheme,
 } from '../components/chat/Icons';
@@ -45,6 +46,7 @@ const THEME_ICONS = {
   swiss: IconSwiss,
   keycap: IconKeycap,
   chrome: IconChrome,
+  sprite: IconSprite,
 };
 
 const DRAWER = {

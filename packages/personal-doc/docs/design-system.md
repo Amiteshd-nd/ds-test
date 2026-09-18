@@ -44,6 +44,7 @@ sounds, and it is what forced the interesting part of the architecture (§4).
 | **Swiss International** | bone `#f5f1e8`, nothing on it | white cards, 1px black, no shadow, **2rem grid**, 1120px wide, radius 0 | Inter **400** display, caps kickers, **numbered cards** | six bands, tan |
 | **Realism** | anodised plate, photographed brushed grain | paper sheets with fibre, moulded keycaps that **travel on press** | system UI face, engraved glyphs | **none — stays refractive** |
 | **Y2K** | bubblegum → lavender → cyan | frosted glass cards, Aqua pills, white rims, gloss | Inter 900 caps, **chrome-gradient display**, ✦ kickers | eight bands, chrome |
+| **Pixel Art** | PICO-8 `#1d2b53`, 8px pixel grid | black dialogs, 3px cream border, **stepped corners**, no easing | VT323 body, Press Start 2P kickers | four bands, **28-block sprite** |
 
 The neo theme follows the reference the work was briefed against: white cards,
 black outlines, hard offset shadows, an electric blue primary, and yellow /
@@ -111,6 +112,17 @@ those are not the same force.
 **Y2K is the other depth theme and the opposite kind of depth** — not mass but
 gloss. Frosted cards over a bubblegum gradient, Aqua pills split hard at the
 equator, and a chrome display line.
+
+**16-Bit Handheld and Pixel Art are two halves of one idea**, which is how a
+second pixel theme earns its place. The handheld is the *console*: a sunlit
+screen, cream window panels, the UI a game draws around itself. Pixel Art is
+the *canvas*: the dark editor the sprite is drawn on, at half the resolution
+(28 blocks against 56), in a palette with a name. Using PICO-8's actual sixteen
+rather than inventing sixteen plausible colours is the difference between pixel
+art and pixel-ish — the constraint is the medium. It is also the first dark
+theme since glass, which is why it has no `--color-white` remap and no entry in
+the opacity floor: those exist for light themes, and the utilities were written
+for a dark ground in the first place.
 
 **Swiss and Minimal are opposite arguments**, which is why both earn a place.
 Minimal *removes* until one thing is left: pure white, a 640px single column,
@@ -301,6 +313,24 @@ streams a word at a time, and text reflowing between two columns as it arrives
 is unreadable. The device assumes finished text. Everything else the guide
 asks for is implemented; this one is a considered no, not an oversight.
 
+### 4cc. `filter` is a containing block, and that has teeth
+
+The pixel theme draws its stepped corners with `clip-path`, and its hard
+shadow with `filter: drop-shadow` rather than `box-shadow` — a filter follows
+the clipped silhouette, where a box-shadow would be clipped away with it.
+
+That pairing is applied to the chips and the suggestion cards, and pointedly
+*not* to `.lg-surface` as a whole. `filter` makes an element a containing block
+for `position: fixed` descendants. The prompt bar is a `.lg-surface`, and it
+contains the depth and tone menus whose click-away layer is `fixed inset-0` —
+filtering the bar would trap that layer inside it and the menus would quietly
+stop dismissing on an outside click. The two selectors it *is* applied to have
+no fixed descendants.
+
+Worth knowing before reaching for `filter`, `transform` or `backdrop-filter` in
+a theme rule: all three do this, and the failure is silent and interaction-only,
+so it will not show up in a screenshot.
+
 ### 4d. Two things that only showed up on screen
 
 Both were tuned by eye against a flat value and both were wrong once the theme
@@ -410,6 +440,7 @@ that become shader uniforms:
 | Swiss | 1 | tan | 6 | 0 |
 | Realism | **0** | — | — | 0 |
 | Y2K | 1 | chrome | 8 | 0 |
+| Pixel Art | 1 | PICO-8 blue | 4 | **28** |
 
 Minimal is the only flat theme that wants *more* bands, not fewer. Its
 restraint is about decoration, not about crudeness — eight steps is the

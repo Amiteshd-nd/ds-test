@@ -137,6 +137,16 @@ export const IconPixel = (p) => (
   </Svg>
 );
 
+export const IconSprite = (p) => (
+  <Svg {...p}>
+    <path
+      d="M4 16h4v4H4zM8 12h4v4H8zM12 8h4v4h-4zM16 4h4v4h-4z"
+      fill="currentColor"
+      stroke="none"
+    />
+  </Svg>
+);
+
 export const IconChrome = (p) => (
   <Svg {...p}>
     <circle cx="12" cy="12" r="8.5" />

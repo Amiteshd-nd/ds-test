@@ -154,6 +154,18 @@ export const THEMES = [
     material: { flat: 1, tint: [0.88, 0.9, 0.96], bands: 8, pixel: 0 },
     fonts: 'https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&display=swap',
   },
+  {
+    id: 'pixel',
+    name: 'Pixel Art',
+    hint: 'PICO-8 palette, dark canvas',
+    icon: 'sprite',
+    swatch: ['#1d2b53', '#ff004d', '#29adff'],
+    /* 28 blocks across and four bands — half the resolution of the handheld
+     * theme and fewer steps, because this one is the sprite rather than the
+     * screen it is displayed on. */
+    material: { flat: 1, tint: [0.16, 0.68, 1.0], bands: 4, pixel: 28 },
+    fonts: 'https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap',
+  },
 ];
 
 export const DEFAULT_THEME = THEMES[0].id;
