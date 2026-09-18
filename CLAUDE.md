@@ -24,6 +24,8 @@ Current allocation (all compliant):
 | gully         | 6175 |
 | discovery     | 6177 |
 | trimension    | 6178 (web), 8788 (session server) |
+| file-compressor | 6179 |
+| carcinogen    | 6180 |
 | hub           | 8787 |
 
 Set the port explicitly (e.g. Vite `server.port` + `strictPort`, Next `-p`) so it holds

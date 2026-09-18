@@ -73,6 +73,28 @@
         "dev"
       ],
       "port": 6178
+    },
+    {
+      "name": "carcinogen",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "packages/carcinogen"
+      ],
+      "port": 6180
+    },
+    {
+      "name": "file-compressor",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "packages/file-compressor"
+      ],
+      "port": 6179
     }
   ]
 }

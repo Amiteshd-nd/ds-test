@@ -1,0 +1,11 @@
+{
+  "name": "carcinogen",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Carcinogen heatmap — 26 everyday exposures against 13 cancer sites. One self-contained HTML file, no build step.",
+  "scripts": {
+    "dev": "node serve.mjs",
+    "start": "node serve.mjs",
+    "build": "node -e \"console.log('carcinogen: nothing to build — index.html is the deliverable')\""
+  }
+}

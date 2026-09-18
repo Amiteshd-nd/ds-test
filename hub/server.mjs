@@ -59,6 +59,23 @@ const PROJECTS = [
     port: 6177,
   },
   {
+    id: 'file-compressor',
+    name: 'File Compressor',
+    tag: 'PDF · Next.js + Wasm-free browser pipeline',
+    desc:
+      'Adaptive PDF compression with a perceptual quality gate. Drop a PDF: it is analysed, ' +
+      'compressed image by image under a fidelity floor, and checked against the original. ' +
+      'Everything runs in the browser tab — nothing is uploaded.',
+    cwd: path.join(ROOT, 'packages/file-compressor'),
+    // Not `next` directly: the package bundles its compression worker and copies
+    // pdf.js's assets before the dev server starts, and dev.mjs is where both
+    // that and `next dev` are sequenced.
+    command: process.execPath,
+    bin: 'node',
+    args: ['dev.mjs'],
+    port: 6179,
+  },
+  {
     id: 'trimension',
     name: 'trimension',
     tag: 'Agent-native CAD · Rust/Wasm + Vite',
@@ -95,6 +112,20 @@ const PROJECTS = [
     bin: 'next',
     args: ['dev', '-H', '0.0.0.0', '-p', '6176'],
     port: 6176,
+  },
+  {
+    id: 'carcinogen',
+    name: 'Carcinogen heatmap',
+    tag: 'Essay · one static HTML file',
+    desc:
+      '26 everyday exposures against 13 cancer sites, plus a certainty-vs-magnitude panel. ' +
+      'No build step — packages/carcinogen/index.html also opens straight from the filesystem.',
+    cwd: path.join(ROOT, 'packages/carcinogen'),
+    // No dev-server binary to resolve: it is served by a plain node script.
+    command: process.execPath,
+    bin: 'node',
+    args: ['serve.mjs'],
+    port: 6180,
   },
 ];
 
@@ -178,7 +209,9 @@ async function startProject(id) {
     return;
   }
 
-  const child = spawn(binPath(p), p.args, {
+  // Most projects run a dev-server binary from their own node_modules/.bin; a package with
+  // no dependencies (carcinogen) names an absolute command instead.
+  const child = spawn(p.command ?? binPath(p), p.args, {
     cwd: p.cwd,
     env: { ...process.env, FORCE_COLOR: '0' },
     detached: true, // own process group, so we can kill children (e.g. next's workers)

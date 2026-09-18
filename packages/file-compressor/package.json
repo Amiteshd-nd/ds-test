@@ -1,0 +1,37 @@
+{
+  "name": "file-compressor",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Adaptive PDF compressor with a perceptual quality gate. Runs entirely in the browser.",
+  "scripts": {
+    "dev": "node dev.mjs",
+    "prebuild": "node scripts/copy-pdfjs-worker.mjs && node scripts/build-worker.mjs",
+    "build": "next build",
+    "start": "next start -p 6179",
+    "worker": "node scripts/build-worker.mjs",
+    "assets": "node scripts/copy-pdfjs-worker.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "fixture": "node scripts/make-fixture.mjs"
+  },
+  "dependencies": {
+    "fflate": "0.8.3",
+    "next": "16.3.2",
+    "pdf-lib": "1.17.1",
+    "pdfjs-dist": "6.3.289",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@napi-rs/canvas": "^1.0.9",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "24.9.2",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4",
+    "esbuild": "0.25.12"
+  }
+}

@@ -9,7 +9,9 @@ packages/
 ├── game/          # @cloud-march/game — Bangalore Times (Phaser). Library + standalone app.
 ├── blockmodel/    # Next.js prototype: phone photos → 3D model (see its own README)
 ├── gully/         # Vite + MapLibre: one Bengaluru layout at true width, plus report capture (see its own README)
-└── discovery/     # Next.js: the agentic UI program — six surfaces, one design grammar (see its own README)
+├── discovery/     # Next.js: the agentic UI program — six surfaces, one design grammar (see its own README)
+├── carcinogen/    # one self-contained HTML page: the carcinogen heatmap (no build step)
+└── file-compressor/ # Next.js: adaptive PDF compression behind a perceptual quality gate (see its own README)
 ```
 
 The **personal-doc** site embeds the **game** as a library (route `/game/bangalore-times`),
@@ -42,7 +44,8 @@ The **hub** (`hub/`) lists every project. Hit **Play** on a card to start that
 project's dev server on demand; the card then shows **Open ↗** (once it's up), **Stop**,
 and live **Logs**. Quitting the hub (`Ctrl-C`) stops every server it started.
 
-Fixed ports: personal-doc `:6173`, game `:6174`, gully `:6175`, blockmodel `:6176`, discovery `:6177`.
+Fixed ports: personal-doc `:6173`, game `:6174`, gully `:6175`, blockmodel `:6176`, discovery `:6177`,
+trimension `:6178`, file-compressor `:6179`, carcinogen `:6180`.
 
 ## Run a package directly (without the hub)
 
@@ -52,10 +55,12 @@ pnpm dev:game           # game standalone → http://localhost:6174
 pnpm dev:blockmodel     # blockmodel → http://localhost:6176  (see packages/blockmodel/README.md)
 pnpm dev:gully          # gully → http://localhost:6175  (see packages/gully/README.md)
 pnpm dev:discovery      # discovery → http://localhost:6177  (surfaces at /coding, gallery at /dev, studies at /studies)
+pnpm dev:file-compressor # file-compressor → http://localhost:6179  (see packages/file-compressor/README.md)
+pnpm dev:carcinogen     # carcinogen → http://localhost:6180  (or just open packages/carcinogen/index.html)
 ```
 
 Or target any package directly: `pnpm --filter <name> <script>`
-(names: `personal-doc`, `@cloud-march/game`, `blockmodel`, `gully`, `discovery`).
+(names: `personal-doc`, `@cloud-march/game`, `blockmodel`, `gully`, `discovery`, `carcinogen`).
 
 ## Build
 

@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Everything causes cancer. Not equally.</title>
+<meta name="description" content="26 everyday exposures against 13 cancer sites, coloured by how much they actually move the odds — and a panel separating how sure we are from how much it matters.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=Fraunces:opsz,wght@9..144,600&display=swap">
+<style>
+/* ── tokens ─────────────────────────────────────────────────────────────── */
+:root{
+  --paper:#E9EAE4; --panel:#F2F3EE; --ink:#23282B; --ink-soft:#5C6560; --rule:#C8CCC2;
+  --h0:#CFD4CB; --h1:#DCC581; --h2:#C08A2E; --h3:#A03A2E; --h4:#6E1B26;
+  --h0-ink:#39413C; --h1-ink:#41360F; --h2-ink:#2A1E05; --h3-ink:#F7EDE8; --h4-ink:#F7E8E7;
+  --mark:#2E6F6A;
+  --serif:"Fraunces",Georgia,"Times New Roman",serif;
+  --sans:"Archivo","Helvetica Neue",Arial,Helvetica,sans-serif;
+  --cell-w:46px; --cell-h:34px; --rowh-w:212px; --rowh-fs:13px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#181B1A; --panel:#212524; --ink:#E6E8E2; --ink-soft:#9AA39C; --rule:#343A37;
+    --h0:#333A36; --h1:#8A7534; --h2:#C08A2E; --h3:#B4463A; --h4:#8E2733;
+    --h0-ink:#C6CDC7; --h1-ink:#F3E9D0; --h2-ink:#221A05; --h3-ink:#FCF0EB; --h4-ink:#FAE7E7;
+    --mark:#5FB3AB;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#181B1A; --panel:#212524; --ink:#E6E8E2; --ink-soft:#9AA39C; --rule:#343A37;
+  --h0:#333A36; --h1:#8A7534; --h2:#C08A2E; --h3:#B4463A; --h4:#8E2733;
+  --h0-ink:#C6CDC7; --h1-ink:#F3E9D0; --h2-ink:#221A05; --h3-ink:#FCF0EB; --h4-ink:#FAE7E7;
+  --mark:#5FB3AB;
+}
+
+/* ── base ───────────────────────────────────────────────────────────────── */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.5;
+  overflow-x:hidden; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:980px; margin:0 auto; padding:0 24px}
+h1,h2{font-family:var(--serif); font-weight:600; margin:0}
+h1{font-size:clamp(30px,5.2vw,52px); line-height:1.04; letter-spacing:-.015em; max-width:16ch}
+h2{font-size:clamp(20px,2.6vw,26px); line-height:1.15; letter-spacing:-.01em}
+p{margin:0 0 1em}
+a{color:inherit; text-decoration-color:var(--mark); text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--mark); outline-offset:2px}
+.hr{border:0; border-top:1px solid var(--rule); margin:0}
+
+/* ── header ─────────────────────────────────────────────────────────────── */
+header{padding:64px 0 40px}
+.stand{max-width:62ch; font-size:17px; color:var(--ink-soft); margin-top:22px}
+.stand strong{color:var(--ink); font-weight:600}
+.dateline{font-size:13px; color:var(--ink-soft); margin:0 0 20px}
+
+section{padding:40px 0}
+.lede{max-width:62ch; color:var(--ink-soft); margin-top:14px}
+
+/* ── controls + legend ──────────────────────────────────────────────────── */
+.bar{display:flex; flex-wrap:wrap; gap:26px 34px; align-items:flex-end; margin:26px 0 18px}
+.ctrl{display:flex; flex-direction:column; gap:7px}
+.ctrl>span{font-size:12px; color:var(--ink-soft)}
+.sorts{display:flex; gap:0; border:1px solid var(--rule); background:var(--panel)}
+.sorts button{
+  font:inherit; font-size:13px; padding:7px 13px; background:none; color:var(--ink-soft);
+  border:0; border-right:1px solid var(--rule); cursor:pointer;
+}
+.sorts button:last-child{border-right:0}
+.sorts button[aria-pressed="true"]{background:var(--ink); color:var(--paper)}
+.legend{display:flex; flex-wrap:wrap; gap:6px 14px}
+.legend .sw{display:flex; align-items:center; gap:7px; font-size:12px; color:var(--ink-soft)}
+.legend .sw b{
+  width:24px; height:20px; display:grid; place-items:center;
+  font-size:11px; font-weight:600; font-variant-numeric:tabular-nums;
+}
+.legend .sw:nth-child(1) b{background:var(--h0); color:var(--h0-ink)}
+.legend .sw:nth-child(2) b{background:var(--h1); color:var(--h1-ink)}
+.legend .sw:nth-child(3) b{background:var(--h2); color:var(--h2-ink)}
+.legend .sw:nth-child(4) b{background:var(--h3); color:var(--h3-ink)}
+.legend .sw:nth-child(5) b{background:var(--h4); color:var(--h4-ink)}
+
+/* ── matrix ─────────────────────────────────────────────────────────────── */
+.scroller{overflow-x:auto; overflow-y:visible; padding-bottom:4px}
+table.matrix{border-collapse:separate; border-spacing:0; font-size:12px}
+.tnote{font-size:12px; color:var(--ink-soft); max-width:74ch; margin:0 0 12px}
+th,td{padding:0; font-weight:400; text-align:left}
+
+thead th.corner{width:var(--rowh-w); min-width:var(--rowh-w); position:sticky; left:0; z-index:3; background:var(--paper)}
+thead th.site{
+  width:var(--cell-w); min-width:var(--cell-w); height:132px; vertical-align:bottom;
+  padding:0; position:relative;
+}
+thead th.site span{
+  display:block; width:var(--cell-w); white-space:nowrap; font-size:12px; color:var(--ink);
+  transform-origin:left bottom; transform:translateX(14px) rotate(-58deg);
+}
+
+th.rowh{
+  position:sticky; left:0; z-index:2; background:var(--paper);
+  width:var(--rowh-w); min-width:var(--rowh-w);
+  border-right:1px solid var(--rule); padding-right:12px;
+}
+th.rowh button{
+  font:inherit; font-size:var(--rowh-fs); line-height:1.2; color:var(--ink);
+  background:none; border:0; padding:4px 0; margin:0; width:100%; text-align:left; cursor:pointer;
+}
+tbody tr.sel th.rowh button{font-weight:600}
+tbody tr.sel th.rowh{box-shadow:inset 2px 0 0 var(--mark)}
+
+td.c{width:var(--cell-w); min-width:var(--cell-w); height:var(--cell-h); padding:1px}
+td.c i{display:block; width:100%; height:100%; background:var(--h0)}
+td.c.v1 i{background:var(--h1)}
+td.c.v2 i{background:var(--h2)}
+td.c.v3 i{background:var(--h3)}
+td.c.v4 i{background:var(--h4)}
+
+/* selection dimming */
+.matrix.has-sel tbody tr:not(.sel):not(.grp) th.rowh button{opacity:.38}
+.matrix.has-sel tbody tr:not(.sel) td.c i{opacity:.2}
+.matrix.has-sel tbody tr.sel td.c i{box-shadow:inset 0 0 0 1px var(--paper)}
+@media (prefers-reduced-motion:no-preference){
+  td.c i, th.rowh button{transition:opacity .16s ease}
+}
+
+/* tier group rows */
+tr.grp th.rowh{padding:22px 12px 6px 0; border-right:1px solid var(--rule)}
+tr.grp:first-child th.rowh{padding-top:6px}
+tr.grp .glabel{display:block; font-size:12px; font-weight:600; color:var(--ink-soft); line-height:1.25}
+tr.grp td.grule{vertical-align:bottom; padding:0 0 7px}
+tr.grp td.grule span{display:block; height:1px; background:var(--rule)}
+
+/* ── readout ────────────────────────────────────────────────────────────── */
+.readout{border-top:1px solid var(--rule); margin-top:20px; padding-top:18px; min-height:132px}
+.readout .rname{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.2; margin:0 0 8px}
+.readout .rmeta{font-size:13px; color:var(--ink-soft); margin:0 0 10px; max-width:70ch}
+.readout .rmeta em{font-style:normal; color:var(--ink)}
+.readout .rnote{font-size:15px; max-width:62ch; margin:0}
+.readout .rhint{font-size:13px; color:var(--ink-soft); max-width:62ch; margin:0}
+
+/* ── scatter ────────────────────────────────────────────────────────────── */
+.scatter{margin-top:26px}
+.scatter svg{width:100%; min-width:640px; height:auto; display:block}
+.sc-axis{stroke:var(--rule); stroke-width:1}
+.sc-guide{stroke:var(--rule); stroke-width:1; stroke-dasharray:3 5}
+.sc-link{stroke:var(--mark); stroke-width:1; stroke-dasharray:2 5; opacity:.75}
+.sc-end{fill:var(--ink-soft); font-family:var(--sans); font-size:12px}
+.sc-title{fill:var(--ink); font-family:var(--sans); font-size:13px; font-weight:600}
+.sc-lab{fill:var(--ink); font-family:var(--sans); font-size:12.5px}
+.sc-note{fill:var(--ink); font-family:var(--serif); font-size:14px; font-style:italic}
+.p0{fill:var(--h0)} .p1{fill:var(--h1)} .p2{fill:var(--h2)} .p3{fill:var(--h3)} .p4{fill:var(--h4)}
+.dot{stroke:var(--paper); stroke-width:1.5}
+
+/* ── takeaways + footer ─────────────────────────────────────────────────── */
+.takes{list-style:none; padding:0; margin:22px 0 0; max-width:70ch}
+.takes li{border-top:1px solid var(--rule); padding:14px 0 16px}
+.takes li b{display:block; font-weight:600; font-size:15px; margin-bottom:3px}
+.takes li span{color:var(--ink-soft); font-size:15px}
+footer{border-top:1px solid var(--rule); margin-top:20px; padding:26px 0 72px}
+footer p{font-size:13px; color:var(--ink-soft); max-width:74ch}
+footer b{color:var(--ink); font-weight:600}
+
+/* ── narrow ─────────────────────────────────────────────────────────────── */
+@media (max-width:620px){
+  :root{--cell-w:38px; --cell-h:32px; --rowh-w:150px; --rowh-fs:12px}
+  .wrap{padding:0 16px}
+  header{padding:44px 0 28px}
+  section{padding:30px 0}
+  thead th.site span{font-size:11px; transform:translateX(11px) rotate(-58deg)}
+  .bar{gap:20px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="dateline">Cancer risk, at scale — 18 September 2026</p>
+  <h1>Everything causes cancer. Not equally.</h1>
+  <p class="stand">Two different questions get reported as one: <strong>whether</strong> something can cause cancer, and <strong>how much</strong> it raises your risk. Tobacco and processed meat sit in the same IARC group. One multiplies lung-cancer risk roughly twentyfold; the other adds about 18% to a small baseline. Below, 26 everyday exposures against 13 cancer sites — coloured by how far they actually move the odds.</p>
+</header>
+
+<hr class="hr">
+
+<section id="matrix-section">
+  <h2>26 exposures, 13 cancer sites</h2>
+  <p class="lede">Darker means a bigger established effect, not just a firmer classification. Read the block at the top, then the block at the bottom — the shape is the argument. Click any exposure for its detail.</p>
+
+  <div class="bar">
+    <div class="ctrl">
+      <span id="sort-label">Order</span>
+      <div class="sorts" role="group" aria-labelledby="sort-label">
+        <button type="button" id="sort-tier" aria-pressed="true">By tier</button>
+        <button type="button" id="sort-reach" aria-pressed="false">By number of sites</button>
+        <button type="button" id="sort-peak" aria-pressed="false">By strongest effect</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <span>Strength of the link</span>
+      <div class="legend">
+        <span class="sw"><b>0</b>No credible link</span>
+        <span class="sw"><b>1</b>Limited / probable</span>
+        <span class="sw"><b>2</b>Established, modest</span>
+        <span class="sw"><b>3</b>Established, substantial</span>
+        <span class="sw"><b>4</b>Established, large</span>
+      </div>
+    </div>
+  </div>
+
+  <p class="tnote" id="matrix-note">Each cell is one exposure against one cancer site. Hover a cell for its reading in words; the matrix scrolls sideways under the exposure column.</p>
+
+  <div class="scroller">
+    <table class="matrix" id="matrix" aria-describedby="matrix-note">
+      <thead id="matrix-head"></thead>
+      <tbody id="matrix-body"></tbody>
+    </table>
+  </div>
+
+  <div class="readout" id="readout" aria-live="polite">
+    <p class="rname">Pick an exposure</p>
+    <p class="rhint">Click any name in the left column — or tab to it and press Enter — to see every site it is linked to, in order of strength, and what the effect size actually looks like in the real world.</p>
+  </div>
+</section>
+
+<hr class="hr">
+
+<section id="scatter-section">
+  <h2>How sure we are is not how much it matters</h2>
+  <p class="lede">The matrix above fuses two things into one colour, because nobody can read two colour dimensions at once. This panel pulls them apart. Left to right: how strong the evidence is that the thing causes cancer at all. Bottom to top: how much it raises the risk. Both axes are qualitative — the point is the gap, not the coordinates.</p>
+
+  <div class="scatter scroller">
+  <svg viewBox="0 0 760 460" role="img" aria-label="Scatter chart plotting strength of evidence on the horizontal axis, from weak on the left to proven on the right, against size of the risk increase on the vertical axis, from small at the bottom to huge at the top. Cigarette smoking and processed meat sit at nearly the same far-right position: the evidence for both is equally settled. Smoking sits at the very top of the risk axis; processed meat sits at the very bottom. Persistent HPV, hepatitis B or C, asbestos and betel quid cluster high on both axes. Night-shift work and red meat sit low and to the left: weaker evidence, small effects. Mobile phones sit at the bottom-left corner: much studied, no measured increase.">
+    <!-- axes -->
+    <line class="sc-axis" x1="98" y1="48"  x2="98"  y2="392"></line>
+    <line class="sc-axis" x1="98" y1="392" x2="716" y2="392"></line>
+    <!-- midpoint reference -->
+    <line class="sc-guide" x1="98" y1="220" x2="716" y2="220"></line>
+    <!-- the argument: same evidence, opposite magnitude -->
+    <line class="sc-link" x1="676" y1="86" x2="676" y2="362"></line>
+
+    <!-- axis wording -->
+    <text class="sc-end" x="104" y="412">weak evidence</text>
+    <text class="sc-end" x="716" y="412" text-anchor="end">proven</text>
+    <text class="sc-title" x="407" y="438" text-anchor="middle">strength of the evidence</text>
+    <text class="sc-end" x="88" y="56" text-anchor="end">huge</text>
+    <text class="sc-end" x="88" y="390" text-anchor="end">small</text>
+    <text class="sc-title" x="58" y="220" text-anchor="middle" transform="rotate(-90 58 220)">size of the risk increase</text>
+
+    <!-- points, high to low -->
+    <circle class="dot p4" cx="676" cy="76"  r="7"></circle>
+    <text class="sc-lab" x="664" y="80"  text-anchor="end">Cigarettes &#8594; lung</text>
+
+    <circle class="dot p4" cx="646" cy="110" r="6"></circle>
+    <text class="sc-lab" x="634" y="114" text-anchor="end">Persistent HPV &#8594; cervix</text>
+
+    <circle class="dot p4" cx="628" cy="142" r="6"></circle>
+    <text class="sc-lab" x="616" y="146" text-anchor="end">Hepatitis B or C &#8594; liver</text>
+
+    <circle class="dot p4" cx="610" cy="172" r="6"></circle>
+    <text class="sc-lab" x="598" y="176" text-anchor="end">Asbestos at work &#8594; lung</text>
+
+    <circle class="dot p4" cx="592" cy="202" r="6"></circle>
+    <text class="sc-lab" x="580" y="206" text-anchor="end">Betel quid &#8594; mouth</text>
+
+    <circle class="dot p3" cx="572" cy="234" r="6"></circle>
+    <text class="sc-lab" x="560" y="238" text-anchor="end">H. pylori &#8594; stomach</text>
+
+    <circle class="dot p3" cx="556" cy="262" r="6"></circle>
+    <text class="sc-lab" x="544" y="266" text-anchor="end">Heavy drinking &#8594; mouth &amp; throat</text>
+
+    <circle class="dot p3" cx="540" cy="290" r="6"></circle>
+    <text class="sc-lab" x="528" y="294" text-anchor="end">Sunlight &#8594; skin</text>
+
+    <circle class="dot p2" cx="500" cy="320" r="6"></circle>
+    <text class="sc-lab" x="488" y="324" text-anchor="end">Secondhand smoke &#8594; lung</text>
+
+    <circle class="dot p2" cx="478" cy="348" r="6"></circle>
+    <text class="sc-lab" x="466" y="352" text-anchor="end">Outdoor air pollution &#8594; lung</text>
+
+    <circle class="dot p2" cx="676" cy="372" r="7"></circle>
+    <text class="sc-lab" x="664" y="376" text-anchor="end">Processed meat &#8594; colorectal</text>
+
+    <circle class="dot p1" cx="330" cy="366" r="6"></circle>
+    <text class="sc-lab" x="342" y="370">Red meat &#8594; colorectal</text>
+
+    <circle class="dot p1" cx="326" cy="300" r="6"></circle>
+    <text class="sc-lab" x="314" y="304" text-anchor="end">Night-shift work &#8594; breast</text>
+
+    <circle class="dot p0" cx="140" cy="372" r="6"></circle>
+    <text class="sc-lab" x="152" y="376">Mobile phones &#8594; no site</text>
+
+    <!-- annotation -->
+    <text class="sc-note" x="658" y="332" text-anchor="end">Same certainty as smoking.</text>
+    <text class="sc-note" x="658" y="351" text-anchor="end">A fraction of the risk.</text>
+  </svg>
+  </div>
+</section>
+
+<hr class="hr">
+
+<section id="takeaways">
+  <h2>What the shape says</h2>
+  <ul class="takes">
+    <li><b>Four things carry most of the load.</b><span> Tobacco in every form, alcohol, chronic infection, and sustained excess weight account for the large majority of preventable cancer. They are the dark rows, and they are dark across many columns at once.</span></li>
+    <li><b>"Group 1" is a statement about evidence, not about danger.</b><span> Processed meat and cigarettes share a classification and differ by two orders of magnitude in effect. A headline that reports the group and not the effect size has reported half the sentence.</span></li>
+    <li><b>The bottom block is the point of the page.</b><span> Phones, Wi-Fi, microwaves, deodorant, plastic bottles, non-stick pans, sugar — heavily studied, consistently flat. Attention spent here is attention not spent on the top block.</span></li>
+    <li><b>Where you live is a row too.</b><span> Air pollution, cooking smoke, arsenic in groundwater and occupational exposures are not lifestyle choices. They move with policy and infrastructure rather than with individual resolve.</span></li>
+  </ul>
+</section>
+
+<footer>
+  <p><b>How to read this, and how not to.</b> The 0&#8211;4 strength value deliberately fuses two things — how settled the evidence is, and how large the effect is — into one axis, because a single colour can only carry one. It is an editorial simplification for this page, not a published index; the scatter panel exists to pull the two apart again. Values reflect the broad consensus of IARC monographs, World Cancer Research Fund reviews and large cohort studies, rounded hard.</p>
+  <p>Everything here is <b>relative</b> risk across populations. A large multiplier on a rare cancer can mean less in absolute terms than a small multiplier on a common one, and none of it describes any individual. This page cannot tell you your risk, and is not medical advice. 26 rows chosen for everyday recognisability, not for completeness — the biggest gap is occupational exposure.</p>
+</footer>
+
+</div>
+<script>
+(function () {
+  'use strict';
+
+  /* ── data ───────────────────────────────────────────────────────────────
+     v[] is index-aligned to SITES and must be exactly 13 long.
+     0 no credible link · 1 limited/probable · 2 established modest
+     3 established substantial · 4 established large                        */
+
+  var SITES = ["Lung", "Mouth & throat", "Oesophagus", "Stomach", "Liver",
+               "Colorectal", "Breast", "Cervix", "Bladder", "Kidney",
+               "Pancreas", "Skin", "Blood"];
+
+  var TIERS = ["The ones that drive most cancer",
+               "Probable, smaller, or occupational",
+               "Widely feared, not supported"];
+
+  var LABELS = ["No credible link", "Limited / probable",
+                "Established, modest", "Established, substantial",
+                "Established, large"];
+
+  var ROWS = [
+    { t: 0, n: "Cigarettes & beedis", v: [4,4,3,2,2,1,0,2,3,2,2,0,2],
+      note: "A lifetime smoker carries roughly 15–30 times a never-smoker's lung-cancer risk, and smoking still causes about a fifth of all cancer deaths worldwide. It is the only row here that is dark across nine sites at once." },
+    { t: 0, n: "Smokeless tobacco (khaini, gutkha)", v: [0,4,3,1,0,0,0,0,0,0,1,0,0],
+      note: "The largest driver of mouth cancer in South Asia — several times the risk for regular users, in a region where oral cancer is among the most common cancers in men. Not a safer substitute for smoking; a different cancer." },
+    { t: 0, n: "Betel quid & areca nut", v: [0,4,2,0,1,0,0,0,0,0,0,0,0],
+      note: "Areca nut is carcinogenic on its own, with no tobacco added. Chewing quid multiplies oral-cancer risk several-fold, and with tobacco in the quid the two multiply rather than add." },
+    { t: 0, n: "Alcohol, regular drinking", v: [0,3,3,1,3,2,2,0,0,0,1,0,0],
+      note: "Risk climbs with dose from the first drink — about 7–10% more breast cancer per daily drink, several-fold more mouth and oesophageal cancer at heavy intake. No safe threshold, but a very shallow slope at one drink a week." },
+    { t: 0, n: "Persistent HPV infection", v: [0,3,0,0,0,0,0,4,0,0,0,0,0],
+      note: "Effectively every cervical cancer begins with a persistent high-risk HPV infection, and HPV now accounts for a large share of throat cancers too. Vaccination before exposure removes most of it — one of the few rows on this page with a direct fix." },
+    { t: 0, n: "Hepatitis B or C infection", v: [0,0,0,0,4,0,0,0,0,0,0,0,0],
+      note: "Chronic infection raises liver-cancer risk roughly fifteen- to twentyfold, and most of the world's liver cancer traces back to it. There is a vaccine for B and a cure for C." },
+    { t: 0, n: "Helicobacter pylori infection", v: [0,0,0,3,0,0,0,0,0,0,0,0,2],
+      note: "The main cause of stomach cancer: carriers run several times the risk, and eradication treatment measurably lowers it. Most carriers never develop cancer, but almost every case starts here." },
+    { t: 0, n: "Sunlight & UV exposure", v: [0,0,0,0,0,0,0,0,0,0,0,4,0],
+      note: "Cumulative UV drives the overwhelming majority of skin cancers, and a history of blistering sunburns roughly doubles melanoma risk. Shade and sleeves do more than any dietary change on this page." },
+    { t: 0, n: "Excess body weight, sustained", v: [0,0,3,1,2,2,2,0,0,3,2,0,1],
+      note: "Now the second-largest preventable cause of cancer after tobacco, touching at least a dozen sites — roughly double for oesophageal adenocarcinoma and kidney, more modest for breast and colorectal. The exposure is years of excess weight, not a heavy month." },
+    { t: 0, n: "Smoke from solid-fuel cooking", v: [3,1,0,0,0,0,0,0,0,0,0,0,0],
+      note: "Burning wood, dung or coal indoors roughly doubles lung-cancer risk and is a leading cause among women who have never smoked. A chimney or a gas connection outperforms any filter or supplement." },
+
+    { t: 1, n: "Secondhand smoke", v: [2,1,0,0,0,0,1,0,0,0,0,0,0],
+      note: "Living with a smoker raises lung-cancer risk by roughly 20–30%. Real, involuntary and preventable — and about an order of magnitude smaller than smoking yourself, a comparison the coverage usually drops." },
+    { t: 1, n: "Asbestos at work", v: [4,2,0,1,0,0,0,0,0,0,0,0,0],
+      note: "Sustained occupational exposure raises lung-cancer risk several-fold and causes mesothelioma, which is otherwise almost unknown. Latency runs 20–40 years, so today's cases reflect exposure that ended decades ago." },
+    { t: 1, n: "Arsenic in drinking water", v: [3,0,0,0,1,0,0,0,3,1,0,3,0],
+      note: "Where groundwater is heavily contaminated — parts of West Bengal and Bangladesh among the worst — skin, bladder and lung cancer risk rises several-fold. This is a question of which well, not of diet." },
+    { t: 1, n: "Diesel exhaust at work", v: [3,0,0,0,0,0,0,0,1,0,0,0,0],
+      note: "Miners, mechanics and long-haul drivers with heavy sustained exposure carry roughly 30–50% more lung cancer. At ordinary street-level exposure the effect is far smaller — that row is below." },
+    { t: 1, n: "Outdoor air pollution", v: [2,0,0,0,0,0,0,0,1,0,0,0,0],
+      note: "Established as a lung carcinogen, at roughly 10–20% added risk per typical long-term increment of PM2.5. Small per person, large across a city — and unlike most rows here, not something you opt into." },
+    { t: 1, n: "Radon indoors", v: [2,0,0,0,0,0,0,0,0,0,0,0,0],
+      note: "The leading cause of lung cancer in never-smokers in several countries, but only in homes where it accumulates. It multiplies with smoking rather than adding to it, and a test kit is the only way to know." },
+    { t: 1, n: "Processed meat, daily", v: [0,0,0,1,0,2,0,0,0,0,0,0,0],
+      note: "IARC Group 1, the same category as tobacco — the same certainty, nothing like the same size. Each 50g a day raises colorectal-cancer risk about 18%, moving a roughly 5% lifetime risk to about 6%." },
+    { t: 1, n: "Red meat, several times a week", v: [0,0,0,0,0,1,0,0,0,0,1,0,0],
+      note: "Probably carcinogenic, with a smaller and less certain colorectal effect than processed meat. The honest summary is “a little, maybe” — which is exactly what this colour means." },
+    { t: 1, n: "Night-shift work", v: [0,0,0,0,0,1,1,0,0,0,0,0,0],
+      note: "Classified probably carcinogenic on limited human evidence: long-term shift workers show modestly higher breast-cancer rates, but the studies disagree and the confounding is hard to rule out." },
+
+    { t: 2, n: "Mobile phones held to the head", v: [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      note: "Thirty years of use, dozens of studies, and brain-tumour rates have not followed the adoption curve anywhere. The frequencies involved cannot break chemical bonds — no mechanism, and no signal in the data." },
+    { t: 2, n: "Wi-Fi routers & 5G masts", v: [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      note: "Non-ionising radiation, orders of magnitude weaker than the sunlight falling on the same room. Exposure from a mast is typically well below that from the handset in your pocket — which is itself not associated with cancer." },
+    { t: 2, n: "Microwave ovens", v: [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      note: "A microwave agitates water; it does not make food radioactive or create carcinogens. Grilling or frying the same food over a flame produces more suspect compounds than microwaving it does." },
+    { t: 2, n: "Deodorant & antiperspirant", v: [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      note: "The aluminium-and-parabens claim has been tested repeatedly in case-control studies and has not held up. Breast tumours cluster in the upper outer quadrant because that is where most breast tissue is." },
+    { t: 2, n: "Plastic bottles left in the sun", v: [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      note: "BPA and phthalates migrate at levels far below any dose linked to cancer, and no cohort study has tied bottled water to it. The hot-car version of the story circulated as a chain email long before it was ever studied." },
+    { t: 2, n: "Non-stick pans in home use", v: [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      note: "PFOA, once used to manufacture the coating, is genuinely carcinogenic at industrial exposure — and has not been used in production since around 2013. An intact pan releases essentially none; the exposure that mattered was in the factory." },
+    { t: 2, n: "Sugar in the diet", v: [0,0,0,0,0,0,0,0,0,0,0,0,0],
+      note: "Tumours consume glucose, which is where “sugar feeds cancer” comes from — but so does every cell in the body, and cutting it starves none of them. Sugar's real contribution is indirect, and is already on this page as sustained excess weight." }
+  ];
+
+  // Fail loudly rather than silently shifting every cell after a typo.
+  ROWS.forEach(function (r, i) {
+    if (r.v.length !== SITES.length) {
+      console.error('ROWS[' + i + '] "' + r.n + '" has ' + r.v.length +
+                    ' values, expected ' + SITES.length);
+    }
+  });
+
+  /* ── state ──────────────────────────────────────────────────────────── */
+  var mode = 'tier';          // 'tier' | 'reach' | 'peak'
+  var selected = null;        // a row object, or null
+
+  var table = document.getElementById('matrix');
+  var head = document.getElementById('matrix-head');
+  var body = document.getElementById('matrix-body');
+  var readout = document.getElementById('readout');
+
+  function reach(r) { return r.v.filter(function (x) { return x > 0; }).length; }
+  function peak(r) { return Math.max.apply(null, r.v); }
+  function total(r) { return r.v.reduce(function (a, b) { return a + b; }, 0); }
+
+  function ordered() {
+    var list = ROWS.slice();
+    if (mode === 'reach') {
+      list.sort(function (a, b) { return reach(b) - reach(a) || peak(b) - peak(a); });
+    } else if (mode === 'peak') {
+      list.sort(function (a, b) { return peak(b) - peak(a) || total(b) - total(a); });
+    }
+    return list;
+  }
+
+  /* ── render ─────────────────────────────────────────────────────────── */
+  function buildHead() {
+    var tr = document.createElement('tr');
+    var corner = document.createElement('td');
+    corner.className = 'corner';
+    tr.appendChild(corner);
+    SITES.forEach(function (s) {
+      var th = document.createElement('th');
+      th.className = 'site';
+      th.scope = 'col';
+      var span = document.createElement('span');
+      span.textContent = s;
+      th.appendChild(span);
+      tr.appendChild(th);
+    });
+    head.appendChild(tr);
+  }
+
+  function groupRow(label) {
+    var tr = document.createElement('tr');
+    tr.className = 'grp';
+    var th = document.createElement('th');
+    th.className = 'rowh';
+    th.scope = 'colgroup';
+    th.colSpan = 1;
+    var span = document.createElement('span');
+    span.className = 'glabel';
+    span.textContent = label;
+    th.appendChild(span);
+    var td = document.createElement('td');
+    td.className = 'grule';
+    td.colSpan = SITES.length;
+    td.appendChild(document.createElement('span'));
+    tr.appendChild(th);
+    tr.appendChild(td);
+    return tr;
+  }
+
+  function buildBody() {
+    body.textContent = '';
+    var list = ordered();
+    var lastTier = -1;
+
+    list.forEach(function (r) {
+      if (mode === 'tier' && r.t !== lastTier) {
+        body.appendChild(groupRow(TIERS[r.t]));
+        lastTier = r.t;
+      }
+
+      var tr = document.createElement('tr');
+      if (r === selected) tr.className = 'sel';
+
+      var th = document.createElement('th');
+      th.className = 'rowh';
+      th.scope = 'row';
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = r.n;
+      btn.setAttribute('aria-pressed', r === selected ? 'true' : 'false');
+      btn.addEventListener('click', function () { select(r); });
+      th.appendChild(btn);
+      tr.appendChild(th);
+
+      r.v.forEach(function (val, i) {
+        var td = document.createElement('td');
+        td.className = 'c v' + val;
+        td.title = r.n + ' → ' + SITES[i] + ': ' + LABELS[val];
+        td.appendChild(document.createElement('i'));
+        tr.appendChild(td);
+      });
+
+      body.appendChild(tr);
+    });
+  }
+
+  /* ── readout ────────────────────────────────────────────────────────── */
+  function lower(s) { return s.charAt(0).toLowerCase() + s.slice(1); }
+
+  function fillReadout() {
+    readout.textContent = '';
+
+    if (!selected) {
+      readout.appendChild(para('rname', 'Pick an exposure'));
+      readout.appendChild(para('rhint',
+        'Click any name in the left column — or tab to it and press Enter — to see ' +
+        'every site it is linked to, in order of strength, and what the effect size actually ' +
+        'looks like in the real world.'));
+      return;
+    }
+
+    readout.appendChild(para('rname', selected.n));
+
+    var hits = selected.v
+      .map(function (val, i) { return { site: SITES[i], val: val }; })
+      .filter(function (h) { return h.val > 0; })
+      .sort(function (a, b) { return b.val - a.val; });
+
+    var meta = document.createElement('p');
+    meta.className = 'rmeta';
+    if (!hits.length) {
+      meta.textContent = 'No cancer site here has credible human evidence of harm at ' +
+                         'everyday exposure. Studied, and repeatedly not found.';
+    } else {
+      hits.forEach(function (h, i) {
+        var em = document.createElement('em');
+        em.textContent = h.site;
+        meta.appendChild(em);
+        meta.appendChild(document.createTextNode(' — ' + lower(LABELS[h.val])));
+        if (i < hits.length - 1) meta.appendChild(document.createTextNode('   ·   '));
+      });
+    }
+    readout.appendChild(meta);
+    readout.appendChild(para('rnote', selected.note));
+  }
+
+  function para(cls, text) {
+    var p = document.createElement('p');
+    p.className = cls;
+    p.textContent = text;
+    return p;
+  }
+
+  /* ── interaction ────────────────────────────────────────────────────── */
+  function select(r) {
+    selected = (selected === r) ? null : r;
+    if (selected) table.classList.add('has-sel');
+    else table.classList.remove('has-sel');
+    buildBody();
+    fillReadout();
+  }
+
+  var SORTS = { tier: 'sort-tier', reach: 'sort-reach', peak: 'sort-peak' };
+
+  Object.keys(SORTS).forEach(function (key) {
+    document.getElementById(SORTS[key]).addEventListener('click', function () {
+      if (mode === key) return;
+      mode = key;
+      Object.keys(SORTS).forEach(function (k) {
+        document.getElementById(SORTS[k])
+          .setAttribute('aria-pressed', k === key ? 'true' : 'false');
+      });
+      buildBody();
+    });
+  });
+
+  buildHead();
+  buildBody();
+  fillReadout();
+})();
+</script>
+</body>
+</html>

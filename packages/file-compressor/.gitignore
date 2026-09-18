@@ -1,0 +1,11 @@
+.next/
+node_modules/
+next-env.d.ts
+fixture.pdf
+
+# Copied from pdfjs-dist on predev/prebuild — see scripts/copy-pdfjs-worker.mjs
+public/pdf.worker.min.mjs
+public/standard_fonts/
+public/cmaps/
+public/compress-worker.js
+public/compress-worker.js.map
