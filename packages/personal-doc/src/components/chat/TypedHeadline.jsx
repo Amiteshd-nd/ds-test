@@ -57,6 +57,7 @@ export default function TypedHeadline({ onPick, paused }) {
       className="lg-focus group block w-full rounded-2xl px-2 py-1 text-left"
     >
       <span
+        data-lg-display=""
         className="block text-[25px] leading-[1.22] text-white sm:text-[30px] md:text-[35px]"
         style={{
           fontFamily: 'var(--lg-font-display)',

@@ -42,6 +42,8 @@ sounds, and it is what forced the interesting part of the architecture (§4).
 | **Anti-Polish / Raw** | `#fafaf8` paper, SVG grain, kraft blobs | cream, 2px `#1a1a1a`, no shadow, **hand-drawn corners**, tilted ±0.5° | Patrick Hand, sentence case | five bands, sepia |
 | **Magazine** | white page, nothing on it | boxless — a 2px black rule ends every panel, chips underlined, radius 0 | Inter 700, red caps kickers, **drop cap** | six bands, press red |
 | **Swiss International** | bone `#f5f1e8`, nothing on it | white cards, 1px black, no shadow, **2rem grid**, 1120px wide, radius 0 | Inter **400** display, caps kickers, **numbered cards** | six bands, tan |
+| **Realism** | anodised plate, photographed brushed grain | paper sheets with fibre, moulded keycaps that **travel on press** | system UI face, engraved glyphs | **none — stays refractive** |
+| **Y2K** | bubblegum → lavender → cyan | frosted glass cards, Aqua pills, white rims, gloss | Inter 900 caps, **chrome-gradient display**, ✦ kickers | eight bands, chrome |
 
 The neo theme follows the reference the work was briefed against: white cards,
 black outlines, hard offset shadows, an electric blue primary, and yellow /
@@ -94,6 +96,21 @@ way to read it than by era:
   sit straight.
 - **Structure** — magazine, swiss. What separates one thing from the next: a
   rule and some space rather than a container.
+- **Depth** — realism, y2k. Whether the surface has a third dimension at all.
+
+**Realism is the only theme that adds depth back**, and the only one besides
+glass that keeps the cube refractive (`flat: 0`). Every other theme re-inks it
+because a flat surface cannot host a physically-rendered object; this one is
+built on the opposite premise, so the cube becomes the glass paperweight on the
+desk. Its plate and paper are real photographed material — two CC0 tiles from
+ambientCG, 7KB together — tone-mapped so they carry *grain* and the tokens
+underneath still carry the colour. And its keys move: 32ms down against 90ms
+up, because a cap is driven down by a finger and returned by a spring, and
+those are not the same force.
+
+**Y2K is the other depth theme and the opposite kind of depth** — not mass but
+gloss. Frosted cards over a bubblegum gradient, Aqua pills split hard at the
+equator, and a chrome display line.
 
 **Swiss and Minimal are opposite arguments**, which is why both earn a place.
 Minimal *removes* until one thing is left: pure white, a 640px single column,
@@ -251,6 +268,12 @@ crossing the reading column has to be a texture, not a shape.
 
 ### 4c. Semantic hooks
 
+Four exist now — `data-lg-block`, `data-lg-kicker`, `data-lg-key` and
+`data-lg-display` — added as themes needed to name a part of the content model
+that no token and no Tailwind class could reach: the lead paragraph of an
+answer, the label above a card, the one key that is the primary action, and the
+display line.
+
 The magazine theme needed two things no token can say and no Tailwind class
 means: *the lead paragraph of an answer* (for a drop cap) and *the label above
 a card* (for a red kicker). Both got a `data-` attribute on the element that
@@ -258,6 +281,7 @@ already existed:
 
 ```jsx
 <p data-lg-block="p" …>          <span data-lg-kicker="" …>
+<button data-lg-key="send" …>    <span data-lg-display="" …>
 ```
 
 ```css
@@ -276,6 +300,23 @@ which is the signature of the style — and it is wrong here. This transcript
 streams a word at a time, and text reflowing between two columns as it arrives
 is unreadable. The device assumes finished text. Everything else the guide
 asks for is implemented; this one is a considered no, not an oversight.
+
+### 4d. Two things that only showed up on screen
+
+Both were tuned by eye against a flat value and both were wrong once the theme
+was rendered. They are recorded because the mistake generalises.
+
+**A surface that will be lit has to start below the value it should end at.**
+The realism plate carries a sheen gradient, a vignette and an overlay-blended
+texture, and every one of those lightens. `#d6d7d9` arrived looking white and
+the paper stopped separating from it; the base had to drop to `#c2c4c7`.
+
+**Chrome needs a dark horizon.** The first Y2K display ramp ran white → light
+grey → white and was unreadable on a pale ground: no value below 60%, so the
+glyphs had nothing to hold an edge with. Real chrome is a reflection of a sky
+meeting a ground, and the dark band at the join is both what makes it read as
+metal and what makes it legible. The same fix served both purposes, which is
+usually the sign that the original was wrong rather than merely unlucky.
 
 ## 5. Rules
 
@@ -367,6 +408,8 @@ that become shader uniforms:
 | Anti-Polish | 1 | sepia | 5 | 0 |
 | Magazine | 1 | press red | 6 | 0 |
 | Swiss | 1 | tan | 6 | 0 |
+| Realism | **0** | — | — | 0 |
+| Y2K | 1 | chrome | 8 | 0 |
 
 Minimal is the only flat theme that wants *more* bands, not fewer. Its
 restraint is about decoration, not about crudeness — eight steps is the

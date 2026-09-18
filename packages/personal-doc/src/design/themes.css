@@ -1495,7 +1495,167 @@
   }
 }
 
-/* ------------------------------------------------ 12. the utility remap */
+/* ----------------------------------------------------------------- 12. y2k */
+/* Y2K Aesthetic, built to uistyleguide.com/style/y2k-aesthetic: "early 2000s
+ * digital optimism with chrome textures, bubblegum colours, and
+ * futuristic-retro aesthetics." Palette #ff69b4 / #00ffff / #c0c0c0 /
+ * #9400d3 / #ffd700 / #ff1493; effects "metallic gradients, glossy buttons,
+ * 3D chrome, glow".
+ *
+ * Two things carried over from the reference implementation exactly: the card
+ * — linear-gradient(145deg, white .9, white .7) with a 0 20px 40px drop and a
+ * -5px inset — and the pill CTA's 90deg pink-to-violet.
+ *
+ * One thing deliberately not carried over: the reference sets its display line
+ * in flat white on a saturated pink-to-cyan ground, which measures 2.8:1. That
+ * is under AA even at large-bold, and this surface's headline is a control you
+ * click, not decoration. So the ground is softened to bubblegum-lavender-cyan
+ * — where near-black body copy clears 9:1 everywhere — and the display line
+ * gets the treatment the era actually reached for more often than flat white:
+ * chrome. A silver gradient painted into the glyphs carries its own mid-tones,
+ * and the violet offset the guide specifies gives it a hard edge.
+ *
+ * This is the first theme to paint text rather than colour it, and it needed
+ * the third content hook: `data-lg-display`. A gradient in glyphs is not
+ * something a colour token can say.
+ */
+
+[data-lg-theme='y2k'] {
+  /* ground — the guide's two anchors with a violet between them */
+  --lg-bg: linear-gradient(135deg, #ff8ecb 0%, #c79bff 46%, #8ceeff 100%);
+  --lg-wash:
+    radial-gradient(70% 50% at 18% 6%, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0) 62%),
+    radial-gradient(60% 45% at 88% 92%, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0) 62%);
+  --lg-wash-blend: normal;
+  /* the sheen down a glossy surface */
+  --lg-vignette: linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0) 26%);
+  --lg-scrim: linear-gradient(180deg, #ffa3d6 30%, rgba(255, 163, 214, 0.75) 62%, rgba(255, 163, 214, 0) 100%);
+
+  /* ink & accents */
+  --lg-ink: #1b1036;
+  --lg-on-accent: #ffffff;
+  /* chrome is light, so the glyph on it is dark */
+  --lg-on-well: #1b1036;
+  --lg-accent: #9400d3;
+  --lg-accent-soft: #9400d3;
+  --lg-accent-warm: #ff1493;
+  --lg-live: #00e5ff;
+  --lg-live-glow: 0 0 8px 2px rgba(0, 229, 255, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+
+  /* surfaces — the reference's frosted card, with a gloss line added along the
+     top edge because everything in this era had one */
+  --lg-surface-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.72));
+  --lg-surface-blur: blur(12px) saturate(150%);
+  --lg-surface-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -5px 20px rgba(0, 0, 0, 0.05),
+    0 20px 40px rgba(76, 20, 110, 0.22);
+  /* chips are Aqua pills: a hard split at the equator, gloss above, tint below */
+  --lg-flat-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0 48%, rgba(233, 213, 255, 0.86) 48%, rgba(246, 236, 255, 0.92) 100%);
+  --lg-flat-blur: blur(8px) saturate(140%);
+  --lg-flat-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(148, 0, 211, 0.12),
+    0 4px 10px -4px rgba(76, 20, 110, 0.4);
+
+  /* edges — a white rim, not a dark line */
+  --lg-border: 1px;
+  --lg-line: rgba(255, 255, 255, 0.8);
+  --lg-rim-a: rgba(255, 255, 255, 0.95);
+  --lg-rim-b: rgba(148, 0, 211, 0.18);
+  --lg-rim-warm: 255 105 180;
+  --lg-rim-cool: 0 229 255;
+  --lg-rim-hot: 255 255 255;
+  --lg-hairline-display: block;
+  --lg-specular-display: block;
+
+  /* fills */
+  --lg-send-fill: linear-gradient(90deg, #ff69b4 0%, #9400d3 100%);
+  --lg-send-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 6px 18px -6px rgba(148, 0, 211, 0.9);
+  --lg-busy-fill: linear-gradient(180deg, #f2f2f2 0%, #c0c0c0 52%, #9aa0a6 100%);
+  --lg-focus-bloom: 0 0 0 2px rgba(148, 0, 211, 0.55), 0 20px 40px -12px rgba(76, 20, 110, 0.5);
+  --lg-avatar-fill: radial-gradient(circle at 32% 26%, #ffffff 0%, #ffd7f2 26%, #ff69b4 58%, #9400d3 100%);
+  --lg-avatar-shadow: inset 0 -2px 4px rgba(76, 20, 110, 0.45), 0 2px 6px rgba(76, 20, 110, 0.4);
+  --lg-bullet-fill: linear-gradient(135deg, #ff69b4, #00e5ff);
+  --lg-media-filter: none;
+  --lg-bloom-blur: 26px;
+  --lg-bloom-saturation: 1.5;
+  --lg-quote-line: #9400d3;
+
+  /* the hologram the cube could not have */
+  --lg-spectrum: conic-gradient(from 0deg, #ff69b4, #ffd700, #00ffff, #9400d3, #ff1493, #ff69b4);
+  --lg-spectrum-blur: 4px;
+  --lg-spectrum-blur-hover: 7px;
+  --lg-well-fill: linear-gradient(180deg, #ffffff 0%, #dfe3e8 44%, #9aa0a6 52%, #e8ebee 100%);
+  --lg-well-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 -2px 4px rgba(0, 0, 0, 0.25);
+
+  /* a11y + motion */
+  --lg-focus-ring: #9400d3;
+  --lg-scroll-thumb: rgba(148, 0, 211, 0.45);
+  --lg-scroll-thumb-hover: rgba(148, 0, 211, 0.75);
+  --lg-theme-transition: background-color 0.28s ease, color 0.28s ease, border-color 0.28s ease;
+
+  /* layout */
+  --lg-measure: 720px;
+  --lg-measure-wide: 840px;
+  --lg-leading: 1.66;
+
+  /* type */
+  --lg-font: 'Inter', system-ui, sans-serif;
+  --lg-font-display: 'Inter', system-ui, sans-serif;
+  --lg-ligatures: normal;
+  --lg-tracking-tight: -0.02em;
+  --lg-display-transform: uppercase;
+  /* the guide's own recipe: violet at 3px, silver at 6px */
+  --lg-display-shadow: 3px 3px 0 #9400d3, 6px 6px 0 rgba(192, 192, 192, 0.85);
+  --lg-weight-strong: 800;
+  --lg-display-weight: 900;
+  --lg-label-transform: uppercase;
+  --lg-label-tracking: 0.12em;
+}
+
+/* ---- chrome type --------------------------------------------------------- */
+
+/* A silver gradient painted into the glyphs. `color: transparent` lets the
+ * background through the letterforms; the text-shadow above still paints,
+ * because a shadow is cast from the glyph outline rather than from its fill.
+ *
+ * The ghost half of the headline sets its own colour, so it stays grey and
+ * only the typed half goes chrome — which is the right split anyway. */
+[data-lg-theme='y2k'] .lg-root [data-lg-display] {
+  /* A chrome ramp needs a dark horizon. The first attempt ran white → light
+     grey → white and was unreadable on a pale ground — it had no value below
+     60%, so the glyphs had nothing to hold an edge with. Real chrome is a
+     reflection of a sky meeting a ground, and the dark band at the join is
+     both what makes it look like metal and what makes it legible. */
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #d7dde5 30%,
+    #39434f 47%,
+    #2b3440 53%,
+    #ffffff 68%,
+    #aab3bd 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Stars on the kickers, the way every banner in 2001 had them. */
+[data-lg-theme='y2k'] .lg-root [data-lg-kicker]::before {
+  content: '✦ ';
+}
+
+/* Glow on approach rather than glow forever — the guide asks for glow
+ * animations, and a permanently pulsing control is a different thing from a
+ * period detail. */
+[data-lg-theme='y2k'] .lg-root [data-lg-key='send']:hover {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 8px 26px -4px rgba(148, 0, 211, 1);
+}
+
+/* ------------------------------------------------ 13. the utility remap */
 /* Tailwind v4 compiles `text-white/60` to
  *     color: color-mix(in oklab, var(--color-white) 60%, transparent)
  * so rebinding --color-white inside this subtree retargets every white-alpha
@@ -1542,7 +1702,11 @@
   --color-white: #1c1d1f;
 }
 
-/* ----------------------------------------- 12b. the opacity floor (light) */
+[data-lg-theme='y2k'] .lg-root {
+  --color-white: #1b1036;
+}
+
+/* ----------------------------------------- 13b. the opacity floor (light) */
 /* Alpha is not perceptually symmetric across grounds. White at 28% over near
  * black still reads as text; ink at 28% over paper is a smudge — the eye is
  * far more forgiving of light-on-dark than of dark-on-light at the same alpha.
@@ -1565,22 +1729,22 @@
  * hard way: the magazine theme's kicker rule matched, computed, and was
  * silently overridden by this block because both landed on (0,3,0). */
 
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/20) { color: color-mix(in oklab, var(--color-white) 42%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/25) { color: color-mix(in oklab, var(--color-white) 46%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/28) { color: color-mix(in oklab, var(--color-white) 52%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/30) { color: color-mix(in oklab, var(--color-white) 54%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/35) { color: color-mix(in oklab, var(--color-white) 58%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/40) { color: color-mix(in oklab, var(--color-white) 62%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/45) { color: color-mix(in oklab, var(--color-white) 64%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/50) { color: color-mix(in oklab, var(--color-white) 68%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/55) { color: color-mix(in oklab, var(--color-white) 72%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/60) { color: color-mix(in oklab, var(--color-white) 76%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/70) { color: color-mix(in oklab, var(--color-white) 82%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real']) .lg-root :where(.text-white\/75) { color: color-mix(in oklab, var(--color-white) 86%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/20) { color: color-mix(in oklab, var(--color-white) 42%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/25) { color: color-mix(in oklab, var(--color-white) 46%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/28) { color: color-mix(in oklab, var(--color-white) 52%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/30) { color: color-mix(in oklab, var(--color-white) 54%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/35) { color: color-mix(in oklab, var(--color-white) 58%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/40) { color: color-mix(in oklab, var(--color-white) 62%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/45) { color: color-mix(in oklab, var(--color-white) 64%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/50) { color: color-mix(in oklab, var(--color-white) 68%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/55) { color: color-mix(in oklab, var(--color-white) 72%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/60) { color: color-mix(in oklab, var(--color-white) 76%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/70) { color: color-mix(in oklab, var(--color-white) 82%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/75) { color: color-mix(in oklab, var(--color-white) 86%, transparent); }
 
 /* Hover states resolve to the full ink, which is already the rule. */
 
-/* ------------------------------------------------- 12c. the radius override */
+/* ------------------------------------------------- 13c. the radius override */
 /* The second — and last — place the system touches the utility layer.
  *
  * Corner radius lives in the markup as `rounded-2xl`, `rounded-full`,
@@ -1599,7 +1763,7 @@
   border-radius: 0;
 }
 
-/* ----------------------------------------------------- 13. theme switching */
+/* ----------------------------------------------------- 14. theme switching */
 /* Tokens are interpolatable, so a change of theme cross-fades the whole
  * surface rather than cutting. Only the cheap properties are transitioned —
  * animating box-shadow or backdrop-filter across a page of glass is not.

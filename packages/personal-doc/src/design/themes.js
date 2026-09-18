@@ -142,6 +142,18 @@ export const THEMES = [
      * and becomes the glass paperweight on the desk. */
     material: { flat: 0, tint: [1, 1, 1], bands: 6, pixel: 0 },
   },
+  {
+    id: 'y2k',
+    name: 'Y2K',
+    hint: 'Chrome, bubblegum, gloss',
+    icon: 'chrome',
+    swatch: ['#ff69b4', '#9400d3', '#00ffff'],
+    /* Chrome, seven bands. The era was obsessed with two finishes — chrome and
+     * holographic — and the shader can only do one at a time. The cube takes
+     * chrome; the theme control's ring takes the hologram. */
+    material: { flat: 1, tint: [0.88, 0.9, 0.96], bands: 8, pixel: 0 },
+    fonts: 'https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&display=swap',
+  },
 ];
 
 export const DEFAULT_THEME = THEMES[0].id;

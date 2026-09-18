@@ -6,6 +6,7 @@ import {
   IconBlocks,
   IconChaos,
   IconCheck,
+  IconChrome,
   IconColumns,
   IconGlass,
   IconKeycap,
@@ -43,6 +44,7 @@ const THEME_ICONS = {
   columns: IconColumns,
   swiss: IconSwiss,
   keycap: IconKeycap,
+  chrome: IconChrome,
 };
 
 const DRAWER = {
