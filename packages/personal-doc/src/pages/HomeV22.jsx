@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from '@cloud-march/motion/react';
 import { Link } from 'react-router-dom';
 
 import GlassCube from '../components/chat/GlassCube';

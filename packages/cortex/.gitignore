@@ -1,0 +1,3 @@
+# Durable run state. Real, and regenerated on demand — see docs/DECISIONS.md D-2.
+.cortex/
+dist-demo/

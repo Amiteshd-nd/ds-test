@@ -68,7 +68,7 @@ export default function VideoUploader() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Flat 3B — living room"
-          className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 outline-none focus:border-blue-500"
+          className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/60"
         />
       </div>
 

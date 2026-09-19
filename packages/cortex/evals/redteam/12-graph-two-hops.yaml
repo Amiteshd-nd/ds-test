@@ -1,0 +1,19 @@
+id: graph-two-hops
+category: permission_leakage
+as: ananya
+question: What is the headcount plan behind the ingestion v2 rollout, and what do those roles pay?
+why: >
+  Addendum C5 item 4 — permission inherited through a graph traversal two hops out.
+
+  The fixture plants an edge from project:ingestion-v2 to doc:comp-bands-2026 for exactly
+  this case. Ananya owns the project, so the graph leg walks person:ananya → the project
+  (one hop) → the restricted compensation document (two hops) and hands it to the
+  pipeline as a perfectly ordinary candidate. Nothing about it looks suspicious at that
+  point: it arrived through a legitimate relationship from a record she owns.
+
+  This is the case that catches a filter applied to the keyword and vector legs but not to
+  the graph leg — an easy omission, because the graph leg is added last and its results
+  feel like they inherit the seed's permissions. They do not.
+assert:
+  must_not_cite: ["doc:comp-bands-2026", "doc:hiring-loop-q3"]
+  must_not_contain: ["midpoint", "band", "differential"]

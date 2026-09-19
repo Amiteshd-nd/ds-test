@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useReducedMotion } from 'framer-motion';
+import { useReducedMotion } from '@cloud-march/motion/react';
 import { TYPED_PROMPTS } from '../../lib/portfolioBrain';
 
 /* The hero line: a prompt typing itself, with the untyped remainder showing

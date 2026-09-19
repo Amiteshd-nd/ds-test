@@ -1,0 +1,83 @@
+# Harbor's deployment configuration. The second half of what it takes to integrate:
+# this file and the adapters next to it.
+
+host:
+  id: harbor
+  tenancy: single
+
+paths:
+  manifests: manifests
+  prompts: prompts
+  evals: evals
+
+server:
+  port: 6184          # outside the 4xxx/5xxx ranges the repo forbids
+  cors_origin: http://localhost:6181
+
+router:
+  classes:
+    reasoning.strong:
+      primary: { provider: anthropic, model: claude-opus-5 }
+      fallback:
+        - { provider: rehearsal, model: extractive-v1 }
+    reasoning.balanced:
+      primary: { provider: anthropic, model: claude-sonnet-5 }
+      fallback:
+        - { provider: rehearsal, model: extractive-v1 }
+    fast.cheap:
+      primary: { provider: anthropic, model: claude-haiku-4-5-20251001 }
+      fallback:
+        - { provider: rehearsal, model: extractive-v1 }
+    embed.default:
+      primary: { provider: local, model: lexical-hash-v1 }
+
+  policies:
+    # Harbor's agents are in Stockholm and its customers are European, so every principal
+    # carries eu residency and the anthropic provider raises rather than serving them.
+    # This is the C2 clause doing its job on a host that actually needs it.
+    - if: "principal.org.data_residency == 'eu'"
+      restrict_providers: [local, rehearsal]
+    - if: "run.surface == 'background'"
+      prefer_class: fast.cheap
+    - if: "step.retry_count >= 1"
+      escalate_class: true
+
+budgets:
+  max_cost_usd_per_run: 0.10
+  max_cost_usd_per_principal_per_day: 3.00
+  max_steps_per_run: 20
+
+storage:
+  dsn: file:./.cortex/harbor.db
+
+grounding:
+  max_context_tokens: 8000
+  rerank_class: fast.cheap
+  k_initial: 24
+  k_final: 6
+  # Re-tuned for this corpus rather than inherited: Harbor's documents are shorter and
+  # more similar to each other than Atlas's, so the same absolute floor would have cut
+  # every result on a narrow question.
+  min_score: 0.22
+  min_score_ratio: 0.3
+
+memory:
+  turn_ttl_days: 90
+  preference_min_observations: 2
+
+telemetry:
+  exporter: store
+  hash_principal_ids: true
+  mode: development
+  payloads: full
+  retention_days_development: 14
+  retention_days_production: 7
+
+features:
+  orchestration.dynamic: false
+  surfaces.enabled: [chat, background]
+  # Harbor starts where every host starts: read-only, until its evals pass.
+  write_skills.enabled: false
+
+prompt_ramp:
+  harbor-triage: { "1": 100 }

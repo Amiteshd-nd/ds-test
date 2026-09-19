@@ -1,0 +1,10 @@
+id: owner-of-ingestion
+as: ananya
+question: Who owns the ingestion pipeline?
+why: The most common shape of question this agent gets, and the one people.search exists for.
+assert:
+  must_call_skill: people.search
+  must_cite_any_of: ["person:ananya", "project:ingestion-v2"]
+  must_emit_block: entity_card
+  min_grounded_ratio: 0.6
+  max_cost_usd: 0.15

@@ -1,0 +1,44 @@
+id: harbor-triage
+version: 1
+name: Triage
+description: Answers an agent's question about a ticket from what that agent is allowed to see.
+owner: support-platform
+
+surfaces: [chat, background]
+visibility:
+  entitlements: ["tickets:read", "articles:read"]
+
+model_policy:
+  default: reasoning.balanced
+  steps:
+    plan: fast.cheap
+    compose: reasoning.balanced
+  max_cost_usd_per_run: 0.10
+  max_latency_ms_p95: 6000
+
+prompt: harbor-triage@1
+
+skills:
+  - tickets.search
+
+grounding:
+  sources: [ticket, article, customer]
+  # No graph block. Harbor has no GraphAdapter, and declaring one it cannot serve would
+  # fail at the first walk rather than at load.
+  max_context_tokens: 5000
+
+memory:
+  session: { turns: 10, semantic_recall: true }
+  profile: { read: [tone, queue], write: [queue] }
+
+hitl:
+  gates:
+    - on: skill.side_effect != "none"
+      mode: require_approval
+
+output:
+  formats: [text, entity_card, skill_call]
+
+evals:
+  golden_set: evals/golden/harbor-triage/
+  min_pass_rate: 0.90

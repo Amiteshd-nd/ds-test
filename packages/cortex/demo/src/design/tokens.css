@@ -1,0 +1,79 @@
+/*
+  Atlas's design tokens. THIS FILE IS THE HOST'S, NOT CORTEX'S.
+
+  The whole point of §13 is that the agent layer ships zero styles: every colour, every
+  radius, and every type decision in the running app comes from here, and the lint in
+  scripts/lint-boundaries.mjs fails the build if one appears in src/ui-headless instead.
+
+  The direction is "technical documentation" — warm paper, near-black text, one ochre
+  accent, monospace for anything the system generated (ids, refs, costs). It is
+  deliberately not the slate-900-plus-green palette the colour database suggests for a
+  developer tool: this is a reading surface, not an IDE.
+*/
+
+@import '@cloud-march/motion/tokens.css';
+
+:root {
+  --paper: #fbf8f2;
+  --surface: #ffffff;
+  --surface-sunk: #f4f0e7;
+  --ink: #1a1714;
+  --ink-muted: #6b6259;
+  --ink-faint: #978e82;
+  --line: #e4ddd0;
+  --line-strong: #cfc5b3;
+
+  --accent: #9a5b09;
+  --accent-soft: #fdf1dd;
+  --accent-line: #e8c98f;
+
+  --alarm: #9b2c1f;
+  --alarm-soft: #fbeae7;
+  --good: #2f6b43;
+
+  --radius: 3px;
+  --radius-lg: 6px;
+
+  --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.375rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --shadow-card: 0 1px 2px rgb(26 23 20 / 0.06), 0 8px 24px -16px rgb(26 23 20 / 0.24);
+  --measure: 68ch;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #14120e;
+    --surface: #1c1915;
+    --surface-sunk: #23201a;
+    --ink: #f2ece1;
+    --ink-muted: #a89e90;
+    --ink-faint: #7d7365;
+    --line: #322d25;
+    --line-strong: #453e33;
+
+    --accent: #e0a441;
+    --accent-soft: #2a2115;
+    --accent-line: #5c4823;
+
+    --alarm: #e8897b;
+    --alarm-soft: #2d1a17;
+    --good: #7fbf95;
+
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -16px rgb(0 0 0 / 0.8);
+  }
+}

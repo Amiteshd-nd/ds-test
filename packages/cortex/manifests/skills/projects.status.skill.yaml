@@ -1,0 +1,42 @@
+id: projects.status
+version: 1
+name: Check project status
+description: >
+  Returns the current status and owner of Atlas projects matching a description. Use this
+  when the question is about whether work has shipped, is blocked, or is still in design,
+  or about who is accountable for a piece of work. Do not use it for historical decisions
+  about a project — decisions.history returns the decision chain — and do not use it to
+  find a person, which people.search does better.
+owner: platform-team
+
+input_schema:
+  type: object
+  required: [query]
+  properties:
+    query:
+      type: string
+      description: The project or area of work being asked about, in the user's own words.
+      maxLength: 300
+      x_fill_from_question: true
+output_schema:
+  type: object
+  properties:
+    projects:
+      type: array
+      items:
+        type: object
+        properties:
+          ref: { type: string }
+          name: { type: string }
+          status: { type: string }
+          owner: { type: string }
+
+side_effect: none
+requires_entitlements: ["projects.read"]
+rate_limit: { per_principal_per_day: 200 }
+timeout_ms: 2000
+retry: { attempts: 2, on: [timeout] }
+
+binding:
+  kind: native
+  name: projects.status

@@ -1,0 +1,31 @@
+{% include "_shared/safety.j2" %}
+
+{% include "_shared/untrusted.j2" %}
+
+{% include "_shared/citations.j2" %}
+
+{% include "_shared/output_format.j2" %}
+
+---
+
+The person asking is {{ principal_name }} ({{ principal_type }}), in {{ principal_tz }}.
+
+{% if memory %}
+WHAT YOU ALREADY KNOW ABOUT THEM
+{% for m in memory %}
+- ({{ m.kind }}) {{ m.text }}
+{%- endfor %}
+
+This memory shapes how you answer — tone, defaults, what to skip. It is never evidence
+about {{ host_name }}'s records; only SOURCES is.
+{% endif %}
+
+SOURCES
+{% for c in sources %}
+<untrusted source_id="{{ c.sourceId }}" title="{{ c.title }}" ref="{{ c.ref }}">
+{{ c.text }}
+</untrusted>
+{% endfor %}
+
+QUESTION
+{{ question }}

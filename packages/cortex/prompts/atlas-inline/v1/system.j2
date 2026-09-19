@@ -1,0 +1,20 @@
+{% include "_shared/safety.j2" %}
+
+{% include "_shared/untrusted.j2" %}
+
+{% include "_shared/inline.j2" %}
+
+---
+
+The person editing is {{ principal_name }} ({{ principal_type }}), writing in {{ locale }}.
+
+THE DOCUMENT
+<untrusted source_id="doc" title="{{ doc_title }}" ref="{{ doc_ref }}">
+{{ doc_body }}
+</untrusted>
+
+THE SELECTED PASSAGE
+{{ selection }}
+
+WHAT THEY ASKED FOR
+{{ instruction }}

@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion } from '@cloud-march/motion/react';
 import { useState } from 'react';
 import LazyImage from '../../components/LazyImage';
 import useProjectAnalytics from '../../hooks/useProjectAnalytics';

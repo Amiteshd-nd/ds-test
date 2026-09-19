@@ -1,0 +1,47 @@
+{
+  "name": "@cloud-march/cortex",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "CORTEX \u2014 a portable AI agent layer. Core knows nothing about the product it runs in; every host concern sits behind one of eight adapters.",
+  "scripts": {
+    "dev": "node dev.mjs",
+    "serve": "node src/server/main.ts",
+    "build": "vite build --config demo/vite.config.ts",
+    "lint": "node scripts/lint-boundaries.mjs",
+    "test": "node --test \"tests/**/*.test.ts\"",
+    "doctor": "node scripts/doctor.ts",
+    "eval": "node evals/runner/run.ts",
+    "dod": "node scripts/dod.ts",
+    "guard": "node scripts/regression-guard.mjs",
+    "init": "node scripts/init.ts",
+    "doctor:harbor": "CORTEX_CONFIG=hosts/harbor/cortex.config.yaml node scripts/doctor.ts",
+    "eval:harbor": "CORTEX_CONFIG=hosts/harbor/cortex.config.yaml node evals/runner/run.ts"
+  },
+  "main": "./src/core/index.ts",
+  "exports": {
+    ".": "./src/core/index.ts",
+    "./adapters": "./src/core/adapters/index.ts",
+    "./sdk": "./src/sdk/client.ts",
+    "./ui-headless": "./src/ui-headless/index.ts"
+  },
+  "dependencies": {
+    "@cloud-march/motion": "workspace:*",
+    "better-sqlite3": "^12.5.0",
+    "js-yaml": "^4.1.0",
+    "nunjucks": "^3.2.4"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^24.0.0",
+    "@types/nunjucks": "^3.2.6",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.1.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "typescript": "5.9.3",
+    "vite": "^7.1.0"
+  }
+}

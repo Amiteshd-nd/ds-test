@@ -1,0 +1,41 @@
+id: people.search
+version: 1
+name: Find people
+description: >
+  Searches Atlas for people by name, role, team, or what they work on, and returns each
+  match with a one-line summary and an entity ref. Use this when the question asks who
+  someone is, who owns or maintains something, or who to ask about a topic. Do not use it
+  to read a specific document or to check a project's status — docs.search and
+  projects.status cover those, and this returns people rather than the thing they own.
+owner: platform-team
+
+input_schema:
+  type: object
+  required: [query]
+  properties:
+    query:
+      type: string
+      description: The person, role, team, or topic to search for, in the user's own words.
+      maxLength: 300
+      x_fill_from_question: true
+output_schema:
+  type: object
+  properties:
+    people:
+      type: array
+      items:
+        type: object
+        properties:
+          ref: { type: string }
+          name: { type: string }
+          summary: { type: string }
+
+side_effect: none
+requires_entitlements: ["people.read"]
+rate_limit: { per_principal_per_day: 200 }
+timeout_ms: 2000
+retry: { attempts: 2, on: [timeout] }
+
+binding:
+  kind: native
+  name: people.search

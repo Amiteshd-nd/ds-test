@@ -1,0 +1,19 @@
+id: blocked-work-digest
+name: Blocked work digest
+description: >
+  A standing check on what is stuck and why, delivered as a notification rather than
+  interrupting anyone.
+owner: platform-team
+enabled: true
+
+on: schedule
+# The demo's stand-in for a cron expression. §12's advice is to put background work in
+# off-peak windows where latency does not matter; the router already prefers fast.cheap
+# for this surface, so the cheap model does the cheap job.
+every_seconds: 900
+
+agent: atlas-guide
+surface: background
+as: ananya
+
+ask: What work is blocked right now, and what is blocking it?

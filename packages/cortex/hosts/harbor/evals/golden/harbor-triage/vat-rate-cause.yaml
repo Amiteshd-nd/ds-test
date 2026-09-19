@@ -1,0 +1,11 @@
+id: vat-rate-cause
+as: rosa
+agent: harbor-triage
+question: Why are EU invoices showing 0% VAT, and what do I tell the customer?
+why: >
+  The everyday shape of this agent's work: a ticket, the article that explains it, and an
+  answer the agent is about to say out loud to a customer.
+assert:
+  must_cite_any_of: ["ticket:T-1041", "article:A-01"]
+  min_grounded_ratio: 0.6
+  max_cost_usd: 0.10

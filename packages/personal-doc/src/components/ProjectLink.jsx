@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion } from '@cloud-march/motion/react';
 import { Link } from 'react-router-dom';
 import ReactGA from 'react-ga4';
 import { useState } from 'react';

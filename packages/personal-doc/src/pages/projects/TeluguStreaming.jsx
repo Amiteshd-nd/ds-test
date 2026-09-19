@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion } from '@cloud-march/motion/react';
 import ProjectNav from '../../components/ProjectNav';
 import BlurImage from '../../components/BlurImage';
 import useProjectAnalytics from '../../hooks/useProjectAnalytics';

@@ -1,0 +1,38 @@
+# A specialist. Ordinary in every way — it runs on its own, it has its own evals, and a
+# supervisor delegating to it gets exactly this and nothing more.
+id: atlas-people
+version: 1
+name: People specialist
+description: Answers questions about who someone is, who owns a piece of work, and who to ask about a topic.
+owner: platform-team
+
+surfaces: [chat, background]
+visibility:
+  entitlements: ["people.read", "docs.read"]
+
+model_policy:
+  default: fast.cheap
+  max_cost_usd_per_run: 0.04
+
+prompt: atlas-guide@1
+
+skills:
+  - people.search
+
+grounding:
+  sources: [person, team]
+  max_context_tokens: 3000
+
+memory:
+  session: { turns: 4, semantic_recall: false }
+  profile: { read: [], write: [] }
+
+hitl:
+  gates: []
+
+output:
+  formats: [text, entity_card, skill_call]
+
+evals:
+  golden_set: evals/golden/atlas-people/
+  min_pass_rate: 0.90

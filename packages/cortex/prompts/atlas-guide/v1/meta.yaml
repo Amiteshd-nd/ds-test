@@ -1,0 +1,17 @@
+id: atlas-guide
+version: 1
+owner: platform-team
+model_hint: reasoning.balanced
+variables:
+  - host_name
+  - locale
+  - principal_name
+  - principal_type
+  - principal_tz
+  - memory
+  - sources
+  - question
+changelog: >
+  v1 — first version. Sources are wrapped per _shared/untrusted.j2; the memory block is
+  explicitly excluded from being usable as evidence, because the first thing an agent
+  does with remembered facts is cite them as if they were host data.

@@ -1,0 +1,37 @@
+{
+  "name": "@cloud-march/motion",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "The repo's shared motion language: duration/easing/spring tokens, DOM helpers, and React presets, all on top of motion.dev.",
+  "scripts": {
+    "build": "node -e \"console.log('@cloud-march/motion: source-only ESM, nothing to build')\""
+  },
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./react": {
+      "types": "./src/react.d.ts",
+      "default": "./src/react.js"
+    },
+    "./tokens.css": "./src/tokens.css"
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "motion": "^13.4.0"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  }
+}

@@ -10,6 +10,7 @@
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
+    "@cloud-march/motion": "workspace:*",
     "@mkkellogg/gaussian-splats-3d": "0.4.7",
     "@react-three/drei": "10.7.8",
     "@react-three/fiber": "9.7.0",

@@ -1,0 +1,50 @@
+# §9.1 Mode B. Off unless features.orchestration.dynamic is true, which it is not by
+# default — non-negotiable 5 is that fixed workflows ship first and dynamic planning
+# stays behind a flag.
+#
+# A supervisor is an ordinary agent whose skill list happens to contain `agent:` entries.
+# It cannot grant a specialist anything: the validator refuses to load a supervisor whose
+# visibility does not already cover every entitlement its sub-agents require, each
+# sub-agent keeps its own allow-list and its own budget, and every delegation is a real
+# run with its own trace.
+id: atlas-supervisor
+version: 1
+name: Atlas Supervisor
+description: Answers a question that spans people and decisions by asking both specialists and composing what they say.
+owner: platform-team
+
+surfaces: [chat, background]
+visibility:
+  entitlements: ["docs.read", "people.read", "projects.read"]
+
+model_policy:
+  default: reasoning.balanced
+  steps:
+    compose: reasoning.balanced
+  # The supervisor's own ceiling. Each specialist has its own on top, which is the point:
+  # a runaway sub-agent cannot spend the supervisor's budget.
+  max_cost_usd_per_run: 0.20
+
+prompt: atlas-guide@1
+
+skills:
+  - agent:atlas-people
+  - agent:atlas-decisions
+
+grounding:
+  sources: [doc, project, person, decision, team]
+  max_context_tokens: 6000
+
+memory:
+  session: { turns: 8, semantic_recall: true }
+  profile: { read: [tone, focus], write: [] }
+
+hitl:
+  gates: []
+
+output:
+  formats: [text, entity_card, skill_call]
+
+evals:
+  golden_set: evals/golden/atlas-supervisor/
+  min_pass_rate: 0.90

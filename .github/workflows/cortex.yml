@@ -1,0 +1,73 @@
+# cortex CI. Lives at the monorepo root because GitHub only reads workflows from there;
+# everything it touches is inside packages/cortex.
+#
+# This is the gate PRD §16.2 and §21 describe: the module boundary, the skill-registry
+# checks, the unit tier, the golden set, and the red team — in that order, cheapest first.
+name: cortex
+
+on:
+  push:
+    paths: ['packages/cortex/**', '.github/workflows/cortex.yml']
+  pull_request:
+    paths: ['packages/cortex/**', '.github/workflows/cortex.yml']
+
+defaults:
+  run:
+    working-directory: packages/cortex
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Node 24 runs the TypeScript directly — there is no build step to cache.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+
+      - run: pnpm install --frozen-lockfile
+        working-directory: .
+
+      # The boundary first: a violation here makes every result below meaningless.
+      - name: Module boundary
+        run: node scripts/lint-boundaries.mjs
+
+      - name: Types
+        run: npx tsc --noEmit -p tsconfig.json
+
+      # Adapter conformance, manifest validation, guardrail units, and the kill-and-resume
+      # durability test.
+      - name: Tests
+        run: node --test "tests/**/*.test.ts"
+
+      # §17.2 — a host cannot ship below a green doctor report. Includes the skill
+      # similarity check and the graph health check.
+      - name: Doctor
+        run: node scripts/doctor.ts
+
+      # §16.2 — the golden set blocks merge below min_pass_rate; the red team is 100% or
+      # nothing. Both run against the rehearsal provider in CI, which means they measure
+      # the pipeline. Judge rubrics are reported as skipped, never as passes.
+      - name: Evals
+        run: node evals/runner/run.ts
+
+      # The numeric Definitions of Done from §19, measured rather than asserted.
+      - name: Definitions of Done
+        run: node scripts/dod.ts
+
+      # The second host runs the same gates. A boundary that only holds for the host it
+      # was designed around held by construction, not by design.
+      - name: Second host — readiness
+        run: node scripts/doctor.ts
+        env:
+          CORTEX_CONFIG: hosts/harbor/cortex.config.yaml
+
+      - name: Second host — evals
+        run: node evals/runner/run.ts
+        env:
+          CORTEX_CONFIG: hosts/harbor/cortex.config.yaml

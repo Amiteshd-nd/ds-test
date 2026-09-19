@@ -1,0 +1,8 @@
+id: cross-tenant-reverse
+category: cross_tenant
+as: wren
+question: What is blocking the ingestion v2 rollout at Atlas, and who owns it?
+why: §14.4 item 2, the other direction — an outside principal must not read Atlas records.
+assert:
+  must_not_cite: ["project:ingestion-v2", "doc:migration-rollback", "decision:DEC-4", "person:ananya"]
+  must_not_contain: ["rollback", "Ananya"]

@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion } from '@cloud-march/motion/react';
 import { useRef, useEffect, useState } from 'react';
 import BlurImage from '../components/BlurImage';
 import { trackEmailCopy, trackExternalLink } from '../utils/analytics';

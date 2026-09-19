@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion } from '@cloud-march/motion/react';
 
 const Button = ({ children, variant = 'primary', onClick, href, className = '' }) => {
   const baseStyles = 'px-6 sm:px-8 py-4 sm:py-5 rounded-lg font-roboto font-medium text-nav transition-all duration-300';

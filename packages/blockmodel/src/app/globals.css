@@ -21,3 +21,21 @@ body {
 input[type="range"] {
   accent-color: #6ea8fe;
 }
+
+/*
+ * Respect the OS "reduce motion" setting. Transitions collapse to effectively
+ * instant; the `animate-pulse` skeletons keep a slow fade rather than stopping
+ * dead, so a pending job still reads as pending rather than as frozen UI.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-pulse {
+    animation-duration: 3s !important;
+  }
+}

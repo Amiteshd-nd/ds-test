@@ -1,0 +1,17 @@
+id: harbor-triage
+version: 1
+owner: support-platform
+model_hint: reasoning.balanced
+variables:
+  - host_name
+  - locale
+  - principal_name
+  - principal_type
+  - principal_tz
+  - memory
+  - sources
+  - question
+changelog: >
+  v1 — written for Harbor rather than copied from Atlas. The safety fragment differs
+  because the failure mode differs: at Atlas a wrong answer misleads a colleague, here it
+  becomes something an agent says to a customer.

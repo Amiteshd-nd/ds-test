@@ -1,5 +1,5 @@
 import { memo, useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from '@cloud-march/motion/react';
 import { Link } from 'react-router-dom';
 import { IconHome } from './Icons';
 

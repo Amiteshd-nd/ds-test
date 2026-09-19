@@ -1,5 +1,5 @@
 import { Routes, Route, useLocation, Link } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, MotionConfig } from '@cloud-march/motion/react';
 import { useEffect, lazy, Suspense } from 'react';
 import ReactGA from 'react-ga4';
 import Navbar from './components/Navbar';
@@ -47,54 +47,59 @@ function App() {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-dark text-light-DEFAULT">
-      {/* Background Image Prefetcher */}
-      <BackgroundLoader />
+    // `reducedMotion="user"` defers every Framer Motion animation below this point
+    // to the OS setting. The CSS `@media (prefers-reduced-motion)` blocks in
+    // themes.css only reach CSS animation — transforms driven from JS need this.
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen bg-dark text-light-DEFAULT">
+        {/* Background Image Prefetcher */}
+        <BackgroundLoader />
 
-      {/* Top Navigation - Hide on project pages */}
-      {!hideChrome && <Navbar />}
+        {/* Top Navigation - Hide on project pages */}
+        {!hideChrome && <Navbar />}
 
-      {/* Main Content with Page Transitions */}
-      <AnimatePresence>
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<Home />} />
-          <Route
-            path="/home-2.2"
-            element={
-              <Suspense fallback={<div className="fixed inset-0 bg-[#060609]" />}>
-                <HomeV22 />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/museum"
-            element={
-              <Suspense fallback={<div className="fixed inset-0 bg-[#060609]" />}>
-                <Museum />
-              </Suspense>
-            }
-          />
-          <Route path="/works" element={<Works />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/projects/hours-of-service" element={<HoursOfService />} />
-          <Route path="/projects/vehicle-health" element={<VehicleHealth />} />
-          <Route path="/projects/gazebo-complex-organisms" element={<GazeboComplexOrganisms />} />
-          <Route path="/projects/vending-analytics" element={<VendingAnalytics />} />
-          <Route path="/projects/telugu-streaming" element={<TeluguStreaming />} />
-          <Route
-            path="/game/bangalore-times"
-            element={
-              <Suspense fallback={<div className="fixed inset-0 bg-[#0e0f13]" />}>
-                <BangaloreTimes backSlot={<Link to="/works">← Back</Link>} />
-              </Suspense>
-            }
-          />
-        </Routes>
-      </AnimatePresence>
+        {/* Main Content with Page Transitions */}
+        <AnimatePresence>
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<Home />} />
+            <Route
+              path="/home-2.2"
+              element={
+                <Suspense fallback={<div className="fixed inset-0 bg-[#060609]" />}>
+                  <HomeV22 />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/museum"
+              element={
+                <Suspense fallback={<div className="fixed inset-0 bg-[#060609]" />}>
+                  <Museum />
+                </Suspense>
+              }
+            />
+            <Route path="/works" element={<Works />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/projects/hours-of-service" element={<HoursOfService />} />
+            <Route path="/projects/vehicle-health" element={<VehicleHealth />} />
+            <Route path="/projects/gazebo-complex-organisms" element={<GazeboComplexOrganisms />} />
+            <Route path="/projects/vending-analytics" element={<VendingAnalytics />} />
+            <Route path="/projects/telugu-streaming" element={<TeluguStreaming />} />
+            <Route
+              path="/game/bangalore-times"
+              element={
+                <Suspense fallback={<div className="fixed inset-0 bg-[#0e0f13]" />}>
+                  <BangaloreTimes backSlot={<Link to="/works">← Back</Link>} />
+                </Suspense>
+              }
+            />
+          </Routes>
+        </AnimatePresence>
 
-      {/* Bottom Navigation - Hide on project pages */}
-      {!hideChrome && <BottomNav />}
-    </div>
+        {/* Bottom Navigation - Hide on project pages */}
+        {!hideChrome && <BottomNav />}
+      </div>
+    </MotionConfig>
   );
 }
 

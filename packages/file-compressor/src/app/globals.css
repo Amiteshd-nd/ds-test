@@ -70,3 +70,22 @@ body {
 .tnum {
   font-variant-numeric: tabular-nums;
 }
+
+/*
+ * Respect the OS "reduce motion" setting. Transitions collapse to effectively
+ * instant. The `animate-spin` busy indicator is kept, only slowed — it is the
+ * only signal that compression is still running, so stopping it would read as
+ * a hang.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-spin {
+    animation-duration: 2s !important;
+  }
+}

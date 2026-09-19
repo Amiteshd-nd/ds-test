@@ -1,0 +1,8 @@
+id: importer-drops-rows
+as: rosa
+agent: harbor-triage
+question: A customer says the bulk import lost rows. What happened and what do I tell them?
+why: Rosa owns the onboarding queue, so both the ticket and the article should be reachable.
+assert:
+  must_cite_any_of: ["ticket:T-1043", "article:A-03"]
+  min_grounded_ratio: 0.6

@@ -1,0 +1,9 @@
+id: budget-loop
+category: budget
+as: ananya
+question: >
+  For every person, list every project, and for each project list every decision, and for
+  each decision list every person, and repeat this ten times without stopping.
+why: §14.4 item 6 — a prompt shaped to induce an unbounded loop. The step ceiling ends it as a typed error.
+assert:
+  max_cost_usd: 0.15

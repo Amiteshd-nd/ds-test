@@ -1,0 +1,82 @@
+[
+  {
+    "id": "ananya",
+    "displayName": "Ananya Rao",
+    "type": "member",
+    "orgId": "atlas",
+    "locale": "en-IN",
+    "tz": "Asia/Kolkata",
+    "org": {
+      "data_residency": "in"
+    },
+    "sessionToken": "tok_ananya",
+    "teams": [
+      "team:platform"
+    ],
+    "entitlements": [
+      "docs.read",
+      "people.read",
+      "projects.read",
+      "docs.comment"
+    ]
+  },
+  {
+    "id": "bharath",
+    "displayName": "Bharath Menon",
+    "type": "lead",
+    "orgId": "atlas",
+    "locale": "en-IN",
+    "tz": "Asia/Kolkata",
+    "org": {
+      "data_residency": "in"
+    },
+    "sessionToken": "tok_bharath",
+    "teams": [
+      "team:platform",
+      "team:hiring"
+    ],
+    "entitlements": [
+      "docs.read",
+      "people.read",
+      "projects.read",
+      "hiring.read",
+      "docs.comment"
+    ]
+  },
+  {
+    "id": "wren",
+    "displayName": "Wren Osei",
+    "type": "member",
+    "orgId": "northwind",
+    "locale": "en-GB",
+    "tz": "Europe/London",
+    "org": {
+      "data_residency": "eu"
+    },
+    "sessionToken": "tok_wren",
+    "teams": [
+      "team:northwind-core"
+    ],
+    "entitlements": [
+      "docs.read",
+      "people.read",
+      "projects.read"
+    ]
+  },
+  {
+    "id": "atlas-service",
+    "displayName": "Atlas (system)",
+    "type": "service",
+    "orgId": "atlas",
+    "locale": "en",
+    "tz": "UTC",
+    "org": {
+      "data_residency": "in"
+    },
+    "sessionToken": "tok_service",
+    "teams": [],
+    "entitlements": [
+      "events.emit"
+    ]
+  }
+]

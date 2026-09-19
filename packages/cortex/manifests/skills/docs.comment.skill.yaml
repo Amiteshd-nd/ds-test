@@ -1,0 +1,43 @@
+id: docs.comment
+version: 1
+name: Comment on a record
+description: >
+  Posts a short comment from the signed-in person onto one Atlas record — a document,
+  project, or decision. Use this only when the person has asked for a comment to be left
+  and has approved the exact text that will appear. Do not use it to answer a question, to
+  draft something for later, or to notify anyone: it writes immediately and the comment is
+  visible to everyone who can read that record.
+owner: platform-team
+
+input_schema:
+  type: object
+  required: [ref, body]
+  properties:
+    ref:
+      type: string
+      description: "The exact entity ref to comment on, such as doc:runbook-ingestion."
+      maxLength: 64
+    body:
+      type: string
+      description: The comment text, exactly as it will appear. Written by the person, not paraphrased.
+      maxLength: 500
+output_schema:
+  type: object
+  properties:
+    comment_id: { type: string }
+    posted_at: { type: string }
+
+# The first non-none side effect in this system. The agent manifest that uses it must
+# declare a matching approval gate, and the validator fails the build otherwise.
+side_effect: write
+requires_entitlements: ["docs.comment"]
+rate_limit: { per_principal_per_day: 25 }
+# Two identical comments inside ten minutes are one comment. This is what makes an
+# approved action safe to retry after a crash.
+idempotency: { key_fields: [ref, body], window_minutes: 10 }
+timeout_ms: 3000
+retry: { attempts: 2, on: [timeout] }
+
+binding:
+  kind: native
+  name: docs.comment

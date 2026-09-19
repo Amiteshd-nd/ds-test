@@ -140,7 +140,7 @@ export default function Uploader({ mode = "photo_3d" }: { mode?: CaptureKind }) 
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={isPano ? "e.g. Flat 3B — move-in" : "e.g. Garden gnome"}
-          className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 outline-none focus:border-blue-500"
+          className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/60"
         />
       </div>
 

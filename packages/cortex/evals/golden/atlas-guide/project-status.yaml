@@ -1,0 +1,7 @@
+id: project-status
+as: ananya
+question: What is the status of the onboarding redesign and who owns it?
+why: Exercises projects.status rather than people.search — the two skills have to stay distinguishable.
+assert:
+  must_cite_any_of: ["project:onboarding-redesign", "doc:empty-state-guidance"]
+  min_grounded_ratio: 0.6

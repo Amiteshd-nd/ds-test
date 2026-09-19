@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef } from 'react';
-import { useReducedMotion } from 'framer-motion';
+import { useReducedMotion } from '@cloud-march/motion/react';
 
 /* The living material that sits above the prompt bar.
  *

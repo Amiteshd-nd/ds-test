@@ -1,0 +1,37 @@
+id: atlas-decisions
+version: 1
+name: Decisions specialist
+description: Answers questions about what was decided, what a decision replaced, and why a position changed.
+owner: platform-team
+
+surfaces: [chat, background]
+visibility:
+  entitlements: ["docs.read", "projects.read"]
+
+model_policy:
+  default: fast.cheap
+  max_cost_usd_per_run: 0.04
+
+prompt: atlas-guide@1
+
+skills:
+  - decisions.history
+  - projects.status
+
+grounding:
+  sources: [decision, project, doc]
+  max_context_tokens: 3000
+
+memory:
+  session: { turns: 4, semantic_recall: false }
+  profile: { read: [], write: [] }
+
+hitl:
+  gates: []
+
+output:
+  formats: [text, entity_card, skill_call]
+
+evals:
+  golden_set: evals/golden/atlas-decisions/
+  min_pass_rate: 0.90

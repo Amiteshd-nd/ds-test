@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef, useState } from 'react';
-import { useReducedMotion } from 'framer-motion';
+import { useReducedMotion } from '@cloud-march/motion/react';
 import { FRAG, VERT } from './glassCubeShader';
 
 /* The glass cube above the prompt bar.

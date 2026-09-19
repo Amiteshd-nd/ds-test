@@ -1,0 +1,172 @@
+[
+  {
+    "from": "person:ananya",
+    "type": "MEMBER_OF",
+    "to": "team:platform"
+  },
+  {
+    "from": "person:devi",
+    "type": "MEMBER_OF",
+    "to": "team:platform"
+  },
+  {
+    "from": "person:marcus",
+    "type": "MEMBER_OF",
+    "to": "team:platform"
+  },
+  {
+    "from": "person:bharath",
+    "type": "LEADS",
+    "to": "team:platform"
+  },
+  {
+    "from": "person:bharath",
+    "type": "MEMBER_OF",
+    "to": "team:hiring"
+  },
+  {
+    "from": "person:wren",
+    "type": "MEMBER_OF",
+    "to": "team:northwind-core"
+  },
+  {
+    "from": "person:ananya",
+    "type": "OWNS",
+    "to": "project:ingestion-v2"
+  },
+  {
+    "from": "person:marcus",
+    "type": "OWNS",
+    "to": "project:gateway-rate-limits"
+  },
+  {
+    "from": "person:devi",
+    "type": "OWNS",
+    "to": "project:onboarding-redesign"
+  },
+  {
+    "from": "project:ingestion-v2",
+    "type": "MENTIONS",
+    "to": "doc:runbook-ingestion"
+  },
+  {
+    "from": "project:ingestion-v2",
+    "type": "MENTIONS",
+    "to": "doc:retry-semantics"
+  },
+  {
+    "from": "project:ingestion-v2",
+    "type": "MENTIONS",
+    "to": "doc:migration-rollback"
+  },
+  {
+    "from": "project:ingestion-v2",
+    "type": "MENTIONS",
+    "to": "decision:DEC-4"
+  },
+  {
+    "from": "project:gateway-rate-limits",
+    "type": "MENTIONS",
+    "to": "doc:api-gateway-overview"
+  },
+  {
+    "from": "project:gateway-rate-limits",
+    "type": "MENTIONS",
+    "to": "decision:DEC-7"
+  },
+  {
+    "from": "project:onboarding-redesign",
+    "type": "MENTIONS",
+    "to": "doc:empty-state-guidance"
+  },
+  {
+    "from": "person:bharath",
+    "type": "OWNS",
+    "to": "doc:events-table-schema"
+  },
+  {
+    "from": "person:bharath",
+    "type": "OWNS",
+    "to": "doc:design-review-notes"
+  },
+  {
+    "from": "person:ananya",
+    "type": "OWNS",
+    "to": "doc:runbook-ingestion"
+  },
+  {
+    "from": "person:ananya",
+    "type": "OWNS",
+    "to": "doc:retry-semantics"
+  },
+  {
+    "from": "person:devi",
+    "type": "OWNS",
+    "to": "doc:empty-state-guidance"
+  },
+  {
+    "from": "person:marcus",
+    "type": "OWNS",
+    "to": "doc:api-gateway-overview"
+  },
+  {
+    "from": "decision:DEC-4",
+    "type": "SUPERSEDES",
+    "to": "decision:DEC-2"
+  },
+  {
+    "from": "person:ananya",
+    "type": "WORKED_ON",
+    "to": "project:ingestion-v2"
+  },
+  {
+    "from": "person:marcus",
+    "type": "WORKED_ON",
+    "to": "project:ingestion-v2"
+  },
+  {
+    "from": "team:hiring",
+    "type": "OWNS",
+    "to": "doc:hiring-loop-q3"
+  },
+  {
+    "from": "team:hiring",
+    "type": "OWNS",
+    "to": "doc:comp-bands-2026"
+  },
+  {
+    "from": "team:northwind-core",
+    "type": "OWNS",
+    "to": "doc:northwind-roadmap"
+  },
+  {
+    "from": "person:bharath",
+    "type": "OWNS",
+    "to": "doc:oncall-rotation"
+  },
+  {
+    "from": "person:devi",
+    "type": "OWNS",
+    "to": "doc:glossary"
+  },
+  {
+    "from": "person:marcus",
+    "type": "OWNS",
+    "to": "doc:prompt-injection-example"
+  },
+  {
+    "from": "project:ingestion-v2",
+    "type": "MENTIONS",
+    "to": "doc:comp-bands-2026"
+  },
+  {
+    "from": "person:devi",
+    "type": "OWNS",
+    "to": "doc:onboarding-draft"
+  },
+  {
+    "from": "project:onboarding-redesign",
+    "type": "MENTIONS",
+    "to": "doc:onboarding-draft"
+  }
+]

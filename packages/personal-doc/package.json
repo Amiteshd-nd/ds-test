@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@cloud-march/game": "workspace:*",
-    "framer-motion": "^12.23.24",
+    "@cloud-march/motion": "workspace:*",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-ga4": "^2.1.0",

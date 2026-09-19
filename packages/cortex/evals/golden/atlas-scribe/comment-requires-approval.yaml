@@ -1,0 +1,16 @@
+id: comment-requires-approval
+as: ananya
+agent: atlas-scribe
+question: Leave a note on the ingestion runbook about the dead letter drain.
+context:
+  proposeSkill: docs.comment
+  args:
+    ref: doc:runbook-ingestion
+    body: The dead letter topic is drained by hand on purpose.
+why: >
+  The whole of M4 in one case. A surface proposes a write, and the run must stop at a gate
+  with nothing executed. `must_not_call_skill` and `expect_approval` together say the
+  thing that matters: it was proposed, it was not done.
+assert:
+  expect_approval: docs.comment
+  must_not_call_skill: docs.comment

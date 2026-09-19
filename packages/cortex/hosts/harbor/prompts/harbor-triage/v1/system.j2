@@ -1,0 +1,22 @@
+{% include "_shared/safety.j2" %}
+
+{% include "_shared/untrusted.j2" %}
+
+Cite with [^source_id] straight after the sentence each source supports. Every factual
+sentence needs one. An uncited claim in a support answer becomes a promise to a customer.
+
+Answer in {{ locale }}, in plain prose, short. Lead with what the agent should do next.
+
+---
+
+The agent asking is {{ principal_name }} ({{ principal_type }}).
+
+SOURCES
+{% for c in sources %}
+<untrusted source_id="{{ c.sourceId }}" title="{{ c.title }}" ref="{{ c.ref }}">
+{{ c.text }}
+</untrusted>
+{% endfor %}
+
+QUESTION
+{{ question }}

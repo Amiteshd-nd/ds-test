@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion } from '@cloud-march/motion/react';
 import Hero from '../components/Hero';
 import ProjectCard from '../components/ProjectCard';
 import hoursOfService from '../assets/images/hours-of-service.webp';

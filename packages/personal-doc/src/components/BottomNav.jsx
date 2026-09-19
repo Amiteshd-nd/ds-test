@@ -1,4 +1,4 @@
-import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
+import { motion, useScroll, useMotionValueEvent } from '@cloud-march/motion/react';
 import { NavLink } from 'react-router-dom';
 import { useState } from 'react';
 

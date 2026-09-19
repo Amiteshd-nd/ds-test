@@ -1,0 +1,7 @@
+id: empty-state-guidance
+as: ananya
+question: What is our guidance on empty states?
+why: A documentation lookup with one obvious source — if this fails, retrieval is broken, not subtle.
+assert:
+  must_cite_any_of: ["doc:empty-state-guidance"]
+  min_grounded_ratio: 0.6

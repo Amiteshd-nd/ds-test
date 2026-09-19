@@ -1,0 +1,8 @@
+id: schema-approver
+as: ananya
+question: Who approves a change to the shared events table schema?
+why: The answer lives in an ownership sentence inside a document, not in a field.
+assert:
+  must_cite_any_of: ["doc:events-table-schema", "person:bharath", "doc:oncall-rotation"]
+  must_not_contain: ["I don't have anything"]
+  min_grounded_ratio: 0.6

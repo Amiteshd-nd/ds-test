@@ -1,0 +1,14 @@
+# PRD §6.2 — the human review gate on the skill registry.
+#
+# The automated similarity check catches near-duplicate skills; this catches the rest.
+# A new skill is a new capability exposed to a model, and the failure mode it guards
+# against is not a bug, it is four hundred near-identical skills in eighteen months with
+# nobody able to say which one an agent should call.
+/packages/cortex/manifests/skills/   @Amiteshd-nd
+
+# Prompts are product surface with a release process (§7). Same reasoning.
+/packages/cortex/prompts/            @Amiteshd-nd
+
+# The eight adapter interfaces are the portability contract. Changing one is a breaking
+# change for every host that has implemented it.
+/packages/cortex/src/core/adapters/  @Amiteshd-nd

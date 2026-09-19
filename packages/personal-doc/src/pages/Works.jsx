@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion } from '@cloud-march/motion/react';
 import ProjectLink from '../components/ProjectLink';
 import hoursOfService from '../assets/images/hours-of-service.webp';
 import vehicleHealth from '../assets/images/vehicle-health.webp';

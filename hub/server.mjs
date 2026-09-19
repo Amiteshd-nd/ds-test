@@ -114,6 +114,22 @@ const PROJECTS = [
     port: 6176,
   },
   {
+    id: 'cortex',
+    name: 'CORTEX + Atlas',
+    tag: 'Agent layer · TypeScript + React',
+    desc:
+      'A portable AI agent layer behind eight adapters, installed into a demo host called Atlas. ' +
+      'Ask a question as one person, then as another, and watch the answer change — the permission ' +
+      'filter runs at retrieval. Runs offline with no API key; set ANTHROPIC_API_KEY for a real model.',
+    cwd: path.join(ROOT, 'packages/cortex'),
+    // Two processes — the service on 6182 and the demo UI on 6181 — sequenced by dev.mjs.
+    // The hub health-checks 6181, which is the one with a page on it.
+    command: process.execPath,
+    bin: 'node',
+    args: ['dev.mjs'],
+    port: 6181,
+  },
+  {
     id: 'carcinogen',
     name: 'Carcinogen heatmap',
     tag: 'Essay · one static HTML file',

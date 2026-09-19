@@ -1,0 +1,37 @@
+id: decisions.history
+version: 1
+name: Trace a decision's history
+description: >
+  Follows the SUPERSEDES chain backwards from one decision record and returns every
+  decision it replaced, newest first. Use this when someone asks why a decision changed,
+  what the earlier position was, or whether a decision is still current. Do not use it to
+  find a decision in the first place — retrieval already does that — because this needs an
+  exact decision ref and will return nothing useful without one.
+owner: platform-team
+
+input_schema:
+  type: object
+  required: [ref]
+  properties:
+    ref:
+      type: string
+      description: "The exact entity ref of a decision, such as decision:DEC-4."
+      maxLength: 64
+output_schema:
+  type: object
+  properties:
+    chain:
+      type: array
+      items:
+        type: object
+        properties:
+          ref: { type: string }
+          title: { type: string }
+
+side_effect: none
+requires_entitlements: ["docs.read"]
+timeout_ms: 1500
+
+binding:
+  kind: native
+  name: decisions.history

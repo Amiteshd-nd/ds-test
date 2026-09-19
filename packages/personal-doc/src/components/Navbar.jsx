@@ -1,4 +1,4 @@
-import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
+import { motion, useScroll, useMotionValueEvent } from '@cloud-march/motion/react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Logo from '../assets/icons/logo.svg';

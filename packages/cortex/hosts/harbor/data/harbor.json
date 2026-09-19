@@ -1,0 +1,36 @@
+{
+  "agents": [
+    { "id": "rosa", "name": "Rosa Lindqvist", "queues": ["billing", "onboarding"], "role": "agent", "apiKey": "hk_rosa", "scopes": ["tickets:read", "articles:read", "customers:read"] },
+    { "id": "theo", "name": "Theo Adeyemi", "queues": ["platform"], "role": "agent", "apiKey": "hk_theo", "scopes": ["tickets:read", "articles:read", "customers:read"] },
+    { "id": "nadia", "name": "Nadia Haddad", "queues": ["billing", "onboarding", "platform"], "role": "supervisor", "apiKey": "hk_nadia", "scopes": ["tickets:read", "articles:read", "customers:read", "tickets:audit"] }
+  ],
+  "customers": [
+    { "id": "acme", "name": "Acme Freight", "plan": "enterprise", "managerId": "rosa" },
+    { "id": "brightline", "name": "Brightline Labs", "plan": "growth", "managerId": "theo" },
+    { "id": "corvid", "name": "Corvid Media", "plan": "starter", "managerId": "rosa" }
+  ],
+  "tickets": [
+    { "id": "T-1041", "subject": "Invoices show the wrong VAT rate for EU customers", "queue": "billing", "assigneeId": "rosa", "customerId": "acme", "status": "open", "priority": "high",
+      "body": "Since the March release, invoices for EU customers are showing 0% VAT instead of the country rate. Finance has paused sending anything out. This affects roughly two hundred invoices already generated.\n\nWorkaround for now is to regenerate the invoice after setting the billing country by hand, which does apply the right rate." },
+    { "id": "T-1042", "subject": "SSO login loops back to the sign-in page", "queue": "platform", "assigneeId": "theo", "customerId": "brightline", "status": "open", "priority": "urgent",
+      "body": "Users are sent back to the sign-in page after authenticating with Okta. It started after they rotated their signing certificate.\n\nThe redirect URL in their Okta app still points at the old callback path, which we deprecated in February." },
+    { "id": "T-1043", "subject": "Bulk import silently drops rows with empty postcodes", "queue": "onboarding", "assigneeId": "rosa", "customerId": "corvid", "status": "pending", "priority": "normal",
+      "body": "A customer imported four thousand records and got no error, but only three thousand nine hundred arrived. The missing rows all have an empty postcode field.\n\nThe importer treats an empty postcode as an invalid address and skips the row without reporting it." },
+    { "id": "T-1044", "subject": "Refund request — duplicate annual charge", "queue": "billing", "assigneeId": "nadia", "customerId": "brightline", "status": "open", "priority": "high",
+      "body": "Customer was charged twice for the annual plan on the same day. Card ending 4417.\n\nBoth charges cleared. The second one came from a retry after a gateway timeout that had in fact succeeded." },
+    { "id": "T-1045", "subject": "Escalation: repeated outage reports from Acme", "queue": "platform", "assigneeId": "theo", "customerId": "acme", "status": "open", "priority": "urgent",
+      "body": "Third outage report this month. The customer is asking for a written explanation and is hinting at the renewal.\n\nAll three coincide with the nightly reindex window." }
+  ],
+  "articles": [
+    { "id": "A-01", "title": "VAT rates by country", "visibility": "public",
+      "body": "Invoices apply the VAT rate of the customer's billing country. If the billing country is missing, no rate is applied and the invoice shows 0%.\n\nSet the billing country on the customer record and regenerate the invoice; the rate is applied at generation time, not at send time." },
+    { "id": "A-02", "title": "SSO callback paths after the February change", "visibility": "public",
+      "body": "The callback path moved from /auth/callback to /sso/callback in February. Identity providers configured before that date keep working until the signing certificate is rotated, at which point the old path stops being accepted.\n\nUpdate the redirect URL in the identity provider, not in our settings." },
+    { "id": "A-03", "title": "Importer validation rules", "visibility": "public",
+      "body": "The importer requires a non-empty postcode for any row with a country that uses postal codes. Rows failing validation are skipped.\n\nSkipped rows are counted in the import summary but are not listed individually, which is a known gap." },
+    { "id": "A-04", "title": "Refund authority and limits", "visibility": "internal",
+      "body": "Agents may refund up to 500 without approval. Above that, a supervisor signs off. Duplicate charges caused by gateway retries are always refunded in full and do not count against the limit.\n\nNever tell a customer a refund is approved before it has been."  },
+    { "id": "A-05", "title": "Renewal risk playbook", "visibility": "internal",
+      "body": "An account with three or more outage reports in a quarter is flagged to the renewal team. Do not discuss renewal terms with the customer directly; hand it to the account manager.\n\nWritten outage explanations go through the supervisor before they are sent." }
+  ]
+}

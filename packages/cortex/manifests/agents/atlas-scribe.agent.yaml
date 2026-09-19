@@ -1,0 +1,52 @@
+# The second agent, and the first that can change anything.
+#
+# It is separate from atlas-guide on purpose. The guide is read-only and its golden set
+# means something precisely because nothing it does has a side effect; folding a write
+# skill into it would have quietly changed what that suite was measuring.
+id: atlas-scribe
+version: 1
+name: Atlas Scribe
+description: Finds a record and leaves a comment on it, once you have approved the exact wording.
+owner: platform-team
+
+surfaces: [chat]
+visibility:
+  entitlements: ["docs.read", "people.read", "projects.read", "docs.comment"]
+
+model_policy:
+  default: reasoning.balanced
+  steps:
+    plan: fast.cheap
+    compose: reasoning.balanced
+  max_cost_usd_per_run: 0.15
+  max_latency_ms_p95: 8000
+
+prompt: atlas-guide@1
+
+skills:
+  - projects.status
+  - docs.comment
+
+grounding:
+  sources: [doc, project, person, decision]
+  max_context_tokens: 6000
+
+memory:
+  session: { turns: 8, semantic_recall: true }
+  # `rejected_action` is written when someone rejects a proposal with a reason (§9.2),
+  # and read back so the agent stops proposing the thing it was told not to.
+  profile: { read: [tone, focus, rejected_action], write: [focus] }
+
+hitl:
+  gates:
+    - on: skill.side_effect != "none"
+      mode: require_approval
+    - on: cost_projection > 0.10
+      mode: notify
+
+output:
+  formats: [text, entity_card, skill_call, choice]
+
+evals:
+  golden_set: evals/golden/atlas-scribe/
+  min_pass_rate: 0.90

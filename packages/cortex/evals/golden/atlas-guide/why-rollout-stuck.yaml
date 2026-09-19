@@ -1,0 +1,21 @@
+id: why-rollout-stuck
+as: ananya
+question: Why is the ingestion v2 rollout stuck at forty percent?
+why: >
+  Requires connecting a project to the decision that holds it and to the untested
+  rollback behind that decision.
+
+  The deterministic assertions below check the pipeline: did retrieval surface the three
+  records that contain the answer, and was the response grounded in them. Whether the
+  prose actually names the rollback as the cause is a judgement about writing, so it is a
+  judge rubric — with no model configured it is reported as skipped, not as a pass. The
+  offline rehearsal provider cites the rollback document and then quotes a different
+  sentence from it, which is exactly the kind of failure a judge catches and a substring
+  match either misses or over-punishes.
+assert:
+  must_cite_any_of: ["doc:migration-rollback", "decision:DEC-4", "project:ingestion-v2"]
+  min_grounded_ratio: 0.6
+  max_cost_usd: 0.15
+  judge: >
+    Does the answer name the untested schema-migration rollback as the reason the rollout
+    is held, rather than restating that the rollout is at forty percent?

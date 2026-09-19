@@ -1,0 +1,43 @@
+id: tickets.search
+version: 1
+name: Search tickets
+description: >
+  Searches the tickets this agent can see by subject, body, status, or priority, and
+  returns each match with its queue and current state. Use this when the question is about
+  which tickets exist, what is open, or what has already been reported. Do not use it to
+  answer a policy question or to look up how something works — the help centre articles
+  are already in the answer's sources and cover that better.
+owner: support-platform
+
+input_schema:
+  type: object
+  required: [query]
+  properties:
+    query:
+      type: string
+      description: What to look for, in the agent's own words.
+      maxLength: 300
+      x_fill_from_question: true
+output_schema:
+  type: object
+  properties:
+    tickets:
+      type: array
+      items:
+        type: object
+        properties:
+          ref: { type: string }
+          subject: { type: string }
+          status: { type: string }
+          priority: { type: string }
+          queue: { type: string }
+
+side_effect: none
+requires_entitlements: ["tickets:read"]
+rate_limit: { per_principal_per_day: 500 }
+timeout_ms: 2000
+retry: { attempts: 2, on: [timeout] }
+
+binding:
+  kind: native
+  name: tickets.search

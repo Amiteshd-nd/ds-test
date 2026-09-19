@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion } from '@cloud-march/motion/react';
 import { SUGGESTIONS } from '../../lib/portfolioBrain';
 import { ICONS } from './iconMap';
 

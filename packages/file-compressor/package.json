@@ -16,6 +16,7 @@
     "fixture": "node scripts/make-fixture.mjs"
   },
   "dependencies": {
+    "@cloud-march/motion": "workspace:*",
     "fflate": "0.8.3",
     "next": "16.3.2",
     "pdf-lib": "1.17.1",

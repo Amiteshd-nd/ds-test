@@ -7,7 +7,7 @@ import {
   useReducedMotion,
   useSpring,
   useTransform,
-} from 'framer-motion';
+} from '@cloud-march/motion/react';
 import { DEPTHS, TONES } from '../../lib/portfolioBrain';
 import { IconChevron, IconPlus, IconSend, IconStop, IconVoice } from './Icons';
 import { ICONS } from './iconMap';

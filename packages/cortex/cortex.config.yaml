@@ -1,0 +1,98 @@
+# CORTEX — the one file a host edits after implementing its adapters.
+# PRD §17.3. Router classes, storage, budgets, feature flags, prompt ramps.
+
+host:
+  id: atlas                       # the demo host in adapters-host/
+  tenancy: single                 # single | multi  (§24 q4 — answered for the demo)
+
+# Where this deployment's manifests, prompts, and eval cases live, relative to this file.
+# A host is a directory: its config, its adapters, its manifests, its prompts.
+paths:
+  manifests: manifests
+  prompts: prompts
+  evals: evals
+
+server:
+  # Repo rule: no port beginning with 4 or 5. Demo UI 6181, this API 6182.
+  port: 6182
+  cors_origin: http://localhost:6181
+
+router:
+  classes:
+    reasoning.strong:
+      primary: { provider: anthropic, model: claude-opus-5 }
+      fallback:
+        - { provider: anthropic, model: claude-sonnet-5 }
+        - { provider: rehearsal, model: extractive-v1 }
+    reasoning.balanced:
+      primary: { provider: anthropic, model: claude-sonnet-5 }
+      fallback:
+        - { provider: rehearsal, model: extractive-v1 }
+    fast.cheap:
+      primary: { provider: anthropic, model: claude-haiku-4-5-20251001 }
+      fallback:
+        - { provider: rehearsal, model: extractive-v1 }
+    embed.default:
+      primary: { provider: local, model: lexical-hash-v1 }
+
+  policies:
+    # §8.2 — data residency is a router concern, never an application one.
+    - if: "principal.org.data_residency == 'eu'"
+      restrict_providers: [local, rehearsal]
+    - if: "run.surface == 'background'"
+      prefer_class: fast.cheap
+    - if: "step.retry_count >= 1"
+      escalate_class: true
+
+budgets:
+  max_cost_usd_per_run: 0.15
+  max_cost_usd_per_principal_per_day: 5.00
+  max_steps_per_run: 24           # §14.4 item 6 — unbounded tool loops are a DoS
+
+storage:
+  # PRD §18 says Postgres. This slice uses SQLite for the same property that
+  # mattered (durability across process death) without standing up a server.
+  # See docs/DECISIONS.md D-2.
+  dsn: file:./.cortex/runs.db
+
+grounding:
+  max_context_tokens: 12000
+  rerank_class: fast.cheap
+  k_initial: 24
+  k_final: 8
+  # A relevance floor, so an unanswerable question retrieves nothing and the agent says
+  # so, instead of being handed eight weak matches and inventing a bridge between them.
+  # Both numbers are calibrated to the retrieval implementation behind RetrievalAdapter —
+  # re-tune them for your host rather than inheriting ours (see docs/DECISIONS.md D-3).
+  min_score: 0.3
+  min_score_ratio: 0.35
+
+memory:
+  turn_ttl_days: 180
+  preference_min_observations: 2
+
+telemetry:
+  # Addendum v1.1 C1: OpenTelemetry-shaped spans everywhere, exported to a store we own.
+  # No hosted tracing, ever — and none was ever wired, so there was nothing to disconnect
+  # (docs/AUDIT-v1.1.md question 4). Spans also print with CORTEX_TRACE=1.
+  exporter: store
+  hash_principal_ids: true
+
+  # development keeps payloads whole, which is the point of a dev trace.
+  # production redacts every payload through PolicyAdapter.redact before it is written.
+  mode: development
+  payloads: full              # full | none
+  retention_days_development: 30
+  retention_days_production: 7
+
+features:
+  orchestration.dynamic: false    # §9.1 Mode B stays off by default. Non-negotiable #5.
+  surfaces.enabled: [chat, inline, rule, background]
+  # Non-negotiable #3: read-only skills ship before write skills, and no write skill
+  # until the read-only evals pass. They do — golden 6/6, red team 12/12 — so this is
+  # now on. A fresh host starts with it off and earns the same way.
+  write_skills.enabled: true
+
+prompt_ramp:
+  # §7.3 — a bad prompt never hits every user at once.
+  atlas-guide: { "1": 100 }

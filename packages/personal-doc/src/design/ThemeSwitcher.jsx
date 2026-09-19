@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion } from '@cloud-march/motion/react';
 
 import PrismButton from '../components/chat/PrismButton';
 import {

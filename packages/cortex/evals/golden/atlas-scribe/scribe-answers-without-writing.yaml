@@ -1,0 +1,11 @@
+id: scribe-answers-without-writing
+as: ananya
+agent: atlas-scribe
+question: What is the status of the gateway rate limits project?
+why: >
+  An agent that can write must still be able to answer. If holding a write skill made
+  every turn go through a gate, nobody would use it.
+assert:
+  must_not_call_skill: docs.comment
+  must_cite_any_of: ["project:gateway-rate-limits", "doc:api-gateway-overview", "decision:DEC-7"]
+  min_grounded_ratio: 0.6

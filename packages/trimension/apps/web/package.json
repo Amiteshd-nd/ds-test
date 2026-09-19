@@ -11,6 +11,7 @@
     "wasm": "cd ../.. && cargo build -p tri-wasm --target wasm32-unknown-unknown --release && wasm-bindgen --target web --out-dir apps/web/wasm --out-name trimension target/wasm32-unknown-unknown/release/tri_wasm.wasm"
   },
   "dependencies": {
+    "@cloud-march/motion": "workspace:*",
     "@xstate/react": "6.1.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",

@@ -1,0 +1,20 @@
+id: atlas-inline
+version: 1
+owner: platform-team
+model_hint: reasoning.balanced
+variables:
+  - host_name
+  - locale
+  - principal_name
+  - principal_type
+  - principal_tz
+  - doc_title
+  - doc_ref
+  - doc_body
+  - selection
+  - instruction
+changelog: >
+  v1 — the inline surface. Separate from atlas-guide@1 because "rewrite this passage" and
+  "answer this question" want opposite things from a model: one should add nothing, the
+  other should cite everything. Sharing a prompt between them produced edits with
+  citations in them.

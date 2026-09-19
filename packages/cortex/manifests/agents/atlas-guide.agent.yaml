@@ -1,0 +1,67 @@
+# The first agent. Read-only, high frequency, clearly useful, and its worst failure is a
+# suggestion someone ignores — PRD §22's advice about where to start, applied.
+id: atlas-guide
+version: 1
+name: Atlas Guide
+description: Answers questions about people, projects, decisions, and documents in Atlas, from what the asker is allowed to see.
+owner: platform-team
+
+# All four surfaces, from one unmodified manifest — the M5 Definition of Done. The
+# runtime decides what a surface means (which workflow, whether it streams, whether it
+# notifies); the agent author does not write any of that down.
+surfaces: [chat, inline, rule, background]
+visibility:
+  entitlements: ["docs.read", "people.read", "projects.read"]
+
+model_policy:
+  default: reasoning.balanced
+  steps:
+    plan: fast.cheap
+    compose: reasoning.balanced
+  max_cost_usd_per_run: 0.15
+  max_latency_ms_p95: 6000
+
+prompt: atlas-guide@1
+# The inline surface asks for an edit, not an answer. Same manifest, same agent, one
+# prompt per job — see prompts/atlas-inline/v1/meta.yaml for why they cannot be shared.
+prompts:
+  inline: atlas-inline@1
+
+# The allow-list. Anything absent is uncallable, whatever the model asks for.
+skills:
+  - people.search
+  - projects.status
+  - decisions.history
+
+grounding:
+  sources: [doc, project, person, decision, team]
+  graph:
+    enabled: true
+    seed: [principal.self, "mention:person"]
+    edge_types: [OWNS, LEADS, MEMBER_OF, MENTIONS, SUPERSEDES]
+    depth: 2
+  max_context_tokens: 6000
+
+memory:
+  session: { turns: 12, semantic_recall: true }
+  profile: { read: [tone, team, focus], write: [focus] }
+
+hitl:
+  gates:
+    # No skill here has a side effect, so this gate never fires today. It is declared
+    # anyway: the day someone adds a write skill, the validator checks for exactly this
+    # line, and a gate that already exists is a gate nobody has to argue for under
+    # deadline pressure.
+    - on: skill.side_effect != "none"
+      mode: require_approval
+    - on: cost_projection > 0.10
+      mode: notify
+
+output:
+  # `diff_proposal` is what the inline surface needs, and the validator refuses to load
+  # an inline agent without it.
+  formats: [text, entity_card, skill_call, choice, diff_proposal]
+
+evals:
+  golden_set: evals/golden/atlas-guide/
+  min_pass_rate: 0.90

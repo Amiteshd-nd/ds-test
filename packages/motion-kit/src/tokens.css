@@ -1,0 +1,64 @@
+/*
+ * @cloud-march/motion/tokens.css
+ *
+ * The same vocabulary as `tokens.js`, for packages that animate in stylesheets:
+ * carcinogen (no build step), game (plain CSS), and anywhere a CSS transition is
+ * simply the right tool.
+ *
+ * Import once near the top of the package's root stylesheet:
+ *   @import '@cloud-march/motion/tokens.css';
+ *
+ * For a package with no bundler, copy this file in and say where it came from.
+ */
+
+:root {
+  /* Durations. Milliseconds here, seconds in tokens.js: same numbers. */
+  --motion-duration-instant: 120ms;
+  --motion-duration-quick: 180ms;
+  --motion-duration-brisk: 240ms;
+  --motion-duration-gentle: 320ms;
+  --motion-duration-slow: 500ms;
+  --motion-duration-deliberate: 800ms;
+
+  /* Easings. */
+  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --motion-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --motion-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --motion-ease-overshoot: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Travel distances. */
+  --motion-distance-nudge: 4px;
+  --motion-distance-rise: 8px;
+  --motion-distance-step: 16px;
+  --motion-distance-far: 32px;
+
+  /* Stagger intervals, for nth-child delays. */
+  --motion-stagger-tight: 30ms;
+  --motion-stagger-normal: 50ms;
+  --motion-stagger-loose: 80ms;
+
+  /* The default transition: what you use when you have no reason to pick another. */
+  --motion-transition: var(--motion-duration-gentle) var(--motion-ease-out);
+}
+
+/*
+ * Reduced motion. Collapse duration rather than removing the transition, so
+ * state still lands and nothing is left mid-animation. Keep this near the top of
+ * the cascade so a later rule can still opt a specific element back in.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration-instant: 1ms;
+    --motion-duration-quick: 1ms;
+    --motion-duration-brisk: 1ms;
+    --motion-duration-gentle: 1ms;
+    --motion-duration-slow: 1ms;
+    --motion-duration-deliberate: 1ms;
+
+    --motion-distance-nudge: 0px;
+    --motion-distance-rise: 0px;
+    --motion-distance-step: 0px;
+    --motion-distance-far: 0px;
+  }
+}

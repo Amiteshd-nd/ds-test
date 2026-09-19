@@ -2,7 +2,7 @@
   "name": "cloud-march",
   "private": true,
   "version": "0.0.0",
-  "description": "Monorepo: personal-doc site, Bangalore Times game, the blockmodel prototype, the gully map foundation, the Discovery background studies, and the adaptive PDF file-compressor.",
+  "description": "Monorepo: personal-doc site, Bangalore Times game, the blockmodel prototype, the gully map foundation, the Discovery background studies, the adaptive PDF file-compressor, and CORTEX, a portable AI agent layer.",
   "packageManager": "pnpm@11.25.0",
   "scripts": {
     "dev": "node hub/server.mjs",
@@ -13,6 +13,7 @@
     "dev:discovery": "pnpm --filter discovery dev",
     "dev:file-compressor": "pnpm --filter file-compressor dev",
     "dev:carcinogen": "pnpm --filter carcinogen dev",
+    "dev:cortex": "pnpm --filter @cloud-march/cortex dev",
     "build": "pnpm -r build",
     "build:personal-doc": "pnpm --filter personal-doc build",
     "build:game": "pnpm --filter @cloud-march/game build",
@@ -20,6 +21,7 @@
     "build:gully": "pnpm --filter gully build",
     "build:discovery": "pnpm --filter discovery build",
     "build:file-compressor": "pnpm --filter file-compressor build",
+    "build:cortex": "pnpm --filter @cloud-march/cortex build",
     "lint": "pnpm -r --if-present lint",
     "test": "corepack pnpm -r --if-present test"
   }

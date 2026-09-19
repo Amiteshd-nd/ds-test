@@ -1,0 +1,25 @@
+id: decision-superseded
+name: Explain a superseded decision
+description: >
+  When a decision record is replaced, ask the Guide what actually changed and who is
+  affected, and put the answer where the team lead will see it.
+owner: platform-team
+enabled: true
+
+# A host event, fired by Atlas. The rule surface is a trigger, not a workflow builder:
+# four fields, no branching, no loops.
+on: event:decision.superseded
+# Guards use the same tiny grammar as router policies — a path, an operator, a literal.
+# A guard that cannot be parsed does not fire, because the alternative is an automation
+# rule that fires whenever it is broken.
+when: "event.org == 'atlas'"
+
+agent: atlas-guide
+surface: rule
+# Whose permissions the run uses. A rule never runs as nobody, and it can never see more
+# than this person can.
+as: bharath
+
+ask: >
+  Decision {{ ref }} has been superseded by {{ by }}. What changed, and which projects or
+  people does it affect?
