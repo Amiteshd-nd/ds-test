@@ -119,8 +119,12 @@ const PROJECTS = [
     tag: 'Agent layer · TypeScript + React',
     desc:
       'A portable AI agent layer behind eight adapters, installed into a demo host called Atlas. ' +
-      'Ask a question as one person, then as another, and watch the answer change — the permission ' +
-      'filter runs at retrieval. Runs offline with no API key; set ANTHROPIC_API_KEY for a real model.',
+      'Ask a question as one person and then as another: the answer changes because the permission ' +
+      'filter runs at retrieval, before a model exists. Five more tabs — edit a document inline, ' +
+      'watch rule-triggered runs arrive as notifications, inspect the exact prompt a run was given, ' +
+      'read every trace, and delete anything it remembers about you. Runs offline with no API key; ' +
+      'set ANTHROPIC_API_KEY for a real model. A second host, Harbor, has no UI and lives at ' +
+      'packages/cortex/hosts/harbor — see docs/SECOND-HOST.md.',
     cwd: path.join(ROOT, 'packages/cortex'),
     // Two processes — the service on 6182 and the demo UI on 6181 — sequenced by dev.mjs.
     // The hub health-checks 6181, which is the one with a page on it.
