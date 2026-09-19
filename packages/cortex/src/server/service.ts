@@ -387,15 +387,38 @@ export function createService(opts: ServiceOptions): Service {
     }
   });
 
-  return {
+  const service: Service = {
     cortex,
     store,
     async listen(): Promise<number> {
       // §12 — scheduled rules. The timers are unref'd, so this never keeps the process
       // alive on its own; stopping the service stops the schedule.
-      const stopSchedule = cortex.ruleEngine.start();
-      process.on('SIGTERM', stopSchedule);
-      process.on('SIGINT', stopSchedule);
+      cortex.ruleEngine.start();
+
+      // Shut down on a signal, and *exit*.
+      //
+      // This previously registered `stopSchedule` alone. Adding any listener for SIGTERM
+      // replaces Node's default behaviour, which is to terminate — so a handler that only
+      // clears timers turns the process into one that ignores SIGTERM and survives every
+      // ordinary kill. It took a `node --watch` grandchild holding port 6182 through
+      // several cleanup attempts before that was obvious.
+      let shuttingDown = false;
+      const shutdown = (signal: NodeJS.Signals): void => {
+        if (shuttingDown) return;
+        shuttingDown = true;
+        process.stdout.write(`\ncortex · ${hostName} · ${signal}, shutting down\n`);
+        void service.close().then(
+          () => process.exit(0),
+          // A close that hangs or throws must not leave the port held. Exiting non-zero
+          // is honest: something did not shut down cleanly.
+          () => process.exit(1),
+        );
+        // A run mid-flight can hold the close open. Runs are durable and resume on the
+        // next start, so a bounded wait is the right trade rather than hanging forever.
+        setTimeout(() => process.exit(0), 5_000).unref();
+      };
+      process.once('SIGTERM', () => shutdown('SIGTERM'));
+      process.once('SIGINT', () => shutdown('SIGINT'));
 
       const recovered = await cortex.engine.recover();
       await new Promise<void>((resolve) => server.listen(config.server.port, resolve));
@@ -409,9 +432,15 @@ export function createService(opts: ServiceOptions): Service {
     async close(): Promise<void> {
       cortex.ruleEngine.stop();
       cortex.exporter.stop();
+      // `close` stops accepting new connections but waits for open ones — and an SSE
+      // stream is an open one that never ends on its own. Dropping them is correct here:
+      // the events are durable and a client reconnects with Last-Event-ID.
+      server.closeAllConnections?.();
       await new Promise<void>((resolve) => server.close(() => resolve()));
     },
   };
+
+  return service;
 }
 
 function numberParam(url: URL, name: string): number | undefined {

@@ -4,7 +4,7 @@
 // /v1 to the service. Started together because a demo with no service behind it is a
 // blank screen with a network error, which is the worst way to learn that.
 
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,7 +13,12 @@ const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const children = [];
 
 function start(name, command, args, cwd) {
-  const child = spawn(command, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'] });
+  // `detached` puts each child in its own process group so `stopAll` can kill the group
+  // rather than just the child. `node --watch` in particular runs the real server as a
+  // grandchild: kill only the child and the grandchild is orphaned, keeps the port, and
+  // every later start is refused by the check below — which is exactly what happened
+  // here, and the symptom was "cortex will not start" long after the cause.
+  const child = spawn(command, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
   const tag = `[${name}] `;
   const pipe = (stream, out) => {
     let buf = '';
@@ -39,7 +44,12 @@ function start(name, command, args, cwd) {
 
 function stopAll() {
   for (const c of children) {
-    try { c.kill('SIGTERM'); } catch { /* already gone */ }
+    try {
+      // Negative pid = the whole group, which is the point of `detached` above.
+      process.kill(-c.pid, 'SIGTERM');
+    } catch {
+      try { c.kill('SIGTERM'); } catch { /* already gone */ }
+    }
   }
 }
 
@@ -63,15 +73,34 @@ function portBusy(port) {
   });
 }
 
+/** Who is holding a port, so the message can name it rather than describe it. */
+function holderOf(port) {
+  const pids = spawnSync('lsof', ['-ti', `tcp:${port}`], { encoding: 'utf8' }).stdout?.trim().split('\n').filter(Boolean) ?? [];
+  return pids.map((pid) => {
+    const command = spawnSync('ps', ['-o', 'command=', '-p', pid], { encoding: 'utf8' }).stdout?.trim() ?? '';
+    const ours = command.includes('packages/cortex');
+    return { pid, command: command.slice(0, 110), ours };
+  });
+}
+
 for (const [name, port] of [['api', 6182], ['web', 6181]]) {
-  if (await portBusy(port)) {
-    process.stderr.write(
-      `\n✖ Port ${port} is already in use, so ${name} cannot start.\n` +
-        `  Something is still listening there — usually a dev server from a previous run.\n` +
-        `  Free it and try again:\n\n    lsof -ti tcp:${port} | xargs kill\n\n`,
-    );
-    process.exit(1);
+  if (!(await portBusy(port))) continue;
+
+  const holders = holderOf(port);
+  const leftovers = holders.filter((h) => h.ours);
+  process.stderr.write(`\n✖ Port ${port} is already in use, so ${name} cannot start.\n\n`);
+  for (const h of holders) {
+    process.stderr.write(`  pid ${h.pid}${h.ours ? '  (this project)' : ''}\n    ${h.command}\n`);
   }
+  process.stderr.write(
+    leftovers.length
+      ? `\n  That is a leftover from a previous run of this project — usually one that was\n` +
+          `  killed hard enough that it never cleaned up. Free it and try again:\n\n` +
+          `    kill ${leftovers.map((h) => h.pid).join(' ')}\n\n`
+      : `\n  That is not this project. Stop it, or change the port in cortex.config.yaml\n` +
+          `  and demo/vite.config.ts.\n\n`,
+  );
+  process.exit(1);
 }
 
 start('api', process.execPath, ['--watch', path.join(ROOT, 'src/server/main.ts')], ROOT);
