@@ -192,3 +192,17 @@
   text-decoration: line-through;
   text-decoration-color: rgba(74, 222, 128, 0.5);
 }
+
+/*
+ * Respect the OS "reduce motion" setting. Only the two chrome transitions
+ * (card border, progress width) are affected — Phaser drives the game canvas
+ * itself and is out of scope for a CSS media query.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

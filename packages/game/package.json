@@ -21,6 +21,7 @@
     "art": "node scripts/generate-art.mjs && node scripts/generate-street-map.mjs"
   },
   "dependencies": {
+    "@cloud-march/motion": "workspace:*",
     "phaser": "^3.90.0",
     "zustand": "^5.0.14"
   },

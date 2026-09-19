@@ -52,7 +52,7 @@ export function validateMap(mapKey, def, tmj, availableTilesets, tileSize, layer
   // A layer named outside the taxonomy is a typo or a drift — either way the
   // game will never draw it, and silently ignoring it is how maps rot.
   if (layerOrder.length) {
-    const known = new Set([...layerOrder, def.spawnLayer].filter(Boolean));
+    const known = new Set([...layerOrder, def.spawnLayer, def.objectLayer].filter(Boolean));
     for (const layer of tmj.layers ?? []) {
       if (!known.has(layer.name)) {
         problems.push(
@@ -97,6 +97,21 @@ export function validateMap(mapKey, def, tmj, availableTilesets, tileSize, layer
           problems.push(
             `missing spawn object "${spawn}" in "${def.spawnLayer}" (has: ${names.join(', ') || 'none'})`,
           );
+        }
+      }
+    }
+  }
+
+  if (def.objectLayer) {
+    const layer = (tmj.layers ?? []).find((l) => l.name === def.objectLayer);
+    if (!layer) {
+      problems.push(`missing object layer "${def.objectLayer}"`);
+    } else if (layer.type !== 'objectgroup') {
+      problems.push(`"${def.objectLayer}" is a ${layer.type}, expected an object layer`);
+    } else {
+      for (const obj of layer.objects ?? []) {
+        if (!obj.type) {
+          problems.push(`placed object ${obj.id} in "${def.objectLayer}" has no type`);
         }
       }
     }

@@ -18,6 +18,8 @@ export interface MapDefinition {
   collisionLayer?: string;
   /** Object layer holding spawn points. */
   spawnLayer?: string;
+  /** Object layer holding placed world objects, each typed by an ObjectDef id. */
+  objectLayer?: string;
   /** Spawn object names the scene code depends on. */
   requiredSpawns: string[];
 }
@@ -27,6 +29,7 @@ interface ManifestMap {
   requiredLayers: string[];
   collisionLayer?: string;
   spawnLayer?: string;
+  objectLayer?: string;
   requiredSpawns?: string[];
 }
 
@@ -58,6 +61,7 @@ const build = (): Record<string, MapDefinition> => {
           requiredLayers: def.requiredLayers,
           collisionLayer: def.collisionLayer,
           spawnLayer: def.spawnLayer,
+          objectLayer: def.objectLayer,
           requiredSpawns: def.requiredSpawns ?? [],
         } satisfies MapDefinition,
       ];

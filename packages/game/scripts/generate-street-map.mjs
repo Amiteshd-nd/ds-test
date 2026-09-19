@@ -101,50 +101,51 @@ for (let x = 0; x < W; x++) {
   }
 }
 
-// ── Awnings over the storefronts, drawn above the player ───────────────────
-for (let x = 2; x < W - 4; x += 7) {
-  put(above, x, TOP_BUILDING[1] + 1, 'awning_left');
-  put(above, x + 1, TOP_BUILDING[1] + 1, 'awning_mid');
-  put(above, x + 2, TOP_BUILDING[1] + 1, 'awning_right');
-}
-
-// ── Street furniture on the pavements ──────────────────────────────────────
-// Trees: trunk on the object layer (solid), canopy above the player, so
-// walking behind a tree reads correctly.
-const plantTree = (x, y) => {
-  put(objects, x, y, 'tree_trunk');
-  put(above, x, y - 1, 'tree_canopy');
-  collision[y * W + x] = 1;
+// ── Street furniture as placed objects ─────────────────────────────────────
+// Props are objects, not painted tiles. A tile layer draws at one fixed depth,
+// so a bench on it can never occlude the player however far above it they
+// stand; a placed object carries its own depth from the bottom of its
+// footprint and sorts against characters every frame.
+const placed = [];
+let objectId = 10;
+const place = (type, tx, ty, extra = {}) => {
+  placed.push({
+    id: objectId++,
+    name: type,
+    type,
+    x: tx * T,
+    y: ty * T,
+    width: 0,
+    height: 0,
+    point: true,
+    rotation: 0,
+    visible: true,
+    ...(Object.keys(extra).length
+      ? { properties: Object.entries(extra).map(([name, value]) => ({ name, type: typeof value === 'number' ? 'int' : 'string', value })) }
+      : {}),
+  });
 };
 
-for (let x = 3; x < W - 2; x += 6) plantTree(x, TOP_WALK[1]);
-for (let x = 6; x < W - 2; x += 7) plantTree(x, BOTTOM_WALK[0] + 1);
+// Awnings over the storefronts.
+for (let x = 2; x < W - 4; x += 7) place('SHOP_AWNING', x, TOP_BUILDING[1] + 1);
 
-const place = (x, y, name, solid = true) => {
-  put(objects, x, y, name);
-  if (solid) collision[y * W + x] = 1;
-};
+// Trees: a 1x2 object whose canopy is the background row and whose trunk is
+// the footprint, so it blocks at the trunk only.
+for (let x = 3; x < W - 2; x += 6) place('STREET_TREE', x, TOP_WALK[1] - 1);
+for (let x = 6; x < W - 2; x += 7) place('STREET_TREE', x, BOTTOM_WALK[0]);
 
-place(5, BOTTOM_WALK[1], 'bench');
-place(6, BOTTOM_WALK[1], 'bench');
-place(13, BOTTOM_WALK[1], 'bin');
-place(21, BOTTOM_WALK[1], 'bench');
-place(22, BOTTOM_WALK[1], 'bench');
-place(27, BOTTOM_WALK[1], 'bin');
-place(9, TOP_WALK[1], 'planter');
-place(18, TOP_WALK[1], 'planter');
+place('BENCH', 5, BOTTOM_WALK[1]);
+place('BIN', 13, BOTTOM_WALK[1], { hueShift: 40 });
+place('BENCH', 21, BOTTOM_WALK[1], { hueShift: 200 });
+place('BIN', 27, BOTTOM_WALK[1]);
+place('PLANTER', 9, TOP_WALK[1]);
+place('PLANTER', 18, TOP_WALK[1]);
 
-// Streetlights: head on the object layer, pole below it.
-for (let x = 8; x < W - 2; x += 11) {
-  place(x, TOP_WALK[0], 'streetlight_head');
-  put(objects, x, TOP_WALK[0] + 1, 'streetlight_pole');
-}
+for (let x = 8; x < W - 2; x += 11) place('STREETLIGHT', x, TOP_WALK[0]);
+for (let x = 15; x < 20; x++) place('FENCE', x, BOTTOM_WALK[1] - 1);
 
-// Shop signs sit on the wall above the storefronts.
+// Shop signs stay painted — they are flat against the wall, never occluded.
 for (let x = 4; x < W - 4; x += 9) put(walls, x, TOP_BUILDING[1] - 1, 'sign_shop');
-
-// Fence along part of the bottom pavement edge.
-for (let x = 15; x < 20; x++) place(x, BOTTOM_WALK[2 - 1], 'fence');
 
 // ── Assemble ───────────────────────────────────────────────────────────────
 const tileLayer = (name, data, visible = true, order) => ({
@@ -173,6 +174,17 @@ const map = {
     {
       draworder: 'topdown',
       id: 6,
+      name: 'Objects Layer',
+      objects: placed,
+      opacity: 1,
+      type: 'objectgroup',
+      visible: true,
+      x: 0,
+      y: 0,
+    },
+    {
+      draworder: 'topdown',
+      id: 7,
       name: 'Spawns',
       objects: [
         { id: 1, name: 'player_spawn', point: true, rotation: 0, type: '', visible: true, x: 15 * T, y: 10.5 * T, width: 0, height: 0 },
@@ -186,8 +198,8 @@ const map = {
       y: 0,
     },
   ],
-  nextlayerid: 7,
-  nextobjectid: 4,
+  nextlayerid: 8,
+  nextobjectid: 100,
   orientation: 'orthogonal',
   renderorder: 'right-down',
   tiledversion: '1.11.0',
@@ -215,4 +227,7 @@ const map = {
 
 writeFileSync(join(assets, 'tilemaps/whitefield_street.tmj'), `${JSON.stringify(map, null, 1)}\n`);
 const solid = collision.filter(Boolean).length;
-console.log(`✓ whitefield_street.tmj — ${W}x${H} tiles, ${solid} solid, 3 spawns`);
+console.log(
+  `✓ whitefield_street.tmj — ${W}x${H} tiles, ${solid} solid tiles, ` +
+    `${placed.length} placed objects, 3 spawns`,
+);

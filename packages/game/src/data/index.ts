@@ -1,5 +1,13 @@
 import districtsJson from './districts.json';
-import type { DialogueFile, DistrictDef, ItemDef, NpcDef, QuestFile } from '../utils/types';
+import tileIds from '../assets/tilesets/street.tiles.json';
+import type {
+  DialogueFile,
+  DistrictDef,
+  ItemDef,
+  NpcDef,
+  ObjectDef,
+  QuestFile,
+} from '../utils/types';
 
 /**
  * Content registry.
@@ -21,6 +29,7 @@ const dialogueModules = import.meta.glob('./dialogue/*.json', { eager: true, imp
 const questModules = import.meta.glob('./quests/*.json', { eager: true, import: 'default' });
 const itemModules = import.meta.glob('./items/*.json', { eager: true, import: 'default' });
 const npcModules = import.meta.glob('./npcs/*.json', { eager: true, import: 'default' });
+const objectModules = import.meta.glob('./objects/*.json', { eager: true, import: 'default' });
 
 const byId = <T extends { id: string }>(entries: T[], kind: string): Record<string, T> => {
   const out: Record<string, T> = {};
@@ -61,6 +70,26 @@ export const npcsInDistrict = (districtId: string): NpcDef[] =>
 export const questsInDistrict = (districtId: string): QuestFile[] =>
   Object.values(QUESTS).filter((quest) => quest.district === districtId);
 
+/** Placeable world objects, keyed by id. */
+export const OBJECTS: Record<string, ObjectDef> = byId(
+  load<ObjectDef[]>(objectModules).flat(),
+  'object',
+);
+
+/** Tile name -> 0-based frame index in street.png, generated with the art. */
+export const STREET_TILE_IDS: Record<string, number> = tileIds.ids;
+
+/** Frame indices for one variant of an object, row-major. */
+export const objectFrames = (def: ObjectDef, variant = 'default'): number[] => {
+  const names = def.tiles[variant];
+  if (!names) throw new Error(`Object "${def.id}" has no variant "${variant}"`);
+  return names.map((name) => {
+    const frame = STREET_TILE_IDS[name];
+    if (frame === undefined) throw new Error(`Object "${def.id}" uses unknown tile "${name}"`);
+    return frame;
+  });
+};
+
 /** The node every dialogue tree starts from. */
 export const DIALOGUE_ENTRY_NODE = 'start';
 
@@ -89,6 +118,12 @@ export const getDistrict = (id: string): DistrictDef => {
     throw new Error(`Unknown district "${id}" (have: ${Object.keys(DISTRICTS).join(', ')})`);
   }
   return district;
+};
+
+export const getObject = (id: string): ObjectDef => {
+  const def = OBJECTS[id];
+  if (!def) throw new Error(`Unknown object "${id}" (have: ${Object.keys(OBJECTS).join(', ')})`);
+  return def;
 };
 
 export const getNpc = (id: string): NpcDef => {

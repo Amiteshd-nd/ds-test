@@ -47,10 +47,23 @@ await write(sheet, join(assets, 'tilesets/street.png'));
 // ── Characters ─────────────────────────────────────────────────────────────
 // One rig, recoloured. Cheap variety: a crowd of visibly different people
 // without a second sprite sheet to draw or maintain.
+//
+// A whole-sprite hue rotation is the tempting shortcut here, and it is wrong
+// for characters: it rotates skin and hair along with clothing, which at 300
+// degrees turns a brown-skinned character magenta. Because the rig stores
+// semantic cells rather than colours, an explicit palette costs one entry and
+// keeps skin, hair and clothing independent. Hue rotation is still used, but
+// only for objects the manifest marks colorEditable — fabric and painted
+// metal, never skin.
 const VARIANTS = {
   citizen: {},
   citizen_teal: { shirt: '#2f8a7a', shirtShade: '#1f6357', skin: '#b87c50' },
   citizen_ochre: { shirt: '#c98a2f', shirtShade: '#9c6a1f', hair: '#3a2f28' },
+  citizen_maroon: { shirt: '#9c3f4f', shirtShade: '#732c39', skin: '#c98d62' },
+  citizen_olive: { shirt: '#6b7a3a', shirtShade: '#4d5a28', hair: '#1f1a17' },
+  citizen_slate: { shirt: '#55606e', shirtShade: '#3d4650', skin: '#a86f45' },
+  citizen_violet: { shirt: '#6a4f9c', shirtShade: '#4d3873', skin: '#e0b183', hair: '#3a2f28' },
+  citizen_sand: { shirt: '#c9b07a', shirtShade: '#9c8757', skin: '#8f5f3a', hair: '#1f1a17' },
 };
 
 for (const [name, palette] of Object.entries(VARIANTS)) {

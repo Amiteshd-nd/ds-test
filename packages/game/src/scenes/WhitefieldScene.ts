@@ -4,6 +4,9 @@ import { useGameStore } from '../store';
 import { SaveManager } from '../systems/SaveManager';
 import { TILESET_URLS } from '../assets';
 import { MAPS } from '../assets/maps';
+import { OBJECTS } from '../data';
+import { PlacedObject } from '../entities/PlacedObject';
+import { characterZY, depthForZY } from '../core/depth';
 import type { Direction } from '../utils/types';
 import {
   BOT_COUNT,
@@ -25,8 +28,19 @@ type Citizen = Phaser.GameObjects.Sprite & {
 };
 
 // Recoloured variants of one rig — a visibly mixed crowd from a single sheet
-// of drawing work.
-const CITIZEN_SHEETS = ['citizen', 'citizen_teal', 'citizen_ochre'];
+// of drawing work. These are baked palettes rather than a runtime hue
+// rotation: the rig stores semantic cells, so a palette moves shirt colour
+// without dragging skin and hair round the colour wheel with it.
+const CITIZEN_SHEETS = [
+  'citizen',
+  'citizen_teal',
+  'citizen_ochre',
+  'citizen_maroon',
+  'citizen_olive',
+  'citizen_slate',
+  'citizen_violet',
+  'citizen_sand',
+];
 
 /**
  * A Whitefield street block, built from the street tileset.
@@ -42,6 +56,8 @@ export class WhitefieldScene extends Phaser.Scene {
   private player!: Player;
   private citizens: Citizen[] = [];
   private map!: Phaser.Tilemaps.Tilemap;
+  private placedObjects: PlacedObject[] = [];
+  private solids?: Phaser.Physics.Arcade.StaticGroup;
 
   constructor() {
     super(WhitefieldScene.KEY);
@@ -95,6 +111,7 @@ export class WhitefieldScene extends Phaser.Scene {
 
     if (collisionLayer) this.physics.add.collider(this.player, collisionLayer);
 
+    this.placeObjects(collisionLayer);
     this.spawnCitizens(collisionLayer);
 
     SaveManager.getInstance().restore();
@@ -104,6 +121,52 @@ export class WhitefieldScene extends Phaser.Scene {
 
   private persist(): void {
     SaveManager.getInstance().save(WhitefieldScene.KEY, this.player.x, this.player.y);
+  }
+
+  /**
+   * Instantiate every object in the map's object layer from its manifest.
+   *
+   * Solid objects get a static body over their footprint, which is why the
+   * generated map no longer paints props into the collision stencil — the
+   * manifest is the single source of truth for what blocks movement.
+   */
+  private placeObjects(collisionLayer: Phaser.Tilemaps.TilemapLayer | null): void {
+    void collisionLayer;
+    this.placedObjects = [];
+
+    const def = MAPS.whitefield_street;
+    const layer = def.objectLayer ? this.map.getObjectLayer(def.objectLayer) : null;
+    if (!layer) return;
+
+    const solids = this.physics.add.staticGroup();
+    const tile = this.map.tileWidth;
+
+    for (const obj of layer.objects) {
+      const objectDef = obj.type ? OBJECTS[obj.type] : undefined;
+      if (!objectDef) {
+        // Validated at build time, so this means data and build have diverged.
+        console.error(`[WhitefieldScene] placed object "${obj.type}" has no manifest`);
+        continue;
+      }
+
+      const hueProp = obj.properties?.find(
+        (p: { name: string; value: unknown }) => p.name === 'hueShift',
+      );
+
+      const placed = new PlacedObject(
+        this,
+        objectDef,
+        Math.round((obj.x ?? 0) / tile),
+        Math.round((obj.y ?? 0) / tile),
+        tile,
+        { hueShift: typeof hueProp?.value === 'number' ? hueProp.value : undefined },
+      );
+      placed.addCollision(this, solids, tile);
+      this.placedObjects.push(placed);
+    }
+
+    this.physics.add.collider(this.player, solids);
+    this.solids = solids;
   }
 
   /**
@@ -117,7 +180,9 @@ export class WhitefieldScene extends Phaser.Scene {
     const maxY = 16 * tile + tile / 2;
 
     for (let i = 0; i < BOT_COUNT; i++) {
-      const sheet = CITIZEN_SHEETS[i % CITIZEN_SHEETS.length];
+      // Stride the index so neighbouring spawns do not share a look.
+      const sheet = CITIZEN_SHEETS[(i * 3) % CITIZEN_SHEETS.length];
+
       const citizen = this.add.sprite(
         Phaser.Math.Between(tile, this.map.widthInPixels - tile),
         Phaser.Math.Between(minY, maxY),
@@ -130,6 +195,7 @@ export class WhitefieldScene extends Phaser.Scene {
       body.setOffset(6, 35);
       body.setCollideWorldBounds(true);
       if (collisionLayer) this.physics.add.collider(citizen, collisionLayer);
+      if (this.solids) this.physics.add.collider(citizen, this.solids);
 
       citizen.setDepth(DEPTH.ENTITIES);
       citizen.nextTurn = 0;
@@ -174,11 +240,12 @@ export class WhitefieldScene extends Phaser.Scene {
       }
     }
 
-    // Depth sort so characters lower on screen draw in front.
-    const h = this.map.heightInPixels;
-    this.player.setDepth(DEPTH.ENTITIES + this.player.y / h);
+    // Depth is computed from each drawable's bottom edge, never authored.
+    // Placed objects set theirs once at construction; characters move, so
+    // theirs is recomputed each frame.
+    this.player.setDepth(depthForZY(characterZY(this.player)));
     for (const citizen of this.citizens) {
-      citizen.setDepth(DEPTH.ENTITIES + citizen.y / h);
+      citizen.setDepth(depthForZY(characterZY(citizen)));
     }
   }
 }

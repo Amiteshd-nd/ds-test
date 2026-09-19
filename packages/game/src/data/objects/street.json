@@ -1,0 +1,79 @@
+[
+  {
+    "id": "STREET_TREE",
+    "label": "Street Tree",
+    "category": "nature",
+    "tilesWide": 1,
+    "tilesTall": 2,
+    "backgroundTiles": 1,
+    "solid": true,
+    "colorEditable": false,
+    "tiles": { "default": ["tree_canopy", "tree_trunk"] }
+  },
+  {
+    "id": "STREETLIGHT",
+    "label": "Streetlight",
+    "category": "infrastructure",
+    "tilesWide": 1,
+    "tilesTall": 2,
+    "backgroundTiles": 1,
+    "solid": true,
+    "colorEditable": false,
+    "tiles": { "default": ["streetlight_head", "streetlight_pole"] }
+  },
+  {
+    "id": "BENCH",
+    "label": "Bench",
+    "category": "furniture",
+    "tilesWide": 2,
+    "tilesTall": 1,
+    "backgroundTiles": 0,
+    "solid": true,
+    "colorEditable": true,
+    "tiles": { "default": ["bench", "bench"] }
+  },
+  {
+    "id": "BIN",
+    "label": "Rubbish Bin",
+    "category": "furniture",
+    "tilesWide": 1,
+    "tilesTall": 1,
+    "backgroundTiles": 0,
+    "solid": true,
+    "colorEditable": true,
+    "tiles": { "default": ["bin"] }
+  },
+  {
+    "id": "PLANTER",
+    "label": "Planter",
+    "category": "nature",
+    "tilesWide": 1,
+    "tilesTall": 1,
+    "backgroundTiles": 0,
+    "solid": true,
+    "colorEditable": false,
+    "tiles": { "default": ["planter"] }
+  },
+  {
+    "id": "SHOP_AWNING",
+    "label": "Shop Awning",
+    "category": "structure",
+    "tilesWide": 3,
+    "tilesTall": 1,
+    "backgroundTiles": 1,
+    "solid": false,
+    "colorEditable": true,
+    "tiles": { "default": ["awning_left", "awning_mid", "awning_right"] }
+  },
+  {
+    "id": "FENCE",
+    "label": "Fence Section",
+    "category": "structure",
+    "tilesWide": 1,
+    "tilesTall": 1,
+    "backgroundTiles": 0,
+    "solid": true,
+    "colorEditable": false,
+    "tiles": { "default": ["fence"] }
+  }
+]

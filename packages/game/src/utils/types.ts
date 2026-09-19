@@ -124,6 +124,36 @@ export interface NpcDef {
   tint?: number;
 }
 
+// --- Placeable objects -----------------------------------------------------
+/**
+ * A placeable world object, described flatly enough that a script — or a
+ * vision model captioning a bought tileset — can generate one correctly.
+ *
+ * `tiles` lists tile names row-major, top-left to bottom-right, with exactly
+ * `tilesWide * tilesTall` entries. Names resolve against the tileset's
+ * generated id map, so a manifest never hard-codes a bare tile index.
+ */
+export interface ObjectDef {
+  id: string;
+  label: string;
+  category: string;
+  /** Image footprint in grid cells. */
+  tilesWide: number;
+  tilesTall: number;
+  /**
+   * Rows at the TOP of the image that are purely visual — a tree's canopy, a
+   * bookcase's upper shelves. The remaining bottom rows are the footprint that
+   * blocks movement. See src/core/depth.ts for why this reading was chosen.
+   */
+  backgroundTiles: number;
+  /** Whether the footprint blocks movement. */
+  solid: boolean;
+  /** Whether a runtime hue shift is offered for this object. */
+  colorEditable: boolean;
+  /** Named variants — orientations, on/off states. A simple item has `default`. */
+  tiles: Record<string, string[]>;
+}
+
 // --- Quests ----------------------------------------------------------------
 export interface QuestObjective {
   id: string;

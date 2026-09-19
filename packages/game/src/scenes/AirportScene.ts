@@ -6,6 +6,7 @@ import { TILESET_URLS } from '../assets';
 import { DIALOGUE, npcsInDistrict } from '../data';
 import { AIRPORT_MAP } from '../assets/maps';
 import { gameEvents } from '../core/events';
+import { characterZY, depthForZY } from '../core/depth';
 import { QuestManager } from '../systems/QuestManager';
 import { DialogueBox } from '../ui/DialogueBox';
 import {
@@ -209,10 +210,10 @@ export class AirportScene extends Phaser.Scene {
   update(): void {
     this.player.update();
 
-    // Depth sort so characters further down the screen draw in front.
-    this.player.setDepth(DEPTH.ENTITIES + this.player.y / this.map.heightInPixels);
+    // Depth is computed from each drawable's bottom edge, never authored.
+    this.player.setDepth(depthForZY(characterZY(this.player)));
     for (const npc of this.npcs) {
-      npc.setDepth(DEPTH.ENTITIES + npc.y / this.map.heightInPixels);
+      npc.setDepth(depthForZY(characterZY(npc)));
     }
   }
 }

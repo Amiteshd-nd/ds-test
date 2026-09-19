@@ -1,6 +1,14 @@
 import Phaser from 'phaser';
-import { GAME_HEIGHT, GAME_WIDTH, SCENE_KEYS, SPRITE_HEIGHT, SPRITE_WIDTH } from '../utils/constants';
+import {
+  GAME_HEIGHT,
+  GAME_WIDTH,
+  SCENE_KEYS,
+  SPRITE_HEIGHT,
+  SPRITE_WIDTH,
+  TILE_SIZE,
+} from '../utils/constants';
 import { SPRITE_URLS, TILESET_URLS } from '../assets';
+import { STREET_FRAMES_KEY } from '../entities/PlacedObject';
 import { MAPS } from '../assets/maps';
 import { useGameStore } from '../store';
 import { QuestManager } from '../systems/QuestManager';
@@ -55,6 +63,16 @@ export class BootScene extends Phaser.Scene {
 
     for (const [key, url] of Object.entries(TILESET_URLS)) {
       this.load.image(key, url);
+    }
+
+    // The street tileset is loaded a second time as a spritesheet. Tilemap
+    // layers index it by name through the image cache; placed objects index
+    // individual tiles by frame number, which needs a frame grid.
+    if (TILESET_URLS.street) {
+      this.load.spritesheet(STREET_FRAMES_KEY, TILESET_URLS.street, {
+        frameWidth: TILE_SIZE,
+        frameHeight: TILE_SIZE,
+      });
     }
   }
 

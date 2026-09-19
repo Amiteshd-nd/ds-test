@@ -38,7 +38,8 @@
       "optionalLayers": [
         "Effects",
         "Foreground"
-      ]
+      ],
+      "objectLayer": "Objects Layer"
     }
   },
   "layerOrder": [
@@ -50,5 +51,6 @@
     "Effects",
     "Foreground"
   ],
-  "$layerOrderComment": "Canonical draw order, back to front. Depth comes from layering rather than from bigger images. A map need not use every layer, but any layer it does use must be named from this list \u2014 an unlisted name is a typo or a taxonomy drift."
+  "$layerOrderComment": "Canonical draw order, back to front. Depth comes from layering rather than from bigger images. A map need not use every layer, but any layer it does use must be named from this list \u2014 an unlisted name is a typo or a taxonomy drift.",
+  "$objectLayerComment": "Object layer holding placed world objects. Each object's `type` must name an ObjectDef in src/data/objects \u2014 the content validator enforces it."
 }

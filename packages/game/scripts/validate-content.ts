@@ -53,6 +53,8 @@ export function validateContent(
   itemFiles: Array<{ file: string; basename: string; json: Json }>,
   districts: Json[] = [],
   npcFiles: Array<{ file: string; basename: string; json: Json }> = [],
+  objectFiles: Array<{ file: string; basename: string; json: Json }> = [],
+  tileIds: Record<string, number> = {},
 ): string[] {
   const problems: string[] = [];
   const add = (file: string, msg: string) => problems.push(`${file}: ${msg}`);
@@ -180,6 +182,58 @@ export function validateContent(
           add(file, `NPC "${npc.id}" and "${claimed}" both claim spawn "${npc.spawn}" in "${npc.district}"`);
         } else {
           seenSpawns.set(key, npc.id);
+        }
+      }
+    }
+  }
+
+  // ── Placeable objects ────────────────────────────────────────────────────
+  const objectIds = new Set<string>();
+  const knownTiles = Object.keys(tileIds);
+  for (const { file, json } of objectFiles) {
+    if (!Array.isArray(json)) { add(file, 'expected an array of objects'); continue; }
+
+    for (const obj of json) {
+      if (!obj.id) { add(file, 'an object has no id'); continue; }
+      if (objectIds.has(obj.id)) add(file, `duplicate object id "${obj.id}"`);
+      objectIds.add(obj.id);
+
+      const wide = obj.tilesWide;
+      const tall = obj.tilesTall;
+      if (!Number.isInteger(wide) || wide < 1) add(file, `object "${obj.id}" has invalid tilesWide`);
+      if (!Number.isInteger(tall) || tall < 1) add(file, `object "${obj.id}" has invalid tilesTall`);
+
+      const bg = obj.backgroundTiles;
+      if (!Number.isInteger(bg) || bg < 0) {
+        add(file, `object "${obj.id}" has invalid backgroundTiles`);
+      } else if (Number.isInteger(tall) && bg >= tall && obj.solid) {
+        // Every row visual leaves no footprint, so a solid object blocks nothing.
+        add(file, `object "${obj.id}" is solid but all ${tall} rows are backgroundTiles — it would block nothing`);
+      }
+
+      if (typeof obj.solid !== 'boolean') add(file, `object "${obj.id}" has no boolean solid`);
+      if (typeof obj.colorEditable !== 'boolean') {
+        add(file, `object "${obj.id}" has no boolean colorEditable`);
+      }
+
+      const variants = obj.tiles ?? {};
+      if (!variants.default) add(file, `object "${obj.id}" has no "default" tile variant`);
+
+      for (const [variant, names] of Object.entries(variants)) {
+        if (!Array.isArray(names)) {
+          add(file, `object "${obj.id}" variant "${variant}" is not an array`);
+          continue;
+        }
+        const expected = (wide ?? 0) * (tall ?? 0);
+        if (names.length !== expected) {
+          add(file, `object "${obj.id}" variant "${variant}" lists ${names.length} tiles but declares ${wide}x${tall} = ${expected}`);
+        }
+        if (knownTiles.length) {
+          for (const name of names as string[]) {
+            if (!(name in tileIds)) {
+              add(file, `object "${obj.id}" variant "${variant}" uses unknown tile "${name}"`);
+            }
+          }
         }
       }
     }
@@ -324,8 +378,14 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
   const quests = readJsonDir('quests');
   const items = readJsonDir('items');
   const npcs = readJsonDir('npcs');
+  const objects = readJsonDir('objects');
   const districts = JSON.parse(readFileSync(join(dataDir, 'districts.json'), 'utf8')) as Json[];
-  const problems = validateContent(dialogue, quests, items, districts, npcs);
+  const tileIds = (
+    JSON.parse(
+      readFileSync(resolve(here, '../src/assets/tilesets/street.tiles.json'), 'utf8'),
+    ) as { ids: Record<string, number> }
+  ).ids;
+  const problems = validateContent(dialogue, quests, items, districts, npcs, objects, tileIds);
 
   if (problems.length) {
     console.error(`\n✗ Content validation failed (${problems.length} problem${problems.length > 1 ? 's' : ''}):\n`);
@@ -338,6 +398,7 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
     files.reduce((n, f) => n + (Array.isArray(f.json) ? f.json.length : 0), 0);
   console.log(
     `✓ content valid — ${districts.length} districts, ${count(npcs)} NPCs, ` +
-      `${dialogue.length} dialogue, ${quests.length} quest, ${count(items)} items`,
+      `${count(objects)} objects, ${dialogue.length} dialogue, ` +
+      `${quests.length} quest, ${count(items)} items`,
   );
 }
