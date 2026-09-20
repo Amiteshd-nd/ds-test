@@ -4,9 +4,10 @@ A portable AI agent layer. It installs into a product that already has data, API
 and a design system, and turns it into one with native AI chat and agents — without the
 agent layer ever learning which product it is in.
 
-Built from `PRD-cortex-agent-layer.md`, its v1.1 native-only addendum, and the
-`cortex-agent-layer` skill. Section numbers in the code and in this file refer to the PRD;
-C-numbers refer to the addendum.
+Built from the PRD, its v1.1 native-only addendum, and the `cortex-agent-layer` skill —
+all three in `docs/spec/`, verbatim. Section numbers in the code and in this file refer to
+the PRD; C-numbers refer to the addendum. Where the implementation departs from either,
+`docs/DECISIONS.md` says so and why.
 
 **Zero vendor-hosted dependencies, and no run data has ever left this network.** Three
 runtime packages, all MIT, all replaceable in a day: see `docs/DEPENDENCIES.md`.
@@ -202,6 +203,10 @@ floor that had silently switched the entire graph retrieval leg off.
   measured `canRead` p95, coverage by area.
 - `docs/EVENTS.md` — the event vocabulary, and the AG-UI mapping served at
   `?protocol=ag-ui`.
+- `docs/spec/` — **the source documents**, verbatim: the PRD, the v1.1 addendum, and the
+  skill as originally written. Every `§n` and `C1`–`C7` reference in this package resolves
+  there. They are reproduced unedited on purpose — a specification that drifts toward what
+  was built is worse than none.
 - `cortex.config.yaml` — the one file a host edits after implementing its adapters.
 
 ## Adding an agent
