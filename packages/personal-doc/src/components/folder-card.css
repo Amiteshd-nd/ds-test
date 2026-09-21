@@ -1,0 +1,287 @@
+/*
+ * The folder card.
+ *
+ * Art across the top, a sheet pulled up over it on the left to make a tab, and
+ * the numbers pinned to the bottom edge. The tab is the whole idea: it names the
+ * thing while leaving the artwork visible beside it, which a full-width caption
+ * bar cannot do.
+ *
+ * The joint where the tab meets the sheet is a straight diagonal, not a curve:
+ * the tab's right edge falls away at an angle onto the sheet, the way a cut
+ * folder tab does. `.fc-tab::after` is the wedge that fills it.
+ */
+
+.fc {
+  /* The card's outer corner. Generous, against the minimal corners inside: the
+     tab's shape is the detail, and a soft outer edge is what lets it read as a
+     detail rather than as one more hard angle among several. */
+  --fc-radius: 20px;
+  --fc-bezel-width: 5px;
+
+  /* The only rounding inside the card: the tab's outer left corner and the
+     sheet's outer right corner. Small enough to read as a softened edge rather
+     than as a rounded box. */
+  --fc-corner: 5px;
+
+  /* Horizontal run of the diagonal, written by the card at runtime as a ratio
+   * of the tab's height so the angle holds when a title wraps to two lines. A
+   * fixed run would flatten the slope on a tall tab and steepen it on a short
+   * one, and the cards would stop matching each other. */
+  --fc-slant: 20px;
+
+  /* How far each turning's arc reaches back along the edges it joins, also
+     written at runtime — it falls out of the turn radius and the slope angle
+     together, so it cannot be a constant. The tab reserves it as padding. */
+  --fc-turn-run: 9px;
+
+  --fc-sheet: var(--site-card);
+  --fc-ink: var(--site-fg);
+  --fc-ink-2: var(--site-fg-2);
+  --fc-bezel: var(--site-bezel);
+
+  position: relative;
+  display: block;
+  border-radius: var(--fc-radius);
+  background: var(--fc-bezel);
+  padding: var(--fc-bezel-width);
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    transform var(--motion-duration-gentle) var(--motion-ease-out),
+    box-shadow var(--motion-duration-gentle) var(--motion-ease-out);
+}
+
+.fc-inner {
+  position: relative;
+  width: 100%;
+  border-radius: calc(var(--fc-radius) - var(--fc-bezel-width));
+  overflow: hidden;
+  /* The reference is square, but the reference is one showcase card. A grid of
+     these is a list, and a list wants label proportions. The eyebrow moved into
+     the sheet on tiles, so the height it was protecting is no longer needed. */
+  aspect-ratio: 8 / 7;
+}
+
+/* ------------------------------------------------------------------ art --- */
+
+.fc-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fc-eyebrow {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 2;
+  text-align: right;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.24;
+  letter-spacing: -0.01em;
+  color: #fff;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+  max-width: 55%;
+  white-space: pre-line;
+}
+
+/* ---------------------------------------------------------------- sheet --- */
+
+.fc-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Sized by its content with a floor, rather than pinned to a percentage: a
+     title that wraps grows the sheet downward instead of growing the tab up
+     into the artwork. */
+  top: auto;
+  /* A floor, not a target. Deep enough that the sheet reads as a sheet rather
+     than as a caption bar, which is what carries the folder idea — the artwork
+     above it still gets the larger share. */
+  min-height: 51%;
+  z-index: 1;
+  background: var(--fc-sheet);
+  border-top-right-radius: var(--fc-corner);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 14px 12px;
+}
+
+.fc-tab {
+  position: absolute;
+  left: 0;
+  /* A pixel of overlap rather than a flush 100%. The tab and the sheet are the
+     same colour, so it costs nothing visually, and it closes the hairline the
+     rasteriser leaves when both edges land on a fractional pixel — the artwork
+     behind was showing through as a seam at some zoom levels. */
+  bottom: calc(100% - 1px);
+  /* The reference holds the tab at roughly 40% of the card regardless of how
+     short the label is, which is what stops it reading as a chip. `max-content`
+     as the floor means a long title still gets the room it needs rather than
+     being clipped, and min-width beats max-width when the two disagree. */
+  width: 42%;
+  min-width: max-content;
+  max-width: 68%;
+  background: var(--fc-sheet);
+  /* The diagonal lives inside this box now, so the box has to be wide enough to
+     hold it: text, a gap, the slant, and the reach of the lower turning. */
+  padding: 9px 18px 8px 14px;
+  padding-right: calc(10px + var(--fc-slant) + var(--fc-turn-run));
+
+  /*
+   * Tab and slant are one outline, written at runtime by `tabClipPath`.
+   *
+   * They have to be one shape because the upper turning sits exactly on the
+   * seam between them: rounding it from either side alone leaves the other
+   * side's square corner poking through. And it has to be a path rather than a
+   * polygon because both turnings are curves — `border-radius` can only meet a
+   * vertical edge, so against a 53-degree slope it kinks instead of joining.
+   *
+   * `border-top-left-radius` is the fallback for a browser without `path()`:
+   * a plain rounded tab, no slant, rather than nothing.
+   */
+  border-top-left-radius: var(--fc-corner);
+  clip-path: var(--fc-tab-clip, none);
+}
+
+.fc-kicker {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fc-ink-2);
+  margin: 0 0 5px;
+}
+
+.fc-title {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 15.5px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--fc-ink);
+  margin: 0;
+}
+
+.fc-sub {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13.5px;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  color: var(--fc-ink-2);
+  margin: 2px 0 0;
+}
+
+.fc-body {
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  line-height: 1.42;
+  letter-spacing: -0.01em;
+  color: var(--fc-ink-2);
+  /* The gap is measured from the sheet's top edge, not from the subtitle: the
+     tab is out of flow, so this is the only thing holding the description off
+     the line the diagonal lands on. */
+  margin: 22px 0 0;
+  /* Two lines, then stop. A card is a label, not a paragraph. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ----------------------------------------------------------------- meta --- */
+
+.fc-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.fc-stat {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--fc-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.fc-stat span {
+  font-weight: 500;
+  font-size: 12.5px;
+  letter-spacing: -0.01em;
+  color: var(--fc-ink-2);
+  margin-left: 5px;
+}
+
+.fc-note {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 12.5px;
+  letter-spacing: -0.015em;
+  color: var(--fc-ink);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- state --- */
+
+@media (hover: hover) {
+  .fc:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--site-card-shadow);
+  }
+}
+
+.fc:focus-visible {
+  outline: 2px solid var(--site-accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fc,
+  .fc:hover {
+    transform: none;
+  }
+}
+
+/* A wider tile on the Works list: the art sits beside the sheet rather than
+   above it, so eleven of them do not become eleven screens of scrolling. */
+/*
+ * Two steps, not one. Going straight to 16:5 at the point the row layout starts
+ * squeezes the artwork band until the tab climbs into the eyebrow, because the
+ * sheet cannot shrink below its own content. 16:6 first, then the flatter card
+ * once there is width to pay for it.
+ */
+@media (min-width: 560px) {
+  .fc--row .fc-inner {
+    aspect-ratio: 16 / 6;
+  }
+
+  /* Rows carry a little more than the tiles: they are flatter, so the same
+     proportion buys a shallower sheet in absolute terms, and the description
+     line only they show needs somewhere to sit. */
+  .fc--row .fc-sheet {
+    min-height: 58%;
+  }
+
+  .fc-eyebrow {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 768px) {
+  .fc--row .fc-inner {
+    aspect-ratio: 16 / 5;
+  }
+}

@@ -1,6 +1,7 @@
-import { motion } from '@cloud-march/motion/react';
-import { useRef, useEffect, useState } from 'react';
+import { motion, useReducedMotion } from '@cloud-march/motion/react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import BlurImage from '../components/BlurImage';
+import useDragCarousel from '../hooks/useDragCarousel';
 import { trackEmailCopy, trackExternalLink } from '../utils/analytics';
 
 // Profile Image
@@ -40,358 +41,152 @@ import book5 from '../assets/images/about/book-5.webp';
 import book6 from '../assets/images/about/book-6.webp';
 import book7 from '../assets/images/about/book-7.webp';
 
+const INITIAL_TILES = {
+  anime1: interestsAnime1,
+  festival: interestsFestival,
+  jeep: interestsJeep,
+  pingpong: interestsPingpong,
+  chess: interestsChess,
+  suit: interestsSuit,
+  woman1: interestsWoman1,
+  beach1: interestsBeach1,
+  beach2: interestsBeach2,
+  food: interestsFood,
+  woman2: interestsWoman2,
+  anime2: interestsAnime2,
+  shooting: interestsShooting,
+  tv: interestsTv,
+  anime3: interestsAnime3,
+};
+
+const TILE_KEYS = Object.keys(INITIAL_TILES);
+
+/* Taller than they are wide, so they can only trade places with each other
+   without the grid reflowing. */
+const PORTRAIT_TILES = ['anime1', 'chess', 'suit', 'woman1', 'woman2', 'tv'];
+const LANDSCAPE_TILES = TILE_KEYS.filter((k) => !PORTRAIT_TILES.includes(k));
+const TILE_ANIMATIONS = ['flip', 'bounce', 'rotate', 'slide'];
+
+const pick = (list) => list[Math.floor(Math.random() * list.length)];
+
+/* Two distinct members of a list. The old version looped `while (b === a)`,
+   which never terminates on a single-element list. */
+function pickPair(list) {
+  if (list.length < 2) return null;
+  const a = pick(list);
+  const rest = list.filter((k) => k !== a);
+  return [a, pick(rest)];
+}
+
 const About = () => {
   const flexingImages = [flexing1, flexing2, flexing3, flexing4, flexing5, flexing6];
   const bookImages = [book1, book2, book3, book4, book5, book6, book7];
 
-  // Refs for carousels
-  const flexingRef = useRef(null);
-  const bookRef = useRef(null);
-
-  // States to control pausing
-  const [isFlexingPaused, setIsFlexingPaused] = useState(false);
-  const [isBookPaused, setIsBookPaused] = useState(false);
+  /* Both carousels now come from one hook. This used to be twelve useState and
+     useRef declarations plus two copies of ~150 lines of drag, momentum and
+     auto-scroll logic, which had already drifted apart. */
+  const flexing = useDragCarousel({ direction: 1 });
+  const books = useDragCarousel({ direction: -1 });
 
   // Toast state
-  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
+  const toastTimer = useRef(null);
 
-  // Handle email copy
-  const handleCopyEmail = () => {
-    navigator.clipboard.writeText('amiteshdebnath98@gmail.com');
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-    trackEmailCopy();
-  };
+  const setToast = useCallback((message) => {
+    setToastMessage(message);
+    clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToastMessage(null), 4000);
+  }, []);
 
-  // States for drag scrolling
-  const [isFlexingDragging, setIsFlexingDragging] = useState(false);
-  const [isBookDragging, setIsBookDragging] = useState(false);
-  const [flexingStartX, setFlexingStartX] = useState(0);
-  const [bookStartX, setBookStartX] = useState(0);
-  const [flexingScrollLeft, setFlexingScrollLeft] = useState(0);
-  const [bookScrollLeft, setBookScrollLeft] = useState(0);
+  useEffect(() => () => clearTimeout(toastTimer.current), []);
 
-  // Physics states for momentum
-  const flexingVelocityRef = useRef(0);
-  const bookVelocityRef = useRef(0);
-  const flexingLastMoveRef = useRef({ x: 0, time: 0 });
-  const bookLastMoveRef = useRef({ x: 0, time: 0 });
-  const flexingMomentumRef = useRef(null);
-  const bookMomentumRef = useRef(null);
+  /* The clipboard write can reject: no clipboard on an insecure origin, an
+     unfocused document, a denied permission. The old version showed "Email
+     copied!" regardless, so a visitor was told it worked, pasted nothing, and
+     had no other way to reach the address. */
+  const handleCopyEmail = useCallback(async () => {
+    const address = 'amiteshdebnath98@gmail.com';
+
+    try {
+      await navigator.clipboard.writeText(address);
+      setToast('Email copied!');
+      trackEmailCopy();
+    } catch {
+      setToast(address);
+    }
+  }, [setToast]);
 
   // State for dynamic tile animations
   const [tileAnimations, setTileAnimations] = useState({});
   const [swappingTiles, setSwappingTiles] = useState([]);
 
-  // State for tile positions
-  const [tileOrder, setTileOrder] = useState({
-    anime1: { image: interestsAnime1, name: 'anime1' },
-    festival: { image: interestsFestival, name: 'festival' },
-    jeep: { image: interestsJeep, name: 'jeep' },
-    pingpong: { image: interestsPingpong, name: 'pingpong' },
-    chess: { image: interestsChess, name: 'chess' },
-    suit: { image: interestsSuit, name: 'suit' },
-    woman1: { image: interestsWoman1, name: 'woman1' },
-    beach1: { image: interestsBeach1, name: 'beach1' },
-    beach2: { image: interestsBeach2, name: 'beach2' },
-    food: { image: interestsFood, name: 'food' },
-    woman2: { image: interestsWoman2, name: 'woman2' },
-    anime2: { image: interestsAnime2, name: 'anime2' },
-    shooting: { image: interestsShooting, name: 'shooting' },
-    tv: { image: interestsTv, name: 'tv' },
-    anime3: { image: interestsAnime3, name: 'anime3' }
-  });
+  /* Slot key to image. It used to be { image, name } where `name` always
+     repeated the key it was filed under, and the render then looked animations
+     up by `name` while looking the fade up by the key. Once content swaps
+     between slots those two stop agreeing, so the flip landed on a different
+     tile than the fade. One key, used everywhere. */
+  const [tileOrder, setTileOrder] = useState(INITIAL_TILES);
 
-  // Random tile animation and position swap trigger
+  /*
+   * The tile shuffle.
+   *
+   * Previously this listed `tileOrder` as a dependency while its own callback
+   * replaced `tileOrder`, so every swap tore down and rebuilt the interval and
+   * the cadence drifted: 5s, then 5.3s, then 10.6s. The slot keys never change,
+   * so the effect needs no dependencies at all and the timer keeps a fixed beat.
+   *
+   * Its three nested timeouts also held no handles, so leaving the page
+   * mid-swap left callbacks firing into an unmounted component. They are
+   * tracked and cleared now, along with the interval.
+   */
+  const reducedMotion = useReducedMotion();
+
   useEffect(() => {
-    const animateAndSwapTiles = () => {
-      const tileKeys = Object.keys(tileOrder);
+    if (reducedMotion) return undefined;
 
-      // Define portrait tiles (taller than wide)
-      const portraitTiles = ['anime1', 'chess', 'suit', 'woman1', 'woman2', 'tv'];
-      const otherTiles = tileKeys.filter(key => !portraitTiles.includes(key));
-
-      // Pick 2-3 random tiles to animate
-      const numToAnimate = Math.floor(Math.random() * 2) + 2;
-      const selectedTiles = [];
-
-      for (let i = 0; i < numToAnimate; i++) {
-        const randomTile = tileKeys[Math.floor(Math.random() * tileKeys.length)];
-        if (!selectedTiles.includes(randomTile)) {
-          selectedTiles.push(randomTile);
-        }
-      }
-
-      const newAnimations = {};
-      selectedTiles.forEach(tile => {
-        const animations = ['flip', 'bounce', 'rotate', 'slide'];
-        newAnimations[tile] = animations[Math.floor(Math.random() * animations.length)];
-      });
-
-      setTileAnimations(newAnimations);
-
-      // Pick tiles to swap - portrait tiles swap with portrait, others swap independently
-      let tile1Key, tile2Key;
-
-      // Randomly decide if we swap portrait or other tiles
-      if (Math.random() > 0.5 && portraitTiles.length >= 2) {
-        // Swap two portrait tiles
-        tile1Key = portraitTiles[Math.floor(Math.random() * portraitTiles.length)];
-        tile2Key = portraitTiles[Math.floor(Math.random() * portraitTiles.length)];
-        while (tile2Key === tile1Key) {
-          tile2Key = portraitTiles[Math.floor(Math.random() * portraitTiles.length)];
-        }
-      } else {
-        // Swap two non-portrait tiles
-        tile1Key = otherTiles[Math.floor(Math.random() * otherTiles.length)];
-        tile2Key = otherTiles[Math.floor(Math.random() * otherTiles.length)];
-        while (tile2Key === tile1Key) {
-          tile2Key = otherTiles[Math.floor(Math.random() * otherTiles.length)];
-        }
-      }
-
-      // Mark tiles as swapping (fade out)
-      setSwappingTiles([tile1Key, tile2Key]);
-
-      // Wait for fade out, then swap
-      setTimeout(() => {
-        setTileOrder(prev => {
-          const newOrder = { ...prev };
-          // Swap the tile data
-          const temp = newOrder[tile1Key];
-          newOrder[tile1Key] = newOrder[tile2Key];
-          newOrder[tile2Key] = temp;
-          return newOrder;
-        });
-
-        // Clear swapping state to trigger fade in
-        setTimeout(() => {
-          setSwappingTiles([]);
-        }, 50);
-      }, 300);
-
-      // Clear animations after they complete
-      setTimeout(() => {
-        setTileAnimations({});
-      }, 1000);
+    const timers = new Set();
+    const later = (fn, ms) => {
+      const id = setTimeout(() => {
+        timers.delete(id);
+        fn();
+      }, ms);
+      timers.add(id);
+      return id;
     };
 
-    // Run animation and swap together every 5 seconds
-    const interval = setInterval(() => {
-      animateAndSwapTiles();
-    }, 5000);
+    const shuffle = () => {
+      /* Two or three tiles get an animation. The old loop could return fewer
+         than it asked for, because a duplicate draw was skipped rather than
+         retried; drawing from a shuffled copy cannot repeat. */
+      const count = 2 + Math.floor(Math.random() * 2);
+      const shuffled = [...TILE_KEYS].sort(() => Math.random() - 0.5);
+      setTileAnimations(
+        Object.fromEntries(shuffled.slice(0, count).map((key) => [key, pick(TILE_ANIMATIONS)])),
+      );
+
+      /* Portrait tiles only trade with portrait tiles, so the grid holds. */
+      const pair = pickPair(Math.random() > 0.5 ? PORTRAIT_TILES : LANDSCAPE_TILES);
+      if (!pair) return;
+      const [a, b] = pair;
+
+      setSwappingTiles(pair);
+
+      later(() => {
+        setTileOrder((prev) => ({ ...prev, [a]: prev[b], [b]: prev[a] }));
+        later(() => setSwappingTiles([]), 50);
+      }, 300);
+
+      later(() => setTileAnimations({}), 1000);
+    };
+
+    const interval = setInterval(shuffle, 5000);
 
     return () => {
       clearInterval(interval);
+      timers.forEach(clearTimeout);
+      timers.clear();
     };
-  }, [tileOrder]);
-
-  // Momentum scrolling for Flexing carousel
-  const applyFlexingMomentum = () => {
-    if (Math.abs(flexingVelocityRef.current) > 0.5) {
-      if (flexingRef.current) {
-        flexingRef.current.scrollLeft -= flexingVelocityRef.current;
-      }
-      // Apply friction
-      flexingVelocityRef.current *= 0.95;
-      flexingMomentumRef.current = requestAnimationFrame(applyFlexingMomentum);
-    } else {
-      flexingVelocityRef.current = 0;
-      if (flexingMomentumRef.current) {
-        cancelAnimationFrame(flexingMomentumRef.current);
-        flexingMomentumRef.current = null;
-      }
-    }
-  };
-
-  // Drag handlers for Flexing carousel
-  const handleFlexingMouseDown = (e) => {
-    setIsFlexingDragging(true);
-    setIsFlexingPaused(true);
-    setFlexingStartX(e.pageX - flexingRef.current.offsetLeft);
-    setFlexingScrollLeft(flexingRef.current.scrollLeft);
-    flexingRef.current.style.cursor = 'grabbing';
-    flexingRef.current.style.scrollBehavior = 'auto';
-
-    // Cancel any ongoing momentum
-    if (flexingMomentumRef.current) {
-      cancelAnimationFrame(flexingMomentumRef.current);
-      flexingMomentumRef.current = null;
-    }
-    flexingVelocityRef.current = 0;
-    flexingLastMoveRef.current = { x: e.pageX, time: Date.now() };
-  };
-
-  const handleFlexingMouseMove = (e) => {
-    if (!isFlexingDragging) return;
-    e.preventDefault();
-
-    const x = e.pageX - flexingRef.current.offsetLeft;
-    const walk = (x - flexingStartX) * 2.5; // Increased scroll speed multiplier
-    flexingRef.current.scrollLeft = flexingScrollLeft - walk;
-
-    // Calculate velocity for momentum
-    const now = Date.now();
-    const timeDelta = now - flexingLastMoveRef.current.time;
-    if (timeDelta > 0) {
-      const distance = e.pageX - flexingLastMoveRef.current.x;
-      flexingVelocityRef.current = (distance / timeDelta) * 16; // Convert to per-frame velocity
-    }
-    flexingLastMoveRef.current = { x: e.pageX, time: now };
-  };
-
-  const handleFlexingMouseUp = () => {
-    setIsFlexingDragging(false);
-    if (flexingRef.current) {
-      flexingRef.current.style.cursor = 'grab';
-    }
-
-    // Start momentum scrolling
-    if (Math.abs(flexingVelocityRef.current) > 1) {
-      applyFlexingMomentum();
-    }
-  };
-
-  const handleFlexingMouseLeave = () => {
-    if (isFlexingDragging) {
-      setIsFlexingDragging(false);
-      if (flexingRef.current) {
-        flexingRef.current.style.cursor = 'grab';
-      }
-
-      // Start momentum scrolling on leave as well
-      if (Math.abs(flexingVelocityRef.current) > 1) {
-        applyFlexingMomentum();
-      }
-    }
-  };
-
-  // Auto-scroll for Flexing carousel
-  useEffect(() => {
-    const scrollContainer = flexingRef.current;
-    if (!scrollContainer) return;
-
-    const scroll = () => {
-      // Only auto-scroll if not paused, not dragging, and no momentum
-      if (!isFlexingPaused && !isFlexingDragging && !flexingMomentumRef.current) {
-        scrollContainer.scrollLeft += 1;
-
-        // Reset to beginning when reaching end
-        if (scrollContainer.scrollLeft >= scrollContainer.scrollWidth - scrollContainer.clientWidth) {
-          scrollContainer.scrollLeft = 0;
-        }
-      }
-    };
-
-    const intervalId = setInterval(scroll, 20);
-    return () => clearInterval(intervalId);
-  }, [isFlexingPaused, isFlexingDragging]);
-
-  // Momentum scrolling for Book carousel
-  const applyBookMomentum = () => {
-    if (Math.abs(bookVelocityRef.current) > 0.5) {
-      if (bookRef.current) {
-        bookRef.current.scrollLeft -= bookVelocityRef.current;
-      }
-      // Apply friction
-      bookVelocityRef.current *= 0.95;
-      bookMomentumRef.current = requestAnimationFrame(applyBookMomentum);
-    } else {
-      bookVelocityRef.current = 0;
-      if (bookMomentumRef.current) {
-        cancelAnimationFrame(bookMomentumRef.current);
-        bookMomentumRef.current = null;
-      }
-    }
-  };
-
-  // Drag handlers for Book carousel
-  const handleBookMouseDown = (e) => {
-    setIsBookDragging(true);
-    setIsBookPaused(true);
-    setBookStartX(e.pageX - bookRef.current.offsetLeft);
-    setBookScrollLeft(bookRef.current.scrollLeft);
-    bookRef.current.style.cursor = 'grabbing';
-    bookRef.current.style.scrollBehavior = 'auto';
-
-    // Cancel any ongoing momentum
-    if (bookMomentumRef.current) {
-      cancelAnimationFrame(bookMomentumRef.current);
-      bookMomentumRef.current = null;
-    }
-    bookVelocityRef.current = 0;
-    bookLastMoveRef.current = { x: e.pageX, time: Date.now() };
-  };
-
-  const handleBookMouseMove = (e) => {
-    if (!isBookDragging) return;
-    e.preventDefault();
-
-    const x = e.pageX - bookRef.current.offsetLeft;
-    const walk = (x - bookStartX) * 2.5; // Increased scroll speed multiplier
-    bookRef.current.scrollLeft = bookScrollLeft - walk;
-
-    // Calculate velocity for momentum
-    const now = Date.now();
-    const timeDelta = now - bookLastMoveRef.current.time;
-    if (timeDelta > 0) {
-      const distance = e.pageX - bookLastMoveRef.current.x;
-      bookVelocityRef.current = (distance / timeDelta) * 16; // Convert to per-frame velocity
-    }
-    bookLastMoveRef.current = { x: e.pageX, time: now };
-  };
-
-  const handleBookMouseUp = () => {
-    setIsBookDragging(false);
-    if (bookRef.current) {
-      bookRef.current.style.cursor = 'grab';
-    }
-
-    // Start momentum scrolling
-    if (Math.abs(bookVelocityRef.current) > 1) {
-      applyBookMomentum();
-    }
-  };
-
-  const handleBookMouseLeave = () => {
-    if (isBookDragging) {
-      setIsBookDragging(false);
-      if (bookRef.current) {
-        bookRef.current.style.cursor = 'grab';
-      }
-
-      // Start momentum scrolling on leave as well
-      if (Math.abs(bookVelocityRef.current) > 1) {
-        applyBookMomentum();
-      }
-    }
-  };
-
-  // Auto-scroll for Book carousel (reverse direction)
-  useEffect(() => {
-    const scrollContainer = bookRef.current;
-    if (!scrollContainer) return;
-
-    // Start from middle position for seamless loop
-    if (scrollContainer.scrollLeft === 0) {
-      scrollContainer.scrollLeft = scrollContainer.scrollWidth / 2;
-    }
-
-    const scroll = () => {
-      // Only auto-scroll if not paused, not dragging, and no momentum
-      if (!isBookPaused && !isBookDragging && !bookMomentumRef.current) {
-        scrollContainer.scrollLeft -= 1;
-
-        // Reset to middle when reaching beginning
-        if (scrollContainer.scrollLeft <= 0) {
-          scrollContainer.scrollLeft = scrollContainer.scrollWidth / 2;
-        }
-      }
-    };
-
-    const intervalId = setInterval(scroll, 20);
-    return () => clearInterval(intervalId);
-  }, [isBookPaused, isBookDragging]);
+  }, [reducedMotion]);
 
   return (
     <motion.main
@@ -461,37 +256,37 @@ const About = () => {
                   <div className="flex flex-col gap-3 w-[530px]">
                     {/* Top Row */}
                     <div className="flex gap-3">
-                      <div className={`bento-tile bento-tile-animated w-[187px] h-[248px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations[tileOrder.anime1?.name] ? `tile-${tileAnimations[tileOrder.anime1?.name]}` : ''} ${swappingTiles.includes('anime1') ? 'swapping' : ''}`} style={{ animationDelay: '0.1s' }}>
-                        <BlurImage src={tileOrder.anime1?.image} alt={tileOrder.anime1?.name} className="w-full h-full" />
+                      <div className={`bento-tile bento-tile-animated w-[187px] h-[248px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.anime1 ? `tile-${tileAnimations.anime1}` : ''} ${swappingTiles.includes('anime1') ? 'swapping' : ''}`} style={{ animationDelay: '0.1s' }}>
+                        <BlurImage src={tileOrder.anime1} alt="" className="w-full h-full" />
                       </div>
-                      <div className={`bento-tile bento-tile-animated flex-1 h-[248px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.festival?.name] ? `tile-${tileAnimations[tileOrder.festival?.name]}` : ''} ${swappingTiles.includes('festival') ? 'swapping' : ''}`} style={{ animationDelay: '0.2s' }}>
-                        <BlurImage src={tileOrder.festival?.image} alt={tileOrder.festival?.name} className="w-full h-full" />
+                      <div className={`bento-tile bento-tile-animated flex-1 h-[248px] rounded-lg overflow-hidden ${tileAnimations.festival ? `tile-${tileAnimations.festival}` : ''} ${swappingTiles.includes('festival') ? 'swapping' : ''}`} style={{ animationDelay: '0.2s' }}>
+                        <BlurImage src={tileOrder.festival} alt="" className="w-full h-full" />
                       </div>
                     </div>
 
                     {/* Bottom Row */}
                     <div className="flex gap-3">
                       <div className="flex flex-col gap-3 w-[320px]">
-                        <div className={`bento-tile bento-tile-animated w-full h-[205px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.jeep?.name] ? `tile-${tileAnimations[tileOrder.jeep?.name]}` : ''} ${swappingTiles.includes('jeep') ? 'swapping' : ''}`} style={{ animationDelay: '0.3s' }}>
-                          <BlurImage src={tileOrder.jeep?.image} alt={tileOrder.jeep?.name} className="w-full h-full" />
+                        <div className={`bento-tile bento-tile-animated w-full h-[205px] rounded-lg overflow-hidden ${tileAnimations.jeep ? `tile-${tileAnimations.jeep}` : ''} ${swappingTiles.includes('jeep') ? 'swapping' : ''}`} style={{ animationDelay: '0.3s' }}>
+                          <BlurImage src={tileOrder.jeep} alt="" className="w-full h-full" />
                         </div>
-                        <div className={`bento-tile bento-tile-animated bento-tile-pulse w-full h-[184px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.pingpong?.name] ? `tile-${tileAnimations[tileOrder.pingpong?.name]}` : ''} ${swappingTiles.includes('pingpong') ? 'swapping' : ''}`} style={{ animationDelay: '0.4s' }}>
-                          <BlurImage src={tileOrder.pingpong?.image} alt={tileOrder.pingpong?.name} className="w-full h-full" />
+                        <div className={`bento-tile bento-tile-animated bento-tile-pulse w-full h-[184px] rounded-lg overflow-hidden ${tileAnimations.pingpong ? `tile-${tileAnimations.pingpong}` : ''} ${swappingTiles.includes('pingpong') ? 'swapping' : ''}`} style={{ animationDelay: '0.4s' }}>
+                          <BlurImage src={tileOrder.pingpong} alt="" className="w-full h-full" />
                         </div>
                       </div>
-                      <div className={`bento-tile bento-tile-animated w-[198px] h-[401px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations[tileOrder.chess?.name] ? `tile-${tileAnimations[tileOrder.chess?.name]}` : ''} ${swappingTiles.includes('chess') ? 'swapping' : ''}`} style={{ animationDelay: '0.5s' }}>
-                        <BlurImage src={tileOrder.chess?.image} alt={tileOrder.chess?.name} className="w-full h-full" />
+                      <div className={`bento-tile bento-tile-animated w-[198px] h-[401px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.chess ? `tile-${tileAnimations.chess}` : ''} ${swappingTiles.includes('chess') ? 'swapping' : ''}`} style={{ animationDelay: '0.5s' }}>
+                        <BlurImage src={tileOrder.chess} alt="" className="w-full h-full" />
                       </div>
                     </div>
                   </div>
 
                   {/* Right Column */}
                   <div className="flex flex-col gap-3 w-[218px]">
-                    <div className={`bento-tile bento-tile-animated w-full h-[327px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.suit?.name] ? `tile-${tileAnimations[tileOrder.suit?.name]}` : ''} ${swappingTiles.includes('suit') ? 'swapping' : ''}`} style={{ animationDelay: '0.6s' }}>
-                      <BlurImage src={tileOrder.suit?.image} alt={tileOrder.suit?.name} className="w-full h-full" />
+                    <div className={`bento-tile bento-tile-animated w-full h-[327px] rounded-lg overflow-hidden ${tileAnimations.suit ? `tile-${tileAnimations.suit}` : ''} ${swappingTiles.includes('suit') ? 'swapping' : ''}`} style={{ animationDelay: '0.6s' }}>
+                      <BlurImage src={tileOrder.suit} alt="" className="w-full h-full" />
                     </div>
-                    <div className={`bento-tile bento-tile-animated bento-tile-pulse w-full h-[322px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.woman1?.name] ? `tile-${tileAnimations[tileOrder.woman1?.name]}` : ''} ${swappingTiles.includes('woman1') ? 'swapping' : ''}`} style={{ animationDelay: '0.7s' }}>
-                      <BlurImage src={tileOrder.woman1?.image} alt={tileOrder.woman1?.name} className="w-full h-full" />
+                    <div className={`bento-tile bento-tile-animated bento-tile-pulse w-full h-[322px] rounded-lg overflow-hidden ${tileAnimations.woman1 ? `tile-${tileAnimations.woman1}` : ''} ${swappingTiles.includes('woman1') ? 'swapping' : ''}`} style={{ animationDelay: '0.7s' }}>
+                      <BlurImage src={tileOrder.woman1} alt="" className="w-full h-full" />
                     </div>
                   </div>
                 </div>
@@ -500,37 +295,37 @@ const About = () => {
                 <div className="flex gap-3">
                   {/* Left Column */}
                   <div className="flex flex-col gap-3 w-[462px]">
-                    <div className={`bento-tile bento-tile-animated w-full h-[260px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.beach1?.name] ? `tile-${tileAnimations[tileOrder.beach1?.name]}` : ''} ${swappingTiles.includes('beach1') ? 'swapping' : ''}`} style={{ animationDelay: '0.8s' }}>
-                      <BlurImage src={tileOrder.beach1?.image} alt={tileOrder.beach1?.name} className="w-full h-full" />
+                    <div className={`bento-tile bento-tile-animated w-full h-[260px] rounded-lg overflow-hidden ${tileAnimations.beach1 ? `tile-${tileAnimations.beach1}` : ''} ${swappingTiles.includes('beach1') ? 'swapping' : ''}`} style={{ animationDelay: '0.8s' }}>
+                      <BlurImage src={tileOrder.beach1} alt="" className="w-full h-full" />
                     </div>
                     <div className="flex gap-3">
                       <div className="flex flex-col gap-3 w-[163px]">
-                        <div className={`bento-tile bento-tile-animated w-full h-[107px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.beach2?.name] ? `tile-${tileAnimations[tileOrder.beach2?.name]}` : ''} ${swappingTiles.includes('beach2') ? 'swapping' : ''}`} style={{ animationDelay: '0.9s' }}>
-                          <BlurImage src={tileOrder.beach2?.image} alt={tileOrder.beach2?.name} className="w-full h-full" />
+                        <div className={`bento-tile bento-tile-animated w-full h-[107px] rounded-lg overflow-hidden ${tileAnimations.beach2 ? `tile-${tileAnimations.beach2}` : ''} ${swappingTiles.includes('beach2') ? 'swapping' : ''}`} style={{ animationDelay: '0.9s' }}>
+                          <BlurImage src={tileOrder.beach2} alt="" className="w-full h-full" />
                         </div>
-                        <div className={`bento-tile bento-tile-animated bento-tile-pulse w-full h-[168px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.food?.name] ? `tile-${tileAnimations[tileOrder.food?.name]}` : ''} ${swappingTiles.includes('food') ? 'swapping' : ''}`} style={{ animationDelay: '1s' }}>
-                          <BlurImage src={tileOrder.food?.image} alt={tileOrder.food?.name} className="w-full h-full" />
+                        <div className={`bento-tile bento-tile-animated bento-tile-pulse w-full h-[168px] rounded-lg overflow-hidden ${tileAnimations.food ? `tile-${tileAnimations.food}` : ''} ${swappingTiles.includes('food') ? 'swapping' : ''}`} style={{ animationDelay: '1s' }}>
+                          <BlurImage src={tileOrder.food} alt="" className="w-full h-full" />
                         </div>
                       </div>
-                      <div className={`bento-tile bento-tile-animated w-[287px] h-[287px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations[tileOrder.woman2?.name] ? `tile-${tileAnimations[tileOrder.woman2?.name]}` : ''} ${swappingTiles.includes('woman2') ? 'swapping' : ''}`} style={{ animationDelay: '1.1s' }}>
-                        <BlurImage src={tileOrder.woman2?.image} alt={tileOrder.woman2?.name} className="w-full h-full" />
+                      <div className={`bento-tile bento-tile-animated w-[287px] h-[287px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.woman2 ? `tile-${tileAnimations.woman2}` : ''} ${swappingTiles.includes('woman2') ? 'swapping' : ''}`} style={{ animationDelay: '1.1s' }}>
+                        <BlurImage src={tileOrder.woman2} alt="" className="w-full h-full" />
                       </div>
                     </div>
-                    <div className={`bento-tile bento-tile-animated w-full h-[259px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.anime2?.name] ? `tile-${tileAnimations[tileOrder.anime2?.name]}` : ''} ${swappingTiles.includes('anime2') ? 'swapping' : ''}`} style={{ animationDelay: '1.2s' }}>
-                      <BlurImage src={tileOrder.anime2?.image} alt={tileOrder.anime2?.name} className="w-full h-full" />
+                    <div className={`bento-tile bento-tile-animated w-full h-[259px] rounded-lg overflow-hidden ${tileAnimations.anime2 ? `tile-${tileAnimations.anime2}` : ''} ${swappingTiles.includes('anime2') ? 'swapping' : ''}`} style={{ animationDelay: '1.2s' }}>
+                      <BlurImage src={tileOrder.anime2} alt="" className="w-full h-full" />
                     </div>
                   </div>
 
                   {/* Right Column */}
                   <div className="flex flex-col gap-3 w-[286px]">
-                    <div className={`bento-tile bento-tile-animated w-full h-[161px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.shooting?.name] ? `tile-${tileAnimations[tileOrder.shooting?.name]}` : ''} ${swappingTiles.includes('shooting') ? 'swapping' : ''}`} style={{ animationDelay: '1.3s' }}>
-                      <BlurImage src={tileOrder.shooting?.image} alt={tileOrder.shooting?.name} className="w-full h-full" />
+                    <div className={`bento-tile bento-tile-animated w-full h-[161px] rounded-lg overflow-hidden ${tileAnimations.shooting ? `tile-${tileAnimations.shooting}` : ''} ${swappingTiles.includes('shooting') ? 'swapping' : ''}`} style={{ animationDelay: '1.3s' }}>
+                      <BlurImage src={tileOrder.shooting} alt="" className="w-full h-full" />
                     </div>
-                    <div className={`bento-tile bento-tile-animated bento-tile-pulse w-full h-[430px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.tv?.name] ? `tile-${tileAnimations[tileOrder.tv?.name]}` : ''} ${swappingTiles.includes('tv') ? 'swapping' : ''}`} style={{ animationDelay: '1.4s' }}>
-                      <BlurImage src={tileOrder.tv?.image} alt={tileOrder.tv?.name} className="w-full h-full" />
+                    <div className={`bento-tile bento-tile-animated bento-tile-pulse w-full h-[430px] rounded-lg overflow-hidden ${tileAnimations.tv ? `tile-${tileAnimations.tv}` : ''} ${swappingTiles.includes('tv') ? 'swapping' : ''}`} style={{ animationDelay: '1.4s' }}>
+                      <BlurImage src={tileOrder.tv} alt="" className="w-full h-full" />
                     </div>
-                    <div className={`bento-tile bento-tile-animated w-full h-[215px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.anime3?.name] ? `tile-${tileAnimations[tileOrder.anime3?.name]}` : ''} ${swappingTiles.includes('anime3') ? 'swapping' : ''}`} style={{ animationDelay: '1.5s' }}>
-                      <BlurImage src={tileOrder.anime3?.image} alt={tileOrder.anime3?.name} className="w-full h-full" />
+                    <div className={`bento-tile bento-tile-animated w-full h-[215px] rounded-lg overflow-hidden ${tileAnimations.anime3 ? `tile-${tileAnimations.anime3}` : ''} ${swappingTiles.includes('anime3') ? 'swapping' : ''}`} style={{ animationDelay: '1.5s' }}>
+                      <BlurImage src={tileOrder.anime3} alt="" className="w-full h-full" />
                     </div>
                   </div>
                 </div>
@@ -543,11 +338,11 @@ const About = () => {
                 <div className="flex flex-col gap-3">
                   {/* Frame 1 */}
                   <div className="flex gap-3">
-                    <div className={`bento-tile bento-tile-animated w-[137px] h-[182px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations[tileOrder.anime1?.name] ? `tile-${tileAnimations[tileOrder.anime1?.name]}` : ''} ${swappingTiles.includes('anime1') ? 'swapping' : ''}`} style={{ animationDelay: '0.1s' }}>
-                      <BlurImage src={tileOrder.anime1?.image} alt={tileOrder.anime1?.name} className="w-full h-full" />
+                    <div className={`bento-tile bento-tile-animated w-[137px] h-[182px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.anime1 ? `tile-${tileAnimations.anime1}` : ''} ${swappingTiles.includes('anime1') ? 'swapping' : ''}`} style={{ animationDelay: '0.1s' }}>
+                      <BlurImage src={tileOrder.anime1} alt="" className="w-full h-full" />
                     </div>
-                    <div className={`bento-tile bento-tile-animated w-[241px] h-[182px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations[tileOrder.festival?.name] ? `tile-${tileAnimations[tileOrder.festival?.name]}` : ''} ${swappingTiles.includes('festival') ? 'swapping' : ''}`} style={{ animationDelay: '0.2s' }}>
-                      <BlurImage src={tileOrder.festival?.image} alt={tileOrder.festival?.name} className="w-full h-full" />
+                    <div className={`bento-tile bento-tile-animated w-[241px] h-[182px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.festival ? `tile-${tileAnimations.festival}` : ''} ${swappingTiles.includes('festival') ? 'swapping' : ''}`} style={{ animationDelay: '0.2s' }}>
+                      <BlurImage src={tileOrder.festival} alt="" className="w-full h-full" />
                     </div>
                   </div>
 
@@ -555,31 +350,31 @@ const About = () => {
                   <div className="flex gap-3">
                     {/* Frame 2 */}
                     <div className="flex flex-col gap-3">
-                      <div className={`bento-tile bento-tile-animated w-[216px] h-[121px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.beach1?.name] ? `tile-${tileAnimations[tileOrder.beach1?.name]}` : ''} ${swappingTiles.includes('beach1') ? 'swapping' : ''}`} style={{ animationDelay: '0.3s' }}>
-                        <BlurImage src={tileOrder.beach1?.image} alt={tileOrder.beach1?.name} className="w-full h-full" />
+                      <div className={`bento-tile bento-tile-animated w-[216px] h-[121px] rounded-lg overflow-hidden ${tileAnimations.beach1 ? `tile-${tileAnimations.beach1}` : ''} ${swappingTiles.includes('beach1') ? 'swapping' : ''}`} style={{ animationDelay: '0.3s' }}>
+                        <BlurImage src={tileOrder.beach1} alt="" className="w-full h-full" />
                       </div>
-                      <div className={`bento-tile bento-tile-animated w-[216px] h-[325px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.tv?.name] ? `tile-${tileAnimations[tileOrder.tv?.name]}` : ''} ${swappingTiles.includes('tv') ? 'swapping' : ''}`} style={{ animationDelay: '0.4s' }}>
-                        <BlurImage src={tileOrder.tv?.image} alt={tileOrder.tv?.name} className="w-full h-full" />
+                      <div className={`bento-tile bento-tile-animated w-[216px] h-[325px] rounded-lg overflow-hidden ${tileAnimations.tv ? `tile-${tileAnimations.tv}` : ''} ${swappingTiles.includes('tv') ? 'swapping' : ''}`} style={{ animationDelay: '0.4s' }}>
+                        <BlurImage src={tileOrder.tv} alt="" className="w-full h-full" />
                       </div>
                     </div>
                     {/* Frame 3 */}
                     <div className="flex flex-col gap-3">
-                      <div className={`bento-tile bento-tile-animated w-[162px] h-[283px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.chess?.name] ? `tile-${tileAnimations[tileOrder.chess?.name]}` : ''} ${swappingTiles.includes('chess') ? 'swapping' : ''}`} style={{ animationDelay: '0.5s' }}>
-                        <BlurImage src={tileOrder.chess?.image} alt={tileOrder.chess?.name} className="w-full h-full" />
+                      <div className={`bento-tile bento-tile-animated w-[162px] h-[283px] rounded-lg overflow-hidden ${tileAnimations.chess ? `tile-${tileAnimations.chess}` : ''} ${swappingTiles.includes('chess') ? 'swapping' : ''}`} style={{ animationDelay: '0.5s' }}>
+                        <BlurImage src={tileOrder.chess} alt="" className="w-full h-full" />
                       </div>
-                      <div className={`bento-tile bento-tile-animated w-[162px] h-[163px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.suit?.name] ? `tile-${tileAnimations[tileOrder.suit?.name]}` : ''} ${swappingTiles.includes('suit') ? 'swapping' : ''}`} style={{ animationDelay: '0.6s' }}>
-                        <BlurImage src={tileOrder.suit?.image} alt={tileOrder.suit?.name} className="w-full h-full" />
+                      <div className={`bento-tile bento-tile-animated w-[162px] h-[163px] rounded-lg overflow-hidden ${tileAnimations.suit ? `tile-${tileAnimations.suit}` : ''} ${swappingTiles.includes('suit') ? 'swapping' : ''}`} style={{ animationDelay: '0.6s' }}>
+                        <BlurImage src={tileOrder.suit} alt="" className="w-full h-full" />
                       </div>
                     </div>
                   </div>
 
                   {/* Frame 4 */}
                   <div className="flex gap-3">
-                    <div className={`bento-tile bento-tile-animated w-[147px] h-[148px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations[tileOrder.woman2?.name] ? `tile-${tileAnimations[tileOrder.woman2?.name]}` : ''} ${swappingTiles.includes('woman2') ? 'swapping' : ''}`} style={{ animationDelay: '0.7s' }}>
-                      <BlurImage src={tileOrder.woman2?.image} alt={tileOrder.woman2?.name} className="w-full h-full" />
+                    <div className={`bento-tile bento-tile-animated w-[147px] h-[148px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.woman2 ? `tile-${tileAnimations.woman2}` : ''} ${swappingTiles.includes('woman2') ? 'swapping' : ''}`} style={{ animationDelay: '0.7s' }}>
+                      <BlurImage src={tileOrder.woman2} alt="" className="w-full h-full" />
                     </div>
-                    <div className={`bento-tile bento-tile-animated w-[231px] h-[148px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations[tileOrder.jeep?.name] ? `tile-${tileAnimations[tileOrder.jeep?.name]}` : ''} ${swappingTiles.includes('jeep') ? 'swapping' : ''}`} style={{ animationDelay: '0.8s' }}>
-                      <BlurImage src={tileOrder.jeep?.image} alt={tileOrder.jeep?.name} className="w-full h-full" />
+                    <div className={`bento-tile bento-tile-animated w-[231px] h-[148px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.jeep ? `tile-${tileAnimations.jeep}` : ''} ${swappingTiles.includes('jeep') ? 'swapping' : ''}`} style={{ animationDelay: '0.8s' }}>
+                      <BlurImage src={tileOrder.jeep} alt="" className="w-full h-full" />
                     </div>
                   </div>
 
@@ -587,34 +382,34 @@ const About = () => {
                   <div className="flex gap-3">
                     {/* Frame 5 */}
                     <div className="flex flex-col gap-3">
-                      <div className={`bento-tile bento-tile-animated w-[226px] h-[130px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.pingpong?.name] ? `tile-${tileAnimations[tileOrder.pingpong?.name]}` : ''} ${swappingTiles.includes('pingpong') ? 'swapping' : ''}`} style={{ animationDelay: '0.9s' }}>
-                        <BlurImage src={tileOrder.pingpong?.image} alt={tileOrder.pingpong?.name} className="w-full h-full" />
+                      <div className={`bento-tile bento-tile-animated w-[226px] h-[130px] rounded-lg overflow-hidden ${tileAnimations.pingpong ? `tile-${tileAnimations.pingpong}` : ''} ${swappingTiles.includes('pingpong') ? 'swapping' : ''}`} style={{ animationDelay: '0.9s' }}>
+                        <BlurImage src={tileOrder.pingpong} alt="" className="w-full h-full" />
                       </div>
-                      <div className={`bento-tile bento-tile-animated w-[226px] h-[110px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.beach2?.name] ? `tile-${tileAnimations[tileOrder.beach2?.name]}` : ''} ${swappingTiles.includes('beach2') ? 'swapping' : ''}`} style={{ animationDelay: '1s' }}>
-                        <BlurImage src={tileOrder.beach2?.image} alt={tileOrder.beach2?.name} className="w-full h-full" />
+                      <div className={`bento-tile bento-tile-animated w-[226px] h-[110px] rounded-lg overflow-hidden ${tileAnimations.beach2 ? `tile-${tileAnimations.beach2}` : ''} ${swappingTiles.includes('beach2') ? 'swapping' : ''}`} style={{ animationDelay: '1s' }}>
+                        <BlurImage src={tileOrder.beach2} alt="" className="w-full h-full" />
                       </div>
-                      <div className={`bento-tile bento-tile-animated w-[226px] h-[127px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.anime2?.name] ? `tile-${tileAnimations[tileOrder.anime2?.name]}` : ''} ${swappingTiles.includes('anime2') ? 'swapping' : ''}`} style={{ animationDelay: '1.1s' }}>
-                        <BlurImage src={tileOrder.anime2?.image} alt={tileOrder.anime2?.name} className="w-full h-full" />
+                      <div className={`bento-tile bento-tile-animated w-[226px] h-[127px] rounded-lg overflow-hidden ${tileAnimations.anime2 ? `tile-${tileAnimations.anime2}` : ''} ${swappingTiles.includes('anime2') ? 'swapping' : ''}`} style={{ animationDelay: '1.1s' }}>
+                        <BlurImage src={tileOrder.anime2} alt="" className="w-full h-full" />
                       </div>
                     </div>
                     {/* Frame 6 */}
                     <div className="flex flex-col gap-3">
-                      <div className={`bento-tile bento-tile-animated w-[152px] h-[156px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.food?.name] ? `tile-${tileAnimations[tileOrder.food?.name]}` : ''} ${swappingTiles.includes('food') ? 'swapping' : ''}`} style={{ animationDelay: '1.2s' }}>
-                        <BlurImage src={tileOrder.food?.image} alt={tileOrder.food?.name} className="w-full h-full" />
+                      <div className={`bento-tile bento-tile-animated w-[152px] h-[156px] rounded-lg overflow-hidden ${tileAnimations.food ? `tile-${tileAnimations.food}` : ''} ${swappingTiles.includes('food') ? 'swapping' : ''}`} style={{ animationDelay: '1.2s' }}>
+                        <BlurImage src={tileOrder.food} alt="" className="w-full h-full" />
                       </div>
-                      <div className={`bento-tile bento-tile-animated w-[152px] h-[223px] rounded-lg overflow-hidden ${tileAnimations[tileOrder.woman1?.name] ? `tile-${tileAnimations[tileOrder.woman1?.name]}` : ''} ${swappingTiles.includes('woman1') ? 'swapping' : ''}`} style={{ animationDelay: '1.3s' }}>
-                        <BlurImage src={tileOrder.woman1?.image} alt={tileOrder.woman1?.name} className="w-full h-full" />
+                      <div className={`bento-tile bento-tile-animated w-[152px] h-[223px] rounded-lg overflow-hidden ${tileAnimations.woman1 ? `tile-${tileAnimations.woman1}` : ''} ${swappingTiles.includes('woman1') ? 'swapping' : ''}`} style={{ animationDelay: '1.3s' }}>
+                        <BlurImage src={tileOrder.woman1} alt="" className="w-full h-full" />
                       </div>
                     </div>
                   </div>
 
                   {/* Frame 7 */}
                   <div className="flex gap-3">
-                    <div className={`bento-tile bento-tile-animated w-[152px] h-[128px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations[tileOrder.anime3?.name] ? `tile-${tileAnimations[tileOrder.anime3?.name]}` : ''} ${swappingTiles.includes('anime3') ? 'swapping' : ''}`} style={{ animationDelay: '1.4s' }}>
-                      <BlurImage src={tileOrder.anime3?.image} alt={tileOrder.anime3?.name} className="w-full h-full" />
+                    <div className={`bento-tile bento-tile-animated w-[152px] h-[128px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.anime3 ? `tile-${tileAnimations.anime3}` : ''} ${swappingTiles.includes('anime3') ? 'swapping' : ''}`} style={{ animationDelay: '1.4s' }}>
+                      <BlurImage src={tileOrder.anime3} alt="" className="w-full h-full" />
                     </div>
-                    <div className={`bento-tile bento-tile-animated w-[227px] h-[128px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations[tileOrder.shooting?.name] ? `tile-${tileAnimations[tileOrder.shooting?.name]}` : ''} ${swappingTiles.includes('shooting') ? 'swapping' : ''}`} style={{ animationDelay: '1.5s' }}>
-                      <BlurImage src={tileOrder.shooting?.image} alt={tileOrder.shooting?.name} className="w-full h-full" />
+                    <div className={`bento-tile bento-tile-animated w-[227px] h-[128px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.shooting ? `tile-${tileAnimations.shooting}` : ''} ${swappingTiles.includes('shooting') ? 'swapping' : ''}`} style={{ animationDelay: '1.5s' }}>
+                      <BlurImage src={tileOrder.shooting} alt="" className="w-full h-full" />
                     </div>
                   </div>
                 </div>
@@ -636,15 +431,8 @@ const About = () => {
 
             {/* Carousel */}
             <div
-              ref={flexingRef}
-              onMouseEnter={() => setIsFlexingPaused(true)}
-              onMouseLeave={() => {
-                setIsFlexingPaused(false);
-                handleFlexingMouseLeave();
-              }}
-              onMouseDown={handleFlexingMouseDown}
-              onMouseMove={handleFlexingMouseMove}
-              onMouseUp={handleFlexingMouseUp}
+              ref={flexing.ref}
+              {...flexing.handlers}
               className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide cursor-grab select-none"
             >
               {/* Duplicate images for seamless loop */}
@@ -674,15 +462,8 @@ const About = () => {
 
             {/* Carousel */}
             <div
-              ref={bookRef}
-              onMouseEnter={() => setIsBookPaused(true)}
-              onMouseLeave={() => {
-                setIsBookPaused(false);
-                handleBookMouseLeave();
-              }}
-              onMouseDown={handleBookMouseDown}
-              onMouseMove={handleBookMouseMove}
-              onMouseUp={handleBookMouseUp}
+              ref={books.ref}
+              {...books.handlers}
               className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide cursor-grab select-none"
             >
               {/* Duplicate images for seamless loop */}
@@ -761,14 +542,17 @@ const About = () => {
       </div>
 
       {/* Toast Notification */}
-      {showToast && (
+      {toastMessage && (
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 50 }}
-          className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-light text-dark px-6 py-3 rounded-lg shadow-lg z-50"
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg z-50"
+          style={{ background: 'var(--site-fg)', color: 'var(--site-bg)' }}
         >
-          <p className="font-space font-bold text-base">Email copied!</p>
+          <p className="font-space font-bold text-base">
+            {toastMessage === 'Email copied!' ? toastMessage : `Copy failed. ${toastMessage}`}
+          </p>
         </motion.div>
       )}
     </motion.main>

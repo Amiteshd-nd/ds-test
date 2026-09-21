@@ -9,10 +9,15 @@ import Home from './pages/Home';
 import Works from './pages/Works';
 import About from './pages/About';
 import HoursOfService from './pages/projects/HoursOfService';
+import HoursOfServiceV2 from './pages/projects/HoursOfServiceV2';
 import VehicleHealth from './pages/projects/VehicleHealth';
+import VehicleHealthV2 from './pages/projects/VehicleHealthV2';
 import GazeboComplexOrganisms from './pages/projects/GazeboComplexOrganisms';
+import GazeboComplexOrganismsV2 from './pages/projects/GazeboComplexOrganismsV2';
 import VendingAnalytics from './pages/projects/VendingAnalytics';
+import VendingAnalyticsV2 from './pages/projects/VendingAnalyticsV2';
 import TeluguStreaming from './pages/projects/TeluguStreaming';
+import TeluguStreamingV2 from './pages/projects/TeluguStreamingV2';
 
 // Home 2.2 — the chat-native surface. Lazy so its canvas material and chat
 // bundle stay off the critical path for everyone landing on the classic home.
@@ -51,7 +56,7 @@ function App() {
     // to the OS setting. The CSS `@media (prefers-reduced-motion)` blocks in
     // themes.css only reach CSS animation — transforms driven from JS need this.
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen bg-dark text-light-DEFAULT">
+      <div className="min-h-screen site-bg site-fg">
         {/* Background Image Prefetcher */}
         <BackgroundLoader />
 
@@ -81,10 +86,15 @@ function App() {
             <Route path="/works" element={<Works />} />
             <Route path="/about" element={<About />} />
             <Route path="/projects/hours-of-service" element={<HoursOfService />} />
+            <Route path="/projects/hours-of-service-2" element={<HoursOfServiceV2 />} />
             <Route path="/projects/vehicle-health" element={<VehicleHealth />} />
+            <Route path="/projects/vehicle-health-2" element={<VehicleHealthV2 />} />
             <Route path="/projects/gazebo-complex-organisms" element={<GazeboComplexOrganisms />} />
+            <Route path="/projects/gazebo-complex-organisms-2" element={<GazeboComplexOrganismsV2 />} />
             <Route path="/projects/vending-analytics" element={<VendingAnalytics />} />
+            <Route path="/projects/vending-analytics-2" element={<VendingAnalyticsV2 />} />
             <Route path="/projects/telugu-streaming" element={<TeluguStreaming />} />
+            <Route path="/projects/telugu-streaming-2" element={<TeluguStreamingV2 />} />
             <Route
               path="/game/bangalore-times"
               element={

@@ -1,0 +1,225 @@
+/*
+ * Case study 2.0 — the shared material for the rewritten project pages.
+ *
+ * The v1 project pages are white with blue-grey cards. This is a different
+ * argument: warm bone paper, near-black ink, hairline rules instead of card
+ * boxes, and exactly one accent that is spent on data and active state.
+ *
+ * Read `--accent` as a rationed resource. If it is decorating something, it is
+ * in the wrong place.
+ */
+
+@import '@cloud-march/motion/tokens.css';
+
+.case {
+  /* Ground */
+  --paper: #f7f5f0;
+  --panel: #ffffff;
+  --sunk: #f1eee7;
+
+  /* Ink. Three levels, and no more — a fourth grey is always a mistake. */
+  --ink: #16181d;
+  --ink-2: #4a4f5a;
+  --ink-3: #7c828f;
+
+  /* Structure. Rules do the work that cards do on the v1 pages. */
+  --rule: #e3dfd6;
+  --rule-strong: #cdc6b8;
+
+  /* The one accent. 4.75:1 on paper, so it is legal down to body size. */
+  --accent: #c2410c;
+  --accent-wash: #fbeee6;
+
+  --measure: 680px;
+  --gutter: 24px;
+
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Outfit', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (min-width: 768px) {
+  .case {
+    --gutter: 40px;
+  }
+}
+
+/* ---------------------------------------------------------------- type --- */
+
+.case-kicker {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.case-kicker--accent {
+  color: var(--accent);
+}
+
+/* Product names carry their own casing. "Driveri" is not "DRIVERI". */
+.case-kicker--cased {
+  text-transform: none;
+  letter-spacing: 0.06em;
+}
+
+.case-display {
+  font-family: 'Roboto Slab', serif;
+  font-weight: 500;
+  font-size: clamp(34px, 7vw, 60px);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.case-h2 {
+  font-family: 'Roboto Slab', serif;
+  font-weight: 500;
+  font-size: clamp(24px, 4vw, 34px);
+  line-height: 1.14;
+  letter-spacing: -0.028em;
+  color: var(--ink);
+}
+
+.case-h3 {
+  font-family: 'Roboto Slab', serif;
+  font-weight: 500;
+  font-size: clamp(18px, 2.6vw, 22px);
+  line-height: 1.24;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.case-lede {
+  font-size: clamp(17px, 2.4vw, 21px);
+  line-height: 1.5;
+  letter-spacing: -0.015em;
+  color: var(--ink-2);
+  max-width: 34ch;
+  text-wrap: pretty;
+}
+
+.case-body {
+  font-size: 16px;
+  line-height: 1.62;
+  letter-spacing: -0.008em;
+  color: var(--ink-2);
+  max-width: 62ch;
+  text-wrap: pretty;
+}
+
+.case-body strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.case-caption {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--ink-3);
+}
+
+.case-data {
+  font-family: 'Roboto Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ----------------------------------------------------------- structure --- */
+
+.case-rule {
+  height: 1px;
+  background: var(--rule);
+  border: 0;
+  width: 100%;
+}
+
+.case-shell {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+}
+
+/* The reading column. Wider than the 62ch measure so figures can breathe,
+   but the running text inside still holds its own measure. */
+.case-column {
+  max-width: var(--measure);
+}
+
+/* A figure that steps out past the reading column on wide screens. The page
+   has exactly two widths, and this is the second one. */
+.case-wide {
+  max-width: 1080px;
+}
+
+/* ----------------------------------------------------------- surfaces --- */
+
+/* Jakub's rule: a shadow adapts where a border clashes. These sit on paper,
+   so they get a hairline plus the faintest lift, never a heavy card. */
+.case-panel {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+}
+
+.case-panel--sunk {
+  background: var(--sunk);
+  border-color: transparent;
+}
+
+.case-figure {
+  background: var(--sunk);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* ------------------------------------------------------------- states --- */
+
+.case-link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--rule-strong);
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--motion-duration-quick) var(--motion-ease-out);
+}
+
+.case-link:hover {
+  text-decoration-color: var(--accent);
+}
+
+.case-focus:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* The one connector in a lifecycle that used to drop things. Dashed rather than
+   solid, because the point is that the link was not reliable. A border cannot do
+   this on a 1px element (border-box eats the whole height), so it is a gradient,
+   and the direction follows the rail: down the page on a phone, across it above. */
+.case-link-broken {
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--accent) 0 4px,
+    transparent 4px 9px
+  ) !important;
+}
+
+@media (min-width: 640px) {
+  .case-link-broken {
+    background: repeating-linear-gradient(
+      to right,
+      var(--accent) 0 4px,
+      transparent 4px 9px
+    ) !important;
+  }
+}
+
+/* Marquee-free, loop-free. Nothing on this page moves on its own. */

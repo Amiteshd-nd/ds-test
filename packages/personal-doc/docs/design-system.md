@@ -149,6 +149,37 @@ colours the guide lists: the "listening" state and the live dot are the same
 blue as everything else, because a fifth colour is the thing the style exists
 to remove.
 
+## 2b. Light, dark, and the site toggle
+
+Every theme now declares a `mode` in the registry: `glass` and `pixel` are dark,
+the other eleven are light. CSS knows each theme's ground colour but cannot say
+which side of the line it falls on, and the site-wide light/dark toggle needs
+exactly that, so it lives in `themes.js` next to the other things CSS cannot
+express.
+
+The toggle and the drawer are two controls over one state, and they write to
+each other:
+
+- **The toggle is the mode control.** Flipping it moves to a theme of that mode:
+  the last one used in this session, or `DEFAULT_BY_MODE` (`glass` / `min`).
+- **The drawer is the theme control.** Picking Magazine is a choice of a light
+  theme, so the toggle follows it to light.
+
+They talk over a `site-theme-change` window event rather than shared state, so
+`useSiteTheme` does not have to know this page exists.
+
+**On load, the site-wide choice outranks the remembered theme.** The other way
+round is worse than it sounds: someone who set the site to light, and whose last
+theme here was Liquid Glass, would land on this page and have it quietly flip
+the whole site back to dark. It opens in the light member instead, and the
+drawer is right there.
+
+`min` is the light default rather than `real` because someone flipping a toggle
+wants a plainly light page, not an opinion. `real` is arguably the truer pair
+for `glass`, being the only other theme that leaves the cube refractive.
+
+---
+
 ## 3. The layers
 
 ```

@@ -5,6 +5,21 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Amitesh Debnath | Portfolio</title>
+    <!-- Set the theme before first paint, so a visitor who chose light never
+         sees a frame of dark. Deliberately inline and dependency free. -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('site-theme');
+          var light = stored
+            ? stored === 'light'
+            : window.matchMedia('(prefers-color-scheme: light)').matches;
+          document.documentElement.dataset.siteTheme = light ? 'light' : 'dark';
+        } catch (e) {
+          document.documentElement.dataset.siteTheme = 'dark';
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

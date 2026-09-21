@@ -9,6 +9,7 @@ import TypedHeadline from '../components/chat/TypedHeadline';
 import Transcript from '../components/chat/Transcript';
 import { IconArrowDown, IconNew } from '../components/chat/Icons';
 import { ThemeProvider, ThemeSwitcher, useTheme } from '../design';
+import ThemeToggle from '../components/ThemeToggle';
 import { respond } from '../lib/portfolioBrain';
 import '../styles/liquid-glass.css';
 
@@ -289,6 +290,10 @@ function ChatSurface() {
           {/* The appearance control. It keeps the prism pill the Home button
               used — same component, same slot — and owns its own breakpoint
               pair internally. */}
+          <ThemeToggle
+            className="lg-surface-flat lg-focus text-white/70 hover:text-white"
+            color="currentColor"
+          />
           <ThemeSwitcher />
         </div>
       </header>

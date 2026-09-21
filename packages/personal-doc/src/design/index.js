@@ -5,4 +5,4 @@
 export { ThemeProvider } from './ThemeProvider';
 export { useTheme } from './useTheme';
 export { default as ThemeSwitcher } from './ThemeSwitcher';
-export { DEFAULT_THEME, THEMES, getTheme, isTheme } from './themes';
+export { DEFAULT_THEME, DEFAULT_BY_MODE, THEMES, getTheme, isTheme } from './themes';

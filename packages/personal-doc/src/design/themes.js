@@ -6,6 +6,9 @@
  *
  * What does live here is everything CSS cannot express:
  *   - metadata for the theme picker (name, hint, swatch)
+ *   - `mode`, whether the theme's ground is light or dark. CSS knows the
+ *     ground colour but cannot tell you which side of the line it falls on,
+ *     and the site-wide light/dark toggle needs exactly that to pick a member.
  *   - `material`, the handful of numbers the WebGL cube needs as uniforms
  *   - `fonts`, a stylesheet the provider loads only while the theme is active,
  *     so a face nobody has selected is never downloaded.
@@ -16,9 +19,19 @@
 
 export const STORAGE_KEY = 'ad:home-2.2:theme';
 
+/* Which theme the site-wide light/dark toggle lands on for each mode.
+ *
+ * Dark keeps the default. Light is Minimal & Direct because it is the neutral
+ * counterpart: someone flipping a toggle wants a plainly light version of the
+ * page, not an opinion. `real` is arguably the truer pair for `glass` (it is
+ * the only other theme that leaves the cube refractive), but it is a strong
+ * look to hand someone who only asked for light. The drawer is still there. */
+export const DEFAULT_BY_MODE = { dark: 'glass', light: 'min' };
+
 export const THEMES = [
   {
     id: 'glass',
+    mode: 'dark',
     name: 'Liquid Glass',
     hint: 'Dark, refractive, blurred',
     icon: 'glass',
@@ -29,6 +42,7 @@ export const THEMES = [
   },
   {
     id: 'neo',
+    mode: 'light',
     name: 'Neo Brutalism',
     hint: 'Flat ink, hard shadows',
     icon: 'slab',
@@ -39,6 +53,7 @@ export const THEMES = [
   },
   {
     id: 'gba',
+    mode: 'light',
     name: '16-Bit Handheld',
     hint: 'Chunky pixels, sunlit',
     icon: 'pixel',
@@ -50,6 +65,7 @@ export const THEMES = [
   },
   {
     id: 'neub',
+    mode: 'light',
     name: 'Neubrutalism',
     hint: 'Primary colours, no radius',
     icon: 'blocks',
@@ -63,6 +79,7 @@ export const THEMES = [
   },
   {
     id: 'brutal',
+    mode: 'light',
     name: 'Brutalism',
     hint: 'Raw, mono, no shadow',
     icon: 'raw',
@@ -74,6 +91,7 @@ export const THEMES = [
   },
   {
     id: 'min',
+    mode: 'light',
     name: 'Minimal & Direct',
     hint: 'One column, all whitespace',
     icon: 'measure',
@@ -86,6 +104,7 @@ export const THEMES = [
   },
   {
     id: 'chaos',
+    mode: 'light',
     name: 'Maximalism',
     hint: 'Stickers, tilt, overprint',
     icon: 'chaos',
@@ -97,6 +116,7 @@ export const THEMES = [
   },
   {
     id: 'raw',
+    mode: 'light',
     name: 'Anti-Polish / Raw',
     hint: 'Paper, sketch, unfinished',
     icon: 'sketch',
@@ -108,6 +128,7 @@ export const THEMES = [
   },
   {
     id: 'mag',
+    mode: 'light',
     name: 'Magazine',
     hint: 'Rules, kickers, drop caps',
     icon: 'columns',
@@ -119,6 +140,7 @@ export const THEMES = [
   },
   {
     id: 'swiss',
+    mode: 'light',
     name: 'Swiss International',
     hint: 'Grid, air, numerals',
     icon: 'swiss',
@@ -131,6 +153,7 @@ export const THEMES = [
   },
   {
     id: 'real',
+    mode: 'light',
     name: 'Realism',
     hint: 'Keycaps, paper, metal',
     icon: 'keycap',
@@ -144,6 +167,7 @@ export const THEMES = [
   },
   {
     id: 'y2k',
+    mode: 'light',
     name: 'Y2K',
     hint: 'Chrome, bubblegum, gloss',
     icon: 'chrome',
@@ -156,6 +180,7 @@ export const THEMES = [
   },
   {
     id: 'pixel',
+    mode: 'dark',
     name: 'Pixel Art',
     hint: 'PICO-8 palette, dark canvas',
     icon: 'sprite',

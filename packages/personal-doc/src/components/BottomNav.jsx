@@ -31,18 +31,21 @@ const BottomNav = () => {
       transition={{ duration: 0.35, ease: "easeInOut" }}
       className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50"
     >
-      <div className="flex items-center gap-1 p-2 bg-dark-nav backdrop-blur-lg rounded-nav">
-        {navItems.map((item, index) => (
+      <div
+        className="flex items-center gap-1 p-2 backdrop-blur-lg rounded-nav"
+        style={{ background: 'var(--site-nav)', border: '1px solid var(--site-line)' }}
+      >
+        {navItems.map((item) => (
           <NavLink
             key={item.name}
             to={item.path}
-            className={({ isActive }) =>
-              `w-[100px] md:w-[150px] px-6 py-3 rounded-nav-item transition-all duration-300 flex items-center justify-center ${
-                isActive
-                  ? 'bg-light text-ui-gray'
-                  : 'text-light hover:bg-light/10'
-              }`
-            }
+            className="w-[100px] md:w-[150px] px-6 py-3 rounded-nav-item transition-all duration-300 flex items-center justify-center"
+            style={({ isActive }) => ({
+              /* The active pill inverts against the theme; the rest sit in the
+                 secondary ink so they stay legible on either ground. */
+              background: isActive ? 'var(--site-fg)' : 'transparent',
+              color: isActive ? 'var(--site-bg)' : 'var(--site-fg-2)',
+            })}
           >
             {({ isActive }) => (
               <motion.span
