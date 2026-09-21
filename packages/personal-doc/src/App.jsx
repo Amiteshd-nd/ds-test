@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation, Link } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, MotionConfig } from '@cloud-march/motion/react';
 import { useEffect, lazy, Suspense } from 'react';
 import ReactGA from 'react-ga4';
@@ -18,6 +18,7 @@ import VendingAnalytics from './pages/projects/VendingAnalytics';
 import VendingAnalyticsV2 from './pages/projects/VendingAnalyticsV2';
 import TeluguStreaming from './pages/projects/TeluguStreaming';
 import TeluguStreamingV2 from './pages/projects/TeluguStreamingV2';
+import BangaloreTimesComingSoon from './pages/BangaloreTimesComingSoon';
 
 // Home 2.2 — the chat-native surface. Lazy so its canvas material and chat
 // bundle stay off the critical path for everyone landing on the classic home.
@@ -26,11 +27,8 @@ const HomeV22 = lazy(() => import('./pages/HomeV22'));
 // Museum renders the same live canvases, so it is split out for the same reason.
 const Museum = lazy(() => import('./pages/Museum'));
 
-// Lazy-loaded from the game package so Phaser (~1MB) only downloads when the
-// game route is opened.
-const BangaloreTimes = lazy(() =>
-  import('@cloud-march/game').then((m) => ({ default: m.BangaloreTimes })),
-);
+// The Bangalore Times build is parked behind a holding screen, so the game
+// package is deliberately not imported here and Phaser stays out of the bundle.
 
 const FULL_SHELL_ROUTES = ['/home-2.2', '/museum'];
 
@@ -95,14 +93,7 @@ function App() {
             <Route path="/projects/vending-analytics-2" element={<VendingAnalyticsV2 />} />
             <Route path="/projects/telugu-streaming" element={<TeluguStreaming />} />
             <Route path="/projects/telugu-streaming-2" element={<TeluguStreamingV2 />} />
-            <Route
-              path="/game/bangalore-times"
-              element={
-                <Suspense fallback={<div className="fixed inset-0 bg-[#0e0f13]" />}>
-                  <BangaloreTimes backSlot={<Link to="/works">← Back</Link>} />
-                </Suspense>
-              }
-            />
+            <Route path="/game/bangalore-times" element={<BangaloreTimesComingSoon />} />
           </Routes>
         </AnimatePresence>
 
