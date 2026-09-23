@@ -51,7 +51,8 @@
         "personal-doc",
         "dev"
       ],
-      "port": 6173
+      "port": 6173,
+      "autoPort": false
     },
     {
       "name": "discovery",
