@@ -62,6 +62,16 @@ impl History {
     fn push(&mut self, commit: Commit) {
         self.commits.push(commit);
     }
+
+    /// Abandon everything after `n`.
+    ///
+    /// The one place the log is not append-only, and it exists for a single reason:
+    /// committing after an undo. The abandoned commits are unreachable from the new head
+    /// exactly as they are in git after a reset, and keeping them would mean `history()`
+    /// listing commits that are not in the document.
+    fn truncate_to(&mut self, n: usize) {
+        self.commits.truncate(n);
+    }
 }
 
 /// The authoritative side: validates, applies, sequences. One per document.
@@ -73,6 +83,14 @@ impl History {
 pub struct Sequencer {
     doc: Document,
     history: History,
+    /// The document this sequencer was opened on, before any commit in `history`.
+    ///
+    /// Undo is rebuild-and-replay, and replaying from an empty document would be wrong
+    /// for a sequencer opened on a server snapshot. This is the replay base.
+    base: Document,
+    /// How many of `history`'s commits are applied to `doc`. Equal to `history.len()`
+    /// unless something has been undone.
+    applied: usize,
 }
 
 impl Default for Sequencer {
@@ -84,8 +102,10 @@ impl Default for Sequencer {
 impl Sequencer {
     pub fn new(doc: Document) -> Self {
         Sequencer {
+            base: doc.clone(),
             doc,
             history: History::new(),
+            applied: 0,
         }
     }
 
@@ -97,8 +117,75 @@ impl Sequencer {
         &self.history
     }
 
+    /// The commit the document currently reflects.
+    ///
+    /// Not `history.head()`: after an undo the tip of the log is not what is applied, and
+    /// a commit parented to it would claim to follow a state the document is not in.
     pub fn head(&self) -> CommitId {
-        self.history.head()
+        match self.applied.checked_sub(1) {
+            Some(i) => self.history.commits[i].id(),
+            None => CommitId::ROOT,
+        }
+    }
+
+    /// How many commits are applied. Differs from `history().len()` after an undo.
+    pub fn applied(&self) -> usize {
+        self.applied
+    }
+
+    pub fn can_undo(&self) -> bool {
+        self.applied > 0
+    }
+
+    pub fn can_redo(&self) -> bool {
+        self.applied < self.history.len()
+    }
+
+    /// Step back one commit.
+    ///
+    /// **Rebuild-and-replay, not inverse ops.** This crate's module docs already argue the
+    /// point for rejection: inverse ops "would be a second, subtly different
+    /// implementation of every mutation — the exact kind of code that drifts out of sync
+    /// with `apply` and then corrupts a document six months later". Undo has the same
+    /// shape and the same answer, and the cost is replaying a few dozen commits against
+    /// pure validation.
+    ///
+    /// The consequence worth knowing: this is O(n) in history length. For a drafting
+    /// session that is nothing. If it ever matters, the fix is a periodic snapshot to
+    /// replay from, not an inverse of every op.
+    pub fn undo(&mut self) -> bool {
+        if !self.can_undo() {
+            return false;
+        }
+        self.applied -= 1;
+        self.rebuild();
+        true
+    }
+
+    /// Step forward one commit, if a later one is still reachable.
+    pub fn redo(&mut self) -> bool {
+        if !self.can_redo() {
+            return false;
+        }
+        self.applied += 1;
+        self.rebuild();
+        true
+    }
+
+    /// Replay the applied prefix onto the base document.
+    ///
+    /// Every commit goes back through `check`, so a replay cannot produce a document that
+    /// validation would have refused. A commit that no longer validates is dropped rather
+    /// than panicking: that is the same rule `LocalSession` follows when the server
+    /// rejects something underneath a queue of pending work.
+    fn rebuild(&mut self) {
+        let mut doc = self.base.clone();
+        for commit in self.history.commits.iter().take(self.applied) {
+            if let Ok(proof) = check(&doc, commit.ops()) {
+                let _ = doc.apply(proof);
+            }
+        }
+        self.doc = doc;
     }
 
     /// Validate and apply. Conflicting commits apply in arrival order (PRD §4.4), so a
@@ -108,6 +195,13 @@ impl Sequencer {
     pub fn submit(&mut self, commit: Commit) -> Result<Commit, CommitError> {
         if !commit.verify_id() {
             return Err(CommitError::Tampered(commit.id()));
+        }
+
+        // Committing after an undo abandons whatever was undone, which is what every
+        // editor does and what git does on a reset. Keeping those commits in the log
+        // would mean `history()` listing work that is not in the document.
+        if self.applied < self.history.len() {
+            self.history.truncate_to(self.applied);
         }
 
         let sequenced = if commit.parent() == self.head() {
@@ -128,6 +222,7 @@ impl Sequencer {
             .expect("proof is fresh; a failure here is a bug in Sequencer");
 
         self.history.push(sequenced.clone());
+        self.applied = self.history.len();
         Ok(sequenced)
     }
 }

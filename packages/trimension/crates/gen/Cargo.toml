@@ -1,0 +1,23 @@
+[package]
+name = "tri-gen"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+tri-doc = { workspace = true }
+tri-params = { workspace = true }
+tri-commit = { workspace = true }
+tri-geom2d = { workspace = true }
+tri-solid = { workspace = true }
+tri-rules = { workspace = true }
+tri-vaastu = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+tri-render = { workspace = true }
+pollster = "0.4"

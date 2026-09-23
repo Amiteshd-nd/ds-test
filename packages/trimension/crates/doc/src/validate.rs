@@ -97,7 +97,7 @@ pub enum Violation {
     /// I4: a provenance record with no explanation is worse than none, because it looks
     /// like diligence.
     EmptyProvenanceReason {
-        field: &'static str,
+        field: String,
     },
     /// An `Opening` whose host is not a wall, or does not exist.
     OpeningHostInvalid {
@@ -402,7 +402,7 @@ fn check_op(doc: &Document, sh: &mut Shadow, op: &Op, out: &mut Vec<Violation>) 
         Op::RecordImport { record } => {
             if record.unit_scale.reason().trim().is_empty() {
                 out.push(Violation::EmptyProvenanceReason {
-                    field: "import.unit_scale",
+                    field: "import.unit_scale".to_string(),
                 });
             }
         }

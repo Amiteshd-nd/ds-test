@@ -1,0 +1,18 @@
+[package]
+name = "tri-vaastu"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+# NOTE: `tri-gen` is deliberately absent, and must stay absent.
+#
+# The PRD is explicit that Vaastu "ranks and biases options; it never blocks generation".
+# That is not a rule anybody has to remember here: this crate cannot name `TemplateError`,
+# `SelectError` or any other refusal, so the strongest thing it can return is a number and
+# some sentences. `tri-gen` depends on this crate and not the other way round, which is the
+# same shape `tri-rules` uses to keep a bylaw from reaching `commit::validate`.
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }

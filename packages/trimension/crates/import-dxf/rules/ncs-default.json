@@ -5,9 +5,35 @@
   "heal_tolerance_mm": 5,
   "rules": [
     {
+      "id": "ignored.layer.reference",
+      "because": "hatch outlines and room boundaries restate geometry that is already drawn; importing them again would count every wall and room twice",
+      "match": {
+        "on": "any",
+        "value": [
+          {
+            "on": "layer",
+            "how": "glob",
+            "value": "*-PATT*"
+          },
+          {
+            "on": "layer",
+            "how": "glob",
+            "value": "*-FURN*"
+          }
+        ]
+      },
+      "becomes": "ignored",
+      "weight": 500,
+      "confidence": "strong"
+    },
+    {
       "id": "wall.layer.ncs",
       "because": "layer name matches the NCS wall convention (A-WALL*)",
-      "match": { "on": "layer", "how": "glob", "value": "*-WALL*" },
+      "match": {
+        "on": "layer",
+        "how": "glob",
+        "value": "*-WALL*"
+      },
       "becomes": "wall",
       "weight": 400,
       "confidence": "strong"
@@ -15,7 +41,11 @@
     {
       "id": "wall.layer.plain",
       "because": "layer is literally named WALL",
-      "match": { "on": "layer", "how": "equals", "value": "WALL" },
+      "match": {
+        "on": "layer",
+        "how": "equals",
+        "value": "WALL"
+      },
       "becomes": "wall",
       "weight": 400,
       "confidence": "strong"
@@ -23,7 +53,11 @@
     {
       "id": "door.layer.ncs",
       "because": "layer name matches the NCS door convention (A-DOOR*)",
-      "match": { "on": "layer", "how": "glob", "value": "*-DOOR*" },
+      "match": {
+        "on": "layer",
+        "how": "glob",
+        "value": "*-DOOR*"
+      },
       "becomes": "door",
       "weight": 400,
       "confidence": "strong"
@@ -31,7 +65,11 @@
     {
       "id": "window.layer.ncs",
       "because": "layer name matches the NCS glazing convention (A-GLAZ*)",
-      "match": { "on": "layer", "how": "glob", "value": "*-GLAZ*" },
+      "match": {
+        "on": "layer",
+        "how": "glob",
+        "value": "*-GLAZ*"
+      },
       "becomes": "window",
       "weight": 400,
       "confidence": "strong"
@@ -39,7 +77,11 @@
     {
       "id": "window.layer.plain",
       "because": "layer name contains WINDOW",
-      "match": { "on": "layer", "how": "contains", "value": "WINDOW" },
+      "match": {
+        "on": "layer",
+        "how": "contains",
+        "value": "WINDOW"
+      },
       "becomes": "window",
       "weight": 390,
       "confidence": "strong"
@@ -47,7 +89,11 @@
     {
       "id": "annotation.layer.ncs",
       "because": "NCS annotation group (A-ANNO*), including text and dimensions",
-      "match": { "on": "layer", "how": "glob", "value": "*-ANNO*" },
+      "match": {
+        "on": "layer",
+        "how": "glob",
+        "value": "*-ANNO*"
+      },
       "becomes": "annotation",
       "weight": 400,
       "confidence": "strong"
@@ -58,9 +104,21 @@
       "match": {
         "on": "any",
         "value": [
-          { "on": "layer", "how": "glob", "value": "*-GRID*" },
-          { "on": "layer", "how": "equals", "value": "DEFPOINTS" },
-          { "on": "layer", "how": "glob", "value": "*VIEWPORT*" }
+          {
+            "on": "layer",
+            "how": "glob",
+            "value": "*-GRID*"
+          },
+          {
+            "on": "layer",
+            "how": "equals",
+            "value": "DEFPOINTS"
+          },
+          {
+            "on": "layer",
+            "how": "glob",
+            "value": "*VIEWPORT*"
+          }
         ]
       },
       "becomes": "ignored",
@@ -73,13 +131,28 @@
       "match": {
         "on": "all",
         "value": [
-          { "on": "geometry", "value": "is_block_reference" },
+          {
+            "on": "geometry",
+            "value": "is_block_reference"
+          },
           {
             "on": "any",
             "value": [
-              { "on": "block_name", "how": "contains", "value": "DOOR" },
-              { "on": "block_name", "how": "starts_with", "value": "D-" },
-              { "on": "block_name", "how": "glob", "value": "DR?*" }
+              {
+                "on": "block_name",
+                "how": "contains",
+                "value": "DOOR"
+              },
+              {
+                "on": "block_name",
+                "how": "starts_with",
+                "value": "D-"
+              },
+              {
+                "on": "block_name",
+                "how": "glob",
+                "value": "DR?*"
+              }
             ]
           }
         ]
@@ -94,12 +167,23 @@
       "match": {
         "on": "all",
         "value": [
-          { "on": "geometry", "value": "is_block_reference" },
+          {
+            "on": "geometry",
+            "value": "is_block_reference"
+          },
           {
             "on": "any",
             "value": [
-              { "on": "block_name", "how": "contains", "value": "WIN" },
-              { "on": "block_name", "how": "contains", "value": "GLAZ" }
+              {
+                "on": "block_name",
+                "how": "contains",
+                "value": "WIN"
+              },
+              {
+                "on": "block_name",
+                "how": "contains",
+                "value": "GLAZ"
+              }
             ]
           }
         ]
@@ -111,7 +195,10 @@
     {
       "id": "annotation.text",
       "because": "text and mtext entities are annotation wherever they sit",
-      "match": { "on": "geometry", "value": "is_text" },
+      "match": {
+        "on": "geometry",
+        "value": "is_text"
+      },
       "becomes": "annotation",
       "weight": 250,
       "confidence": "strong"
@@ -122,9 +209,21 @@
       "match": {
         "on": "any",
         "value": [
-          { "on": "line_type", "how": "contains", "value": "DASHED" },
-          { "on": "line_type", "how": "contains", "value": "CENTER" },
-          { "on": "line_type", "how": "contains", "value": "HIDDEN" }
+          {
+            "on": "line_type",
+            "how": "contains",
+            "value": "DASHED"
+          },
+          {
+            "on": "line_type",
+            "how": "contains",
+            "value": "CENTER"
+          },
+          {
+            "on": "line_type",
+            "how": "contains",
+            "value": "HIDDEN"
+          }
         ]
       },
       "becomes": "ignored",
@@ -137,8 +236,15 @@
       "match": {
         "on": "all",
         "value": [
-          { "on": "line_weight_at_least", "value": 50 },
-          { "on": "geometry", "value": "longer_than_mm", "extra": 0 }
+          {
+            "on": "line_weight_at_least",
+            "value": 50
+          },
+          {
+            "on": "geometry",
+            "value": "longer_than_mm",
+            "extra": 0
+          }
         ]
       },
       "becomes": "wall",
@@ -151,8 +257,15 @@
       "match": {
         "on": "all",
         "value": [
-          { "on": "geometry", "value": "open_two_point" },
-          { "on": "geometry", "value": "longer_than_mm", "extra": 800 }
+          {
+            "on": "geometry",
+            "value": "open_two_point"
+          },
+          {
+            "on": "geometry",
+            "value": "longer_than_mm",
+            "extra": 800
+          }
         ]
       },
       "becomes": "wall",

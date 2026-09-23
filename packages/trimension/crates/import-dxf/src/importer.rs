@@ -23,6 +23,13 @@ pub struct EntityFacts {
     pub point_count: usize,
     /// Total length in µm, already unit-scaled.
     pub length_um: i64,
+    /// A polyline's constant width, in µm, when the file states one.
+    ///
+    /// DXF carries this on `LWPOLYLINE`, and drafters use it for exactly what it looks
+    /// like: a line that represents something of a known thickness. When it is present
+    /// the wall thickness is *read* rather than inferred from the gap between two
+    /// parallel lines, which is the difference between `Measured` and `Inferred`.
+    pub constant_width_um: i64,
 }
 
 pub trait Importer {

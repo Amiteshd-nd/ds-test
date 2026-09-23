@@ -55,6 +55,38 @@ export interface Measurement {
   contains_assumptions: boolean
 }
 
+export type Standing = 'ok' | 'tight' | 'over' | 'unmeasured'
+
+export interface Metric {
+  id: string
+  label: string
+  value: number
+  limit: number | null
+  unit: string
+  standing: Standing
+  provenance: 'Measured' | 'Inferred' | 'Assumed'
+  reason: string
+}
+
+export interface ComplianceDiagnostic {
+  rule_id: string
+  severity: 'hard' | 'soft' | 'advisory'
+  message: string
+  entities: number[]
+  source: string
+  measured: number | null
+  limit: number | null
+}
+
+export interface ComplianceReport {
+  metrics: Metric[]
+  diagnostics: ComplianceDiagnostic[]
+  authority: string
+  effective: string
+  disclaimer: string
+  reviewed: boolean
+}
+
 export interface LayerInfo {
   id: number
   name: string
@@ -86,6 +118,53 @@ export function initWasm(): Promise<void> {
   return ready
 }
 
+/** One generated option. Ranked in Rust; the shell only displays the order it is given. */
+export interface OptionSummary {
+  /** `3bhk.side-corridor.v1` or `3bhk.side-corridor.v1+larger-bedrooms`. */
+  key: string
+  label: string
+  /** Why it ranked where it did, in a sentence. */
+  note: string
+  template?: string
+  awkward?: number
+  /** Present only when the brief asked for Vaastu. `null`/absent means the layer is off. */
+  vaastu?: {
+    score: number
+    conflicts: string[]
+    authority: string
+    placements: { name: string; kind: string; sector: string; verdict: string }[]
+  } | null
+  /** What choosing this option cost against the best non-Vaastu one, in plain words. */
+  cost?: string
+  summary?: string
+  rooms?: { name: string; kind: string; area_mm2: number }[]
+  hash?: string
+}
+
+export interface GenerationResult {
+  chosen: string
+  options: OptionSummary[]
+}
+
+/** What a one-line brief was read as, before anybody has confirmed it. */
+export interface IntakeReading {
+  brief: Record<string, unknown>
+  /** Fields the brief itself supplied. */
+  stated: string[]
+  /** Tier-1 fields nobody stated. Filled so the card has something to show, and marked. */
+  guessed: string[]
+  chips: { field: string; question: string }[]
+  /** `local`, or `anthropic/claude-sonnet-5`. */
+  source: string
+}
+
+/** A file Rust produced, for the browser to hand to the user. */
+export interface ExportedFile {
+  bytes: number[]
+  summary: string
+  name: string
+}
+
 export class DocumentClient {
   private constructor(private readonly inner: Session) {}
 
@@ -108,6 +187,145 @@ export class DocumentClient {
   /** Run the 2D→3D pipeline and commit the solids. */
   buildSolids(): { walls: number; openings: number; summary: string } {
     return this.inner.buildSolids() as { walls: number; openings: number; summary: string }
+  }
+
+  /**
+   * Generate a plan from the six intake answers.
+   *
+   * The whole flow lands in Rust: brief → parameters → ruleset → template → commits.
+   * Nothing about the layout is decided here.
+   */
+  generate(brief: {
+    units?: string
+    plot_width: number
+    plot_depth: number
+    road_facing: string
+    road_width_m?: number
+    bedrooms: number
+    floors: number
+    car_parking: number
+    vaastu?: boolean | null
+  }): GenerationResult {
+    return this.inner.generate(JSON.stringify(brief)) as GenerationResult
+  }
+
+  /**
+   * Read a one-line brief with no model and no network.
+   *
+   * Throws with a question if the brief is genuinely underspecified — "I want a nice
+   * house" has no plot in it, and answering it would mean inventing the site.
+   */
+  readBrief(text: string): IntakeReading {
+    return this.inner.readBrief(text) as IntakeReading
+  }
+
+  /**
+   * The layered DXF, and a printable plan sheet.
+   *
+   * Both come back as bytes rather than being written anywhere: the browser is the only
+   * thing that knows where the user wants the file, and Rust has no business guessing.
+   */
+  exportDxf(): ExportedFile {
+    return this.inner.exportDxf() as ExportedFile
+  }
+
+  exportPdf(): ExportedFile {
+    return this.inner.exportPdf() as ExportedFile
+  }
+
+  /** The extrusion as a mesh. Massing only — see the header the file carries. */
+  exportObj(): ExportedFile {
+    return this.inner.exportObj() as ExportedFile
+  }
+
+  /** The correction log, as a file. Nothing sends it anywhere. */
+  exportCorrections(): ExportedFile {
+    return this.inner.exportCorrections() as ExportedFile
+  }
+
+  /**
+   * What the solver drew and where the architect moved it.
+   *
+   * Derived from the commit history on every call rather than accumulated, so it cannot
+   * disagree with the document.
+   */
+  corrections(): {
+    summary: string
+    exported: boolean
+    wallEditsBeforeExport: number
+    corrections: { step: number; author: string; kind: string; message: string }[]
+    chosenOption: string | null
+    optionsOffered: string[]
+  } {
+    return this.inner.corrections() as ReturnType<DocumentClient['corrections']>
+  }
+
+  /** Is this entity a wall? The canvas asks before starting a drag. */
+  isWall(entity: number): boolean {
+    return this.inner.isWall(BigInt(entity)) as boolean
+  }
+
+  /**
+   * Move a wall, as a mouse drag does.
+   *
+   * Dispatches `Command::MoveWall` — the same variant an agent calls. There is
+   * deliberately no drag-specific write path: one would mean the undo stack knew about
+   * mouse edits and not about agent edits.
+   */
+  moveWall(entity: number, dxMm: number, dyMm: number): { commit: string; hash: string } {
+    return this.inner.moveWall(BigInt(entity), dxMm, dyMm) as {
+      commit: string
+      hash: string
+    }
+  }
+
+  /** Step back one commit. Human and agent edits are the same commits, so both undo. */
+  undo(): boolean {
+    return this.inner.undo() as boolean
+  }
+
+  redo(): boolean {
+    return this.inner.redo() as boolean
+  }
+
+  historyState(): {
+    applied: number
+    total: number
+    canUndo: boolean
+    canRedo: boolean
+    last: string | null
+  } {
+    return this.inner.historyState() as {
+      applied: number
+      total: number
+      canUndo: boolean
+      canRedo: boolean
+      last: string | null
+    }
+  }
+
+  /** The options from the last generation, in rank order, and which is in front. */
+  options(): { current: string | null; options: OptionSummary[] } {
+    return this.inner.options() as { current: string | null; options: OptionSummary[] }
+  }
+
+  /**
+   * Bring an option to the front.
+   *
+   * Lossless both ways: Rust writes the working branch back before taking the new one,
+   * so leaving an option and returning to it keeps whatever was done to it.
+   */
+  chooseOption(key: string): { chosen: string; hash: string; entities: number } {
+    return this.inner.chooseOption(key) as {
+      chosen: string
+      hash: string
+      entities: number
+    }
+  }
+
+  /** The compliance report. A view over data Rust already computed. */
+  compliance(): ComplianceReport {
+    return this.inner.compliance() as ComplianceReport
   }
 
   heightRangeMm(): [number, number] {

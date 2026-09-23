@@ -20,21 +20,64 @@ use tri_geom2d::pair::{self, PairParams};
 /// constant lives here (PRD Prompt 5).
 #[derive(Clone, Copy, Debug)]
 pub struct BuildParams {
-    pub heal_tolerance: Length,
-    pub pairing: PairParams,
+    pub preparation: Preparation,
     pub default_height: Length,
     pub default_base: Length,
+}
+
+/// How much cleaning the input needs before stages 4–7 can run.
+///
+/// Stages 1–3 (heal, classify, pair) exist for one reason: real drawings are messy.
+/// Generated geometry is clean by construction — its endpoints already coincide, nothing
+/// is drawn twice, and the thickness is a stated parameter rather than something inferred
+/// from the gap between two lines.
+///
+/// Running the messy path over generated input is not merely wasted work, it is wrong:
+/// `pair_walls` would look at two internal partitions 300mm apart and conclude they are
+/// the two faces of one 300mm wall. Naming the distinction here keeps the generator on
+/// the same pipeline as the importer instead of forking it.
+#[derive(Clone, Copy, Debug)]
+pub enum Preparation {
+    /// Imported from a drawing: heal the geometry, then pair parallel lines into runs.
+    Messy {
+        heal_tolerance: Length,
+        pairing: PairParams,
+    },
+    /// Generated: take the centrelines and thicknesses as given.
+    Clean,
 }
 
 impl Default for BuildParams {
     fn default() -> Self {
         BuildParams {
-            heal_tolerance: Length::from_mm(5),
-            pairing: PairParams::default(),
+            preparation: Preparation::Messy {
+                heal_tolerance: Length::from_mm(5),
+                pairing: PairParams::default(),
+            },
             default_height: Length::from_mm(2700),
             default_base: Length::ZERO,
         }
     }
+}
+
+impl BuildParams {
+    /// Parameters for geometry this process generated.
+    pub fn clean() -> BuildParams {
+        BuildParams {
+            preparation: Preparation::Clean,
+            ..BuildParams::default()
+        }
+    }
+}
+
+/// One wall run ready for extrusion: a centreline and a thickness that knows where it
+/// came from. Produced either by pairing imported lines or taken straight from generated
+/// input, after which stages 4–7 cannot tell the difference.
+struct PreparedRun {
+    centreline: Vec<tri_doc::Point2>,
+    thickness: Tracked<Length>,
+    /// Index into the collected wall list.
+    source: usize,
 }
 
 /// What the build did and how much of it was guessed.
@@ -88,25 +131,72 @@ pub fn build_solids(doc: &Document, p: BuildParams) -> (Vec<Op>, BuildReport) {
         return (ops, report);
     }
 
-    // --- stage 1: heal ------------------------------------------------------
-    let chains: Vec<Chain> = walls
-        .iter()
-        .enumerate()
-        .map(|(i, (_, w))| Chain {
-            points: w.centreline.clone(),
-            closed: false,
-            origin: i,
-        })
-        .collect();
-    let (healed, heal_report) = heal::heal(&chains, p.heal_tolerance);
-    report.heal_summary = heal_report.summary();
+    // --- stages 1 and 3: heal and pair, or skip both -------------------------
+    let runs: Vec<PreparedRun> = match p.preparation {
+        Preparation::Messy {
+            heal_tolerance,
+            pairing,
+        } => {
+            let chains: Vec<Chain> = walls
+                .iter()
+                .enumerate()
+                .map(|(i, (_, w))| Chain {
+                    points: w.centreline.clone(),
+                    closed: false,
+                    origin: i,
+                })
+                .collect();
+            let (healed, heal_report) = heal::heal(&chains, heal_tolerance);
+            report.heal_summary = heal_report.summary();
 
-    // --- stage 3: pair into wall runs ---------------------------------------
-    let for_pairing: Vec<(usize, Vec<tri_doc::Point2>)> = healed
-        .iter()
-        .map(|c| (c.origin, c.points.clone()))
-        .collect();
-    let runs = pair::pair_walls(&for_pairing, p.pairing);
+            let for_pairing: Vec<(usize, Vec<tri_doc::Point2>)> = healed
+                .iter()
+                .map(|c| (c.origin, c.points.clone()))
+                .collect();
+
+            pair::pair_walls(&for_pairing, pairing)
+                .into_iter()
+                .filter_map(|run| {
+                    let source = *run.sources.first()?;
+                    let paired = run.evidence.is_paired();
+                    if paired {
+                        report.paired += 1;
+                    } else {
+                        report.unpaired += 1;
+                    }
+                    // Thickness from pairing is Inferred; a fallback default is Assumed.
+                    let thickness = if paired {
+                        Tracked::inferred(run.thickness, run.evidence.reason())
+                    } else {
+                        Tracked::assumed(run.thickness, run.evidence.reason())
+                    };
+                    Some(PreparedRun {
+                        centreline: run.centreline,
+                        thickness,
+                        source,
+                    })
+                })
+                .collect()
+        }
+        Preparation::Clean => {
+            report.heal_summary = "generated geometry; healing and pairing skipped".into();
+            walls
+                .iter()
+                .enumerate()
+                .map(|(i, (_, w))| {
+                    // The thickness already carries its own provenance from whoever
+                    // generated it. Re-deriving it here would replace a stated parameter
+                    // with a guess.
+                    report.paired += 1;
+                    PreparedRun {
+                        centreline: w.centreline.clone(),
+                        thickness: w.thickness.clone(),
+                        source: i,
+                    }
+                })
+                .collect()
+        }
+    };
 
     // Openings, grouped by the wall they host.
     let openings: Vec<(EntityId, Opening)> = doc
@@ -118,24 +208,12 @@ pub fn build_solids(doc: &Document, p: BuildParams) -> (Vec<Op>, BuildReport) {
         .collect();
 
     for run in &runs {
-        // A run may have absorbed two source polylines; the solid attaches to the first.
-        let Some(&(entity, ref original)) = run.sources.first().and_then(|i| walls.get(*i)) else {
+        // A messy run may have absorbed two source polylines; the solid attaches to the
+        // first. A clean run is one to one.
+        let Some(&(entity, ref original)) = walls.get(run.source) else {
             continue;
         };
-
-        let paired = run.evidence.is_paired();
-        if paired {
-            report.paired += 1;
-        } else {
-            report.unpaired += 1;
-        }
-
-        // --- thickness: Inferred when paired, Assumed when not ---------------
-        let thickness = if paired {
-            Tracked::inferred(run.thickness, run.evidence.reason())
-        } else {
-            Tracked::assumed(run.thickness, run.evidence.reason())
-        };
+        let thickness = run.thickness.clone();
 
         // --- height: whatever classification decided, carried forward --------
         // The importer already recorded whether the height was found or defaulted, and

@@ -12,8 +12,18 @@ tri-commit = { workspace = true }
 tri-geom2d = { workspace = true }
 tri-solid = { workspace = true }
 tri-import-dxf = { workspace = true }
+tri-params = { workspace = true }
+tri-intake = { workspace = true }
+tri-export-dxf = { workspace = true }
+tri-export-pdf = { workspace = true }
+tri-export-obj = { workspace = true }
+tri-corrections = { workspace = true }
+tri-rules = { workspace = true }
 tri-render = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 schemars = { workspace = true }
 thiserror = { workspace = true }
+
+[dev-dependencies]
+tri-gen = { workspace = true }

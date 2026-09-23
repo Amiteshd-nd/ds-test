@@ -10,12 +10,14 @@
 //! A commit is a document-level concept; it must not know what a wall is.
 
 pub mod author;
+pub mod branch;
 pub mod history;
 pub mod plan;
 
 mod commit;
 
 pub use author::{AgentId, Author, UserId};
+pub use branch::{Branch, Branches};
 pub use commit::{Commit, CommitError, CommitId};
 pub use history::{History, LocalSession, Repair, Sequencer};
 pub use plan::{ApprovedPlan, Plan, PlanId, PlanStep};

@@ -182,14 +182,28 @@ pub fn classify(
                             centreline: points,
                             // Real thickness comes from polyline pairing in M4. Until
                             // then this is explicitly a default, and says so.
-                            thickness: Tracked::assumed(
-                                Length::from_mm(rules.default_wall_thickness_mm),
-                                format!(
-                                    "no paired polyline found; rule set default \
-                                     {}mm (RuleSet.default_wall_thickness_mm)",
-                                    rules.default_wall_thickness_mm
-                                ),
-                            ),
+                            thickness: if facts.constant_width_um > 0 {
+                                // The file says how thick this wall is, so nothing needs
+                                // inferring. Measured, because it was read from the
+                                // drawing rather than worked out from it.
+                                Tracked::measured(
+                                    Length::from_um(facts.constant_width_um),
+                                    format!(
+                                        "polyline constant width of {:.0}mm stated in the \
+                                         source file",
+                                        facts.constant_width_um as f64 / 1000.0
+                                    ),
+                                )
+                            } else {
+                                Tracked::assumed(
+                                    Length::from_mm(rules.default_wall_thickness_mm),
+                                    format!(
+                                        "no paired polyline found; rule set default \
+                                         {}mm (RuleSet.default_wall_thickness_mm)",
+                                        rules.default_wall_thickness_mm
+                                    ),
+                                )
+                            },
                             height: Tracked::assumed(
                                 Length::from_mm(rules.default_wall_height_mm),
                                 format!(

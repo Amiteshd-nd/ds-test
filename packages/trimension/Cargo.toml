@@ -2,6 +2,15 @@
 resolver = "2"
 members = [
     "crates/doc",
+    "crates/params",
+    "crates/rules",
+    "crates/gen",
+    "crates/intake",
+    "crates/vaastu",
+    "crates/export-dxf",
+    "crates/export-pdf",
+    "crates/export-obj",
+    "crates/corrections",
     "crates/commit",
     "crates/geom2d",
     "crates/solid",
@@ -24,6 +33,15 @@ publish = false
 # Do not bump from memory.
 [workspace.dependencies]
 tri-doc = { path = "crates/doc" }
+tri-params = { path = "crates/params" }
+tri-rules = { path = "crates/rules" }
+tri-gen = { path = "crates/gen" }
+tri-intake = { path = "crates/intake" }
+tri-vaastu = { path = "crates/vaastu" }
+tri-export-pdf = { path = "crates/export-pdf" }
+tri-export-obj = { path = "crates/export-obj" }
+tri-corrections = { path = "crates/corrections" }
+tri-export-dxf = { path = "crates/export-dxf" }
 tri-commit = { path = "crates/commit" }
 tri-geom2d = { path = "crates/geom2d" }
 tri-solid = { path = "crates/solid" }

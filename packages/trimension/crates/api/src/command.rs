@@ -128,6 +128,20 @@ pub enum Command {
         layer: Option<u64>,
     },
 
+    /// Move a wall, and the room edges sitting on it.
+    ///
+    /// The command a mouse drag produces, and the same one an agent calls to say "shift
+    /// the kitchen wall 300mm left". A human dragging and an agent asking dispatch through
+    /// this one variant and produce the same commit, which is invariant I3 in the place it
+    /// is easiest to break: a canvas is the obvious spot to reach past the registry and
+    /// mutate the document directly.
+    ///
+    /// An axis-aligned wall moves only perpendicular to itself, because that is what
+    /// dragging a wall means — sliding one along its own length moves nothing. A wall at
+    /// an angle takes the whole delta and leaves rooms alone, since there is no edge to
+    /// match it against.
+    MoveWall { entity: u64, dx_mm: f64, dy_mm: f64 },
+
     /// Move an entity to a different layer.
     SetEntityLayer { entity: u64, layer: u64 },
 
@@ -172,6 +186,7 @@ impl Command {
             Command::SetWallHeight { .. } => "set_wall_height",
             Command::CreateOpening { .. } => "create_opening",
             Command::CreatePolyline { .. } => "create_polyline",
+            Command::MoveWall { .. } => "move_wall",
             Command::SetEntityLayer { .. } => "set_entity_layer",
             Command::SetLabel { .. } => "set_label",
             Command::DeleteEntity { .. } => "delete_entity",
@@ -186,6 +201,7 @@ impl Command {
         "set_wall_height",
         "create_opening",
         "create_polyline",
+        "move_wall",
         "set_entity_layer",
         "set_label",
         "delete_entity",
@@ -366,6 +382,12 @@ impl Command {
                 vec![Op::CreateEntity { components }]
             }
 
+            Command::MoveWall {
+                entity,
+                dx_mm,
+                dy_mm,
+            } => move_wall(doc, *entity, *dx_mm, *dy_mm, author)?,
+
             Command::SetEntityLayer { entity, layer } => vec![Op::SetComponent {
                 id: entity_ref(*entity)?,
                 component: Component::LayerRef(layer_ref(*layer)?),
@@ -381,4 +403,198 @@ impl Command {
             }],
         })
     }
+}
+
+/// Translate a wall and drag the room edges that sit on it.
+///
+/// # Why the rooms move too
+/// A room is its own entity carrying a recorded area, width and depth. Moving the wall
+/// alone would leave every one of those stale, and the compliance panel — which reads
+/// exactly those numbers — would go on reporting the areas the template produced while the
+/// drawing showed something else. The PRD asks that every edit "re-runs the validator and
+/// updates the compliance panel live", and a panel quietly describing a previous version
+/// of the plan is worse than no panel.
+///
+/// Room rectangles and wall centrelines coincide by construction: the template lays cells
+/// out at the same coordinates it puts walls. So an edge is matched by exact equality in
+/// micrometres rather than by a tolerance, and a wall that matches nothing simply moves on
+/// its own.
+fn move_wall(
+    doc: &Document,
+    entity: u64,
+    dx_mm: f64,
+    dy_mm: f64,
+    author: &str,
+) -> Result<Vec<Op>, CommandError> {
+    let id = EntityId::from_raw(entity);
+    if !doc.contains_entity(id) {
+        return Err(CommandError::UnknownEntity(entity));
+    }
+    let Some(Component::WallProfile(w)) = doc.component(id, &ComponentKey::WallProfile) else {
+        return Err(CommandError::NotApplicable(format!(
+            "entity {entity} is not a wall"
+        )));
+    };
+    if w.centreline.len() < 2 {
+        return Err(CommandError::NotApplicable(
+            "a wall with fewer than two points has no line to move".into(),
+        ));
+    }
+
+    let um = |mm: f64| (mm * 1000.0).round() as i64;
+    let (a, b) = (w.centreline[0], w.centreline[w.centreline.len() - 1]);
+    let vertical = a.x == b.x;
+    let horizontal = a.y == b.y;
+
+    // Perpendicular only. Sliding a wall along its own length moves nothing, so a drag
+    // that would do that is dropped rather than recorded as a no-op commit.
+    let (dx, dy) = match (vertical, horizontal) {
+        (true, false) => (um(dx_mm), 0),
+        (false, true) => (0, um(dy_mm)),
+        _ => (um(dx_mm), um(dy_mm)),
+    };
+    if dx == 0 && dy == 0 {
+        return Err(CommandError::NotApplicable("the wall did not move".into()));
+    }
+
+    let shift = |p: Point2| {
+        Point2::new(
+            Length::from_um(p.x.as_um() + dx),
+            Length::from_um(p.y.as_um() + dy),
+        )
+    };
+    let mut ops = vec![Op::SetComponent {
+        id,
+        component: Component::WallProfile(WallProfile {
+            centreline: w.centreline.iter().copied().map(shift).collect(),
+            thickness: w.thickness.clone(),
+            height: w.height.clone(),
+            base_elevation: w.base_elevation.clone(),
+        }),
+    }];
+
+    // Only an axis-aligned wall has an edge for a room to sit on.
+    if !(vertical || horizontal) {
+        return Ok(ops);
+    }
+    let key = ComponentKey::Custom(tri_rules::ROOM_TYPE_NAME.to_string());
+    let (lo, hi) = if vertical {
+        (a.y.as_um().min(b.y.as_um()), a.y.as_um().max(b.y.as_um()))
+    } else {
+        (a.x.as_um().min(b.x.as_um()), a.x.as_um().max(b.x.as_um()))
+    };
+
+    let mut edits: Vec<(tri_doc::EntityId, [i64; 4])> = Vec::new();
+    for (room_id, set) in doc.iter_with(ComponentKey::Polyline2d) {
+        if set.get(&key).is_none() {
+            continue;
+        }
+        let Some(Component::Polyline2d(outline)) = set.get(&ComponentKey::Polyline2d) else {
+            continue;
+        };
+        let Some(mut r) = rect_of(&outline.points) else {
+            continue;
+        };
+        let [mut x0, mut y0, mut x1, mut y1] = r;
+        let mut touched = false;
+        if vertical && y0 < hi && y1 > lo {
+            if x0 == a.x.as_um() {
+                x0 += dx;
+                touched = true;
+            }
+            if x1 == a.x.as_um() {
+                x1 += dx;
+                touched = true;
+            }
+        }
+        if horizontal && x0 < hi && x1 > lo {
+            if y0 == a.y.as_um() {
+                y0 += dy;
+                touched = true;
+            }
+            if y1 == a.y.as_um() {
+                y1 += dy;
+                touched = true;
+            }
+        }
+        if !touched {
+            continue;
+        }
+        if x1 <= x0 || y1 <= y0 {
+            // The drag would turn a room inside out. Refusing is the only honest answer:
+            // `commit::validate` checks structure, not whether a plan still makes sense,
+            // so nothing further down would catch it.
+            return Err(CommandError::NotApplicable(format!(
+                "moving that wall {dx_mm}x{dy_mm}mm would collapse a room"
+            )));
+        }
+        r = [x0, y0, x1, y1];
+        edits.push((room_id, r));
+    }
+
+    for (room_id, [x0, y0, x1, y1]) in edits {
+        let Some(Component::Custom { data, .. }) = doc.component(room_id, &key) else {
+            continue;
+        };
+        let name = text_of(data, "name");
+        let kind = text_of(data, "kind");
+        let width = Length::from_um(x1 - x0);
+        let depth = Length::from_um(y1 - y0);
+        let area = (width.as_um() as i128 / 1_000 * (depth.as_um() as i128 / 1_000)) as i64;
+        ops.push(Op::SetComponent {
+            id: room_id,
+            component: Component::Custom {
+                type_name: tri_rules::ROOM_TYPE_NAME.to_string(),
+                // `Measured`: an architect moving this edge is evidence, in a way the
+                // template's own guess never was.
+                data: tri_rules::room::to_data_with(
+                    &name,
+                    &kind,
+                    area,
+                    width,
+                    depth,
+                    &format!("edge moved on the canvas by {author}"),
+                    tri_doc::Provenance::Measured,
+                ),
+            },
+        });
+        ops.push(Op::SetComponent {
+            id: room_id,
+            component: Component::Polyline2d(tri_doc::component::Polyline2d {
+                points: vec![
+                    Point2::new(Length::from_um(x0), Length::from_um(y0)),
+                    Point2::new(Length::from_um(x1), Length::from_um(y0)),
+                    Point2::new(Length::from_um(x1), Length::from_um(y1)),
+                    Point2::new(Length::from_um(x0), Length::from_um(y1)),
+                ],
+                closed: true,
+            }),
+        });
+    }
+    Ok(ops)
+}
+
+/// The bounding rectangle of an axis-aligned outline: `[min_x, min_y, max_x, max_y]`.
+fn rect_of(points: &[Point2]) -> Option<[i64; 4]> {
+    if points.len() < 4 {
+        return None;
+    }
+    let xs: Vec<i64> = points.iter().map(|p| p.x.as_um()).collect();
+    let ys: Vec<i64> = points.iter().map(|p| p.y.as_um()).collect();
+    Some([
+        *xs.iter().min()?,
+        *ys.iter().min()?,
+        *xs.iter().max()?,
+        *ys.iter().max()?,
+    ])
+}
+
+fn text_of(
+    data: &std::collections::BTreeMap<String, tri_doc::component::CanonicalValue>,
+    key: &str,
+) -> String {
+    data.get(key)
+        .and_then(|v| v.as_text())
+        .unwrap_or_default()
+        .to_string()
 }

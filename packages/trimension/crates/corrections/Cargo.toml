@@ -1,0 +1,21 @@
+[package]
+name = "tri-corrections"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+tri-doc = { workspace = true }
+tri-commit = { workspace = true }
+tri-params = { workspace = true }
+# For `ROOM_TYPE_NAME`. The room vocabulary is defined once, in the crate that interprets
+# it; a literal "room" here would be a second definition that drifts silently — and did,
+# on the first attempt, because the real name is "Room".
+tri-rules = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+tri-api = { workspace = true }
+tri-gen = { workspace = true }

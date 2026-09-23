@@ -1,0 +1,16 @@
+[package]
+name = "tri-export-obj"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+tri-doc = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+tri-commit = { workspace = true }
+tri-gen = { workspace = true }
+tri-params = { workspace = true }
+tri-rules = { workspace = true }

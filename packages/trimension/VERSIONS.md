@@ -20,7 +20,7 @@ versions from memory").
 | `axum` | `0.8.9` | 1.80 | MIT | Session server. 0.8 changed path-param syntax vs 0.7. |
 | `rstar` | `0.13.0` | 1.85 | MIT OR Apache-2.0 | R*-tree spatial index for `geom2d`. |
 | `slotmap` | `1.1.1` | 1.58.0 | Zlib | `EntityId` storage. Zlib licence — permissive, fine. |
-| `dxf` | `0.6.1` | unset | MIT | ✅ Validated at M2 against all four fixtures. Note: it pulls `uuid`, which needs the `js` feature on wasm32 — enabled from `tri-import-dxf`. |
+| `dxf` | `0.6.1` | unset | MIT | ixmilia/dxf-rs. Reads **and writes**, so import and export share one crate. Re-checked on crates.io 2026-09-22: still the current release. ✅ Validated at M2 against four fixtures and at P3 by a round trip. Two traps, both hit: it pulls `uuid`, which needs the `js` feature on wasm32; and `Drawing::new()` defaults to **R12**, which has neither `LWPOLYLINE` nor `$INSUNITS` — the writer drops entities the target version cannot represent **without erroring**, so an export can succeed and contain no walls. Set `header.version` explicitly. |
 | `manifold-csg` | — | — | — | ❌ **Not used.** Spiked and rejected; see risk 2. |
 | `blake3` | `1.8.7` | — | CC0/Apache-2.0 | Document hashing. |
 | `png` | `0.18` | — | MIT OR Apache-2.0 | `render_view` output. |

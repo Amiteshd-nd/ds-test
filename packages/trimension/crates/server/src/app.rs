@@ -15,6 +15,10 @@ pub fn router(registry: Registry) -> Router {
         .route("/doc/{id}", get(snapshot))
         .route("/doc/{id}/persist", post(persist))
         .route("/ws/{id}", get(ws_upgrade))
+        // Intake. Stateless, and deliberately not under /doc: it touches no document and
+        // holds nothing between calls.
+        .route("/v1/intake", post(crate::intake::intake))
+        .route("/v1/intake/models", get(crate::intake::models))
         .with_state(registry)
 }
 

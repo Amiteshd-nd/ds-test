@@ -1,0 +1,25 @@
+[package]
+name = "tri-export-pdf"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+# NOTE: no PDF crate, deliberately.
+#
+# A plan sheet is vector paths and base-14 Helvetica — no images, no embedded fonts, no
+# compression. Written by hand that is a few hundred lines of a format that has not changed
+# since 1993, and it buys two things worth more than the lines saved: it compiles to
+# wasm32 without argument, so the browser can produce the sheet with no round trip; and
+# every coordinate on the page is one this crate put there, which is what "prints at
+# correct scale" has to mean.
+[dependencies]
+tri-doc = { workspace = true }
+tri-params = { workspace = true }
+tri-render = { workspace = true }
+tri-rules = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+tri-commit = { workspace = true }
+tri-gen = { workspace = true }

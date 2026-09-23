@@ -1,0 +1,107 @@
+{
+  "authority": {
+    "name": "BBMP",
+    "revision": "placeholder-v0",
+    "effective": "2024-04-01",
+    "reviewed_by": null,
+    "notes": "PLACEHOLDER DATA. The shape of this file is correct and the loader is tested against it, but the numbers have NOT been checked against the BBMP building bylaws by anyone qualified. They are plausible, not authoritative. Per the PRD this must be reviewed by a practising Bengaluru architect before launch, and the reviewed_by field filled in. Until then the UI shows the plan as unverified."
+  },
+  "bands": [
+    {
+      "min_area_sqm": 0,
+      "max_area_sqm": 93,
+      "front_mm": 1500,
+      "rear_mm": 1000,
+      "side_mm": 1000,
+      "coverage_x100": 7500,
+      "clause": "placeholder: plots up to 100 sq yd"
+    },
+    {
+      "min_area_sqm": 93,
+      "max_area_sqm": 186,
+      "front_mm": 2000,
+      "rear_mm": 1500,
+      "side_mm": 1000,
+      "coverage_x100": 7000,
+      "clause": "placeholder: 100-200 sq yd"
+    },
+    {
+      "min_area_sqm": 186,
+      "max_area_sqm": 372,
+      "front_mm": 3000,
+      "rear_mm": 2000,
+      "side_mm": 1500,
+      "coverage_x100": 6500,
+      "clause": "placeholder: 200-400 sq yd"
+    },
+    {
+      "min_area_sqm": 372,
+      "max_area_sqm": null,
+      "front_mm": 4000,
+      "rear_mm": 3000,
+      "side_mm": 2000,
+      "coverage_x100": 6000,
+      "clause": "placeholder: above 400 sq yd"
+    }
+  ],
+  "far_bands": [
+    {
+      "min_road_width_m": 0,
+      "max_road_width_m": 9,
+      "far_x1000": 1500,
+      "clause": "placeholder: roads under 9m"
+    },
+    {
+      "min_road_width_m": 9,
+      "max_road_width_m": 12,
+      "far_x1000": 1750,
+      "clause": "placeholder: 9-12m roads"
+    },
+    {
+      "min_road_width_m": 12,
+      "max_road_width_m": 18,
+      "far_x1000": 2250,
+      "clause": "placeholder: 12-18m roads"
+    },
+    {
+      "min_road_width_m": 18,
+      "max_road_width_m": null,
+      "far_x1000": 2500,
+      "clause": "placeholder: roads 18m and wider"
+    }
+  ],
+  "minimum_rooms": [
+    {
+      "kind": "bedroom",
+      "min_area_mm2": 9500000,
+      "min_width_mm": 2400,
+      "clause": "placeholder: habitable room minimum"
+    },
+    {
+      "kind": "living",
+      "min_area_mm2": 12000000,
+      "min_width_mm": 3000,
+      "clause": "placeholder: habitable room minimum"
+    },
+    {
+      "kind": "kitchen",
+      "min_area_mm2": 5000000,
+      "min_width_mm": 1800,
+      "clause": "placeholder: kitchen minimum"
+    },
+    {
+      "kind": "toilet",
+      "min_area_mm2": 1800000,
+      "min_width_mm": 1000,
+      "clause": "placeholder: water closet minimum"
+    }
+  ],
+  "staircase_min_width_mm": 900,
+  "staircase_min_headroom_mm": 2100,
+  "staircase_riser_mm": 165,
+  "staircase_tread_mm": 280,
+  "water_litres_per_person_day": 135,
+  "occupants_per_bedroom": 2,
+  "overhead_share_pct": 40,
+  "disclaimer": "Indicative only. Verify against the sanctioning authority before submission."
+}

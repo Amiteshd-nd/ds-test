@@ -232,6 +232,35 @@
       "type": "object"
     },
     {
+      "description": "Move a wall, and the room edges sitting on it.\n\nThe command a mouse drag produces, and the same one an agent calls to say \"shift\nthe kitchen wall 300mm left\". A human dragging and an agent asking dispatch through\nthis one variant and produce the same commit, which is invariant I3 in the place it\nis easiest to break: a canvas is the obvious spot to reach past the registry and\nmutate the document directly.\n\nAn axis-aligned wall moves only perpendicular to itself, because that is what\ndragging a wall means — sliding one along its own length moves nothing. A wall at\nan angle takes the whole delta and leaves rooms alone, since there is no edge to\nmatch it against.",
+      "properties": {
+        "command": {
+          "const": "move_wall",
+          "type": "string"
+        },
+        "dx_mm": {
+          "format": "double",
+          "type": "number"
+        },
+        "dy_mm": {
+          "format": "double",
+          "type": "number"
+        },
+        "entity": {
+          "format": "uint64",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "command",
+        "entity",
+        "dx_mm",
+        "dy_mm"
+      ],
+      "type": "object"
+    },
+    {
       "description": "Move an entity to a different layer.",
       "properties": {
         "command": {

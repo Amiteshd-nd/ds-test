@@ -221,6 +221,19 @@ impl CanonicalHash for CanonicalValue {
                     v.hash_into(c);
                 }
             }
+            CanonicalValue::Tracked {
+                value,
+                provenance,
+                reason,
+            } => {
+                // Provenance is hashed, not just carried: a 2700mm default and a 2700mm
+                // measured dimension are different documents even though they render the
+                // same, and a reviewer signing one has not signed the other.
+                c.tag(0x37);
+                provenance.hash_into(c);
+                c.str(reason);
+                value.hash_into(c);
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ publish = false
 
 [dependencies]
 tri-api = { workspace = true }
+tri-gen = { workspace = true }
 wasm-bindgen = "0.2.128"
 wasm-bindgen-futures = "0.4"
 js-sys = "0.3"

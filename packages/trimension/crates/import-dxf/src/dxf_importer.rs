@@ -167,6 +167,11 @@ impl DxfImporter {
                 facts.closed = closed;
                 facts.point_count = points.len();
                 facts.is_arc_or_curve = bulged;
+                facts.constant_width_um = units::to_um(p.constant_width, scale);
+                attrs.insert(
+                    "constant_width_um".into(),
+                    CanonicalValue::Int(facts.constant_width_um),
+                );
                 ("LWPOLYLINE", Geometry::Polyline { points, closed })
             }
 

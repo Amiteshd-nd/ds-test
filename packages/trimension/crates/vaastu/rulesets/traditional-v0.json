@@ -1,0 +1,65 @@
+{
+  "authority": "Traditional Vaastu, common South Indian residential practice",
+  "revision": "placeholder-v0",
+  "reviewed_by": null,
+  "note": "Placeholder data. These are the five preferences the PRD names plus two obvious companions, encoded so they can be swapped for a consultant's own. Vaastu is not a code, no authority enforces it, and its schools disagree; this file is a starting point and NOT the opinion of a practising Vaastu consultant.",
+  "centre_fraction_pct": 18,
+  "preferences": [
+    {
+      "kind": "kitchen",
+      "prefer": ["south-east"],
+      "accept": ["east", "south"],
+      "avoid": ["north-east"],
+      "weight": 3,
+      "source": "Agni, the fire element, is placed in the south-east"
+    },
+    {
+      "kind": "bedroom-master",
+      "prefer": ["south-west"],
+      "accept": ["south", "west"],
+      "avoid": ["north-east"],
+      "weight": 3,
+      "source": "the heaviest corner of the plot carries the principal bedroom"
+    },
+    {
+      "kind": "puja",
+      "prefer": ["north-east"],
+      "accept": ["north", "east"],
+      "avoid": ["south-west", "south"],
+      "weight": 2,
+      "source": "Ishanya, the north-east, is kept for the prayer space"
+    },
+    {
+      "kind": "toilet",
+      "prefer": [],
+      "accept": ["west", "north-west", "south"],
+      "avoid": ["north-east", "centre"],
+      "weight": 2,
+      "source": "toilets are kept out of the north-east and off the brahmasthan"
+    },
+    {
+      "kind": "living",
+      "prefer": ["north", "east"],
+      "accept": ["north-east", "north-west"],
+      "avoid": [],
+      "weight": 1,
+      "source": "the public rooms take the lighter northern and eastern sides"
+    },
+    {
+      "kind": "bedroom",
+      "prefer": ["west", "south"],
+      "accept": ["south-west", "north-west"],
+      "avoid": ["north-east"],
+      "weight": 1,
+      "source": "secondary bedrooms follow the master away from the north-east"
+    },
+    {
+      "kind": "entry",
+      "prefer": ["north", "east", "north-east"],
+      "accept": ["north-west", "south-east"],
+      "avoid": ["south-west"],
+      "weight": 2,
+      "source": "the main entry is taken from the lighter half where the plot allows"
+    }
+  ]
+}

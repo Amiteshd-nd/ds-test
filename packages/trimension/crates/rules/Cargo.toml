@@ -1,0 +1,23 @@
+[package]
+name = "tri-rules"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+# NOTE: `tri-commit` is deliberately absent, and must stay absent.
+#
+# Bylaw compliance must never be able to block a commit (see lib.rs). Leaving the commit
+# crate out of this manifest turns that from a rule someone has to remember into one the
+# compiler enforces: there is no path from a bylaw check to `commit::validate`, because
+# this crate cannot name it.
+[dependencies]
+tri-doc = { workspace = true }
+tri-params = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+tri-commit = { workspace = true }

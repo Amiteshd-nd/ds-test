@@ -1,0 +1,22 @@
+[package]
+name = "tri-intake"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+# NOTE: no HTTP client, deliberately.
+#
+# This crate shapes requests and parses responses; it never makes a call. That keeps it
+# compilable to wasm32, testable without a network, and — the reason that matters — keeps
+# the thirty-brief eval a pure function of its inputs. A crate that could reach the
+# internet would eventually have a test that did.
+[dev-dependencies]
+tri-rules = { workspace = true }
+tri-gen = { workspace = true }
+
+[dependencies]
+tri-params = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }

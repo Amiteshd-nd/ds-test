@@ -28,8 +28,15 @@ pub fn probe() -> String {
 // rather than those crates being added as direct dependencies — the rule stays
 // mechanically true in every Cargo.toml, and `api` remains the single seam.
 pub use tri_commit;
+pub use tri_corrections;
 pub use tri_doc;
+pub use tri_export_dxf;
+pub use tri_export_obj;
+pub use tri_export_pdf;
 pub use tri_geom2d;
 pub use tri_import_dxf;
+pub use tri_intake;
+pub use tri_params;
 pub use tri_render;
+pub use tri_rules;
 pub use tri_solid;

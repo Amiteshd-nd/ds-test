@@ -62,23 +62,36 @@ impl Component {
         }
     }
 
-    /// Every `Tracked` value this component carries, for I4 reporting in the UI.
-    pub fn provenance_records(&self) -> Vec<(&'static str, Provenance, &str)> {
+    /// Every tracked value this component carries, for I4 reporting in the UI.
+    ///
+    /// Field names are owned rather than `&'static str` because a runtime-registered
+    /// component's field paths are built at runtime. That is the whole point: before this
+    /// returned `Vec::new()` for `Component::Custom`, which meant the type registry —
+    /// the sanctioned extension mechanism — could not satisfy I4 at all.
+    pub fn provenance_records(&self) -> Vec<(String, Provenance, String)> {
+        let owned = |f: &str, p: Provenance, r: &str| (f.to_string(), p, r.to_string());
         match self {
             Component::WallProfile(w) => vec![
-                ("height", w.height.provenance(), w.height.reason()),
-                ("thickness", w.thickness.provenance(), w.thickness.reason()),
-                (
+                owned("height", w.height.provenance(), w.height.reason()),
+                owned("thickness", w.thickness.provenance(), w.thickness.reason()),
+                owned(
                     "base_elevation",
                     w.base_elevation.provenance(),
                     w.base_elevation.reason(),
                 ),
             ],
             Component::Opening(o) => vec![
-                ("width", o.width.provenance(), o.width.reason()),
-                ("height", o.height.provenance(), o.height.reason()),
-                ("sill", o.sill.provenance(), o.sill.reason()),
+                owned("width", o.width.provenance(), o.width.reason()),
+                owned("height", o.height.provenance(), o.height.reason()),
+                owned("sill", o.sill.provenance(), o.sill.reason()),
             ],
+            Component::Custom { data, .. } => {
+                let mut out = Vec::new();
+                for (k, v) in data {
+                    v.collect_provenance(k, &mut out);
+                }
+                out
+            }
             _ => Vec::new(),
         }
     }
@@ -95,6 +108,114 @@ pub enum CanonicalValue {
     Text(String),
     List(Vec<CanonicalValue>),
     Map(BTreeMap<String, CanonicalValue>),
+    /// A value carrying how it was arrived at.
+    ///
+    /// Without this variant the type registry is a hole in invariant **I4**: a component
+    /// registered at runtime could hold a defaulted wall thickness with no record that it
+    /// was defaulted, which is exactly the failure the invariant exists to prevent. The
+    /// built-in components get provenance from [`Tracked`](crate::Tracked) in field
+    /// position; runtime-registered ones get it from here.
+    Tracked {
+        value: Box<CanonicalValue>,
+        provenance: Provenance,
+        reason: String,
+    },
+}
+
+impl CanonicalValue {
+    pub fn tracked(
+        value: CanonicalValue,
+        provenance: Provenance,
+        reason: impl Into<String>,
+    ) -> Self {
+        CanonicalValue::Tracked {
+            value: Box::new(value),
+            provenance,
+            reason: reason.into(),
+        }
+    }
+
+    pub fn measured(value: CanonicalValue, reason: impl Into<String>) -> Self {
+        Self::tracked(value, Provenance::Measured, reason)
+    }
+
+    pub fn inferred(value: CanonicalValue, reason: impl Into<String>) -> Self {
+        Self::tracked(value, Provenance::Inferred, reason)
+    }
+
+    pub fn assumed(value: CanonicalValue, reason: impl Into<String>) -> Self {
+        Self::tracked(value, Provenance::Assumed, reason)
+    }
+
+    /// The value with any provenance wrapper removed.
+    pub fn bare(&self) -> &CanonicalValue {
+        match self {
+            CanonicalValue::Tracked { value, .. } => value.bare(),
+            other => other,
+        }
+    }
+
+    pub fn as_i64(&self) -> Option<i64> {
+        match self.bare() {
+            CanonicalValue::Int(i) => Some(*i),
+            CanonicalValue::Length(l) => Some(l.as_um()),
+            _ => None,
+        }
+    }
+
+    pub fn as_length(&self) -> Option<Length> {
+        match self.bare() {
+            CanonicalValue::Length(l) => Some(*l),
+            _ => None,
+        }
+    }
+
+    pub fn as_text(&self) -> Option<&str> {
+        match self.bare() {
+            CanonicalValue::Text(t) => Some(t),
+            _ => None,
+        }
+    }
+
+    pub fn as_bool(&self) -> Option<bool> {
+        match self.bare() {
+            CanonicalValue::Bool(b) => Some(*b),
+            _ => None,
+        }
+    }
+
+    /// Every tracked value beneath this one, keyed by a dotted path.
+    ///
+    /// Recursive so a nested parameter group reports `setbacks.front` rather than a bare
+    /// `front` that collides with three other fields.
+    pub fn collect_provenance(&self, prefix: &str, out: &mut Vec<(String, Provenance, String)>) {
+        match self {
+            CanonicalValue::Tracked {
+                value,
+                provenance,
+                reason,
+            } => {
+                out.push((prefix.to_string(), *provenance, reason.clone()));
+                value.collect_provenance(prefix, out);
+            }
+            CanonicalValue::Map(m) => {
+                for (k, v) in m {
+                    let path = if prefix.is_empty() {
+                        k.clone()
+                    } else {
+                        format!("{prefix}.{k}")
+                    };
+                    v.collect_provenance(&path, out);
+                }
+            }
+            CanonicalValue::List(items) => {
+                for (i, v) in items.iter().enumerate() {
+                    v.collect_provenance(&format!("{prefix}[{i}]"), out);
+                }
+            }
+            _ => {}
+        }
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default, Serialize, Deserialize)]

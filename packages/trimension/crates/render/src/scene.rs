@@ -134,9 +134,45 @@ const WALL_FILL: [f32; 4] = [0.72, 0.74, 0.78, 1.0];
 /// Silhouette lines over the shaded solids. Without them a white-on-grey model reads as
 /// a flat blob at small viewport sizes, which is exactly the size these are drawn at.
 const EDGE: [f32; 4] = [0.13, 0.15, 0.18, 1.0];
+/// A hard rule failure. Paired with a glyph in the panel, never colour alone.
+const FAIL: [f32; 4] = [0.94, 0.33, 0.31, 1.0];
+/// A soft warning.
+const WARN: [f32; 4] = [0.98, 0.75, 0.18, 1.0];
+
+/// Entities a rule flagged, so the canvas can show a breach on the geometry rather than
+/// in a list the architect has to map back onto the drawing.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct Highlights {
+    /// Hard failures. Drawn red.
+    pub failing: Vec<EntityId>,
+    /// Soft warnings. Drawn amber.
+    pub warning: Vec<EntityId>,
+}
+
+impl Highlights {
+    fn colour_for(&self, id: EntityId) -> Option<[f32; 4]> {
+        if self.failing.contains(&id) {
+            Some(FAIL)
+        } else if self.warning.contains(&id) {
+            Some(WARN)
+        } else {
+            None
+        }
+    }
+}
 
 /// Build a scene. Pure: no GPU, no allocation of device resources, no I/O.
 pub fn build(doc: &Document, camera: Camera, mode: ViewMode) -> Scene {
+    build_with(doc, camera, mode, &Highlights::default())
+}
+
+/// Build a scene, colouring flagged geometry.
+pub fn build_with(
+    doc: &Document,
+    camera: Camera,
+    mode: ViewMode,
+    highlights: &Highlights,
+) -> Scene {
     let mut scene = Scene {
         depth_test_lines: mode.shows_solids(),
         uniforms: SceneUniforms {
@@ -150,7 +186,12 @@ pub fn build(doc: &Document, camera: Camera, mode: ViewMode) -> Scene {
     };
 
     for (id, set) in doc.iter_entities() {
-        let colour = layer_colour(doc, set).unwrap_or(DEFAULT_LINE);
+        // A flagged entity overrides its layer colour: a breach has to be visible even
+        // on a layer the architect has coloured to taste.
+        let colour = highlights
+            .colour_for(id)
+            .or_else(|| layer_colour(doc, set))
+            .unwrap_or(DEFAULT_LINE);
         if !layer_visible(doc, set) {
             continue;
         }
@@ -252,10 +293,22 @@ fn push_polyline(
 
 /// Plan view of a wall: both faces offset from the centreline by half the thickness.
 /// This is a *drawing* of the wall, not the extrusion — `solid` owns that.
-fn push_wall_plan(out: &mut Vec<LineVertex>, w: &WallProfile, color: [f32; 4]) {
+/// The two faces of a wall in plan, as the canvas draws them.
+///
+/// Public because the PDF sheet draws the same walls and must not compute them
+/// differently. A sheet whose wall faces sat a few millimetres off the screen's would be
+/// wrong in the one way an architect checks with a scale rule, and nothing would catch it.
+pub fn wall_faces(w: &WallProfile) -> (Vec<Point2>, Vec<Point2>) {
     let half = w.thickness.get().as_um() / 2;
-    for side in [half, -half] {
-        let offset = offset_polyline(&w.centreline, side);
+    (
+        offset_polyline(&w.centreline, half),
+        offset_polyline(&w.centreline, -half),
+    )
+}
+
+fn push_wall_plan(out: &mut Vec<LineVertex>, w: &WallProfile, color: [f32; 4]) {
+    let (left, right) = wall_faces(w);
+    for offset in [left, right] {
         push_polyline(out, &offset, false, color, 0.0);
     }
     push_polyline(

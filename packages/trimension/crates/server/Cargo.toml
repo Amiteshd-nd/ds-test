@@ -13,6 +13,9 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "fs", 
 futures-util = "0.3"
 tracing = "0.1"
 async-trait = "0.1"
+# rustls rather than the system OpenSSL: the proxy has to build the same way on a CI box
+# as on a laptop, and a TLS stack that depends on what is installed is one that does not.
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 

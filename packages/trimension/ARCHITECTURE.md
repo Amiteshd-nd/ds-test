@@ -121,6 +121,15 @@ concrete work items before this model could be signed off by a real reviewer.
 crates/
 ├── doc/          document, ids, components, layers, ops, validation, hashing
 ├── commit/       Commit, Author, Plan, Sequencer, LocalSession (optimistic apply)
+├── params/       the brief as a document component, every field provenance-tagged
+├── rules/        bylaws as data; Diagnostic records, never commit Violations
+├── gen/          parameters → template → walls, openings and rooms, as commits
+├── intake/       a one-line brief → Brief; the prompt, the allowlist, no HTTP client
+├── vaastu/       optional directional preferences; can rank an option, cannot refuse one
+├── export-dxf/   layered DXF out, the same crate the importer reads with
+├── export-pdf/   a printable plan sheet at a standard scale; no PDF dependency
+├── export-obj/   the extrusion as a mesh; massing only, and the file says so
+├── corrections/  what the solver drew and where the architect moved it, derived
 ├── geom2d/       heal, pair_walls, profile, R-tree index
 ├── solid/        extrude, opening subtraction, tessellate, the 2D→3D pipeline
 ├── import-dxf/   Importer trait, DXF phase A/B, rule engine, unit resolution
@@ -280,6 +289,649 @@ a reviewer nothing.
 
 ---
 
+## 6. The floor plan track
+
+Built on top of the CAD platform, following `PRD-AI-FLOOR-PLAN-MVP.md`. **Every phase in
+the PRD's table is implemented**: P0–P5 and F1–F8. What is *not* done is listed under
+"What is still missing" at the end of this section — the phases are complete, the product
+is not.
+
+### P1 — `rules`
+
+Bylaw compliance produces `Diagnostic` records (`Hard | Soft | Advisory`), never
+`Violation` records. The distinction is the whole point: `commit::validate` rejects
+documents that are *structurally* impossible, but a plan that exceeds FAR is structurally
+perfect and an architect will draw one deliberately to show a client what the bylaw costs.
+If FAR could block a commit, the document could not hold that drawing at the moment it is
+most useful.
+
+That separation is **structural, not conventional**: `tri-rules` does not depend on
+`tri-commit`, so nothing in it can reach `commit::validate` even by accident. A test reads
+the manifest to keep it that way.
+
+Rules are data. No bylaw number appears in Rust — `rulesets/*.json` carries the authority,
+the revision and the effective date, and a test greps the source to enforce it. The bundled
+BBMP file is **placeholder data, not reviewed by a practising architect**, and
+`provenance_line()` says so wherever it is displayed.
+
+`check()` is a pure function of `(document, ruleset)`. Diagnostics are derived state;
+storing them would let them go stale and would put a commit in history every time a wall
+moved. `attach()` freezes them on request, for a report or a review snapshot.
+
+### P2 — `params`
+
+The brief is a `ParameterSet` component on the document, not React state (I2), so changing
+a parameter is a commit and history replays to the same hash.
+
+The PRD's three intake tiers map onto provenance mechanically: tier 1 (asked) is
+`Measured`, tier 2 (derived) is `Inferred` with the clause in the reason, tier 3
+(defaulted) is `Assumed`. `Tier::provenance()` is the only mapping, so the two cannot
+drift. Tier 2 starts as "not derived yet" rather than zero — a setback of zero and a
+setback nobody computed are different things, and reading the first as the second is how a
+plan gets laid out against no setback at all.
+
+### F1 — `gen`
+
+One template: a 2BHK with a front living room, a service band, and two rear bedrooms.
+Parameters in, commits out — there is no `&mut Document` anywhere in the crate, and a test
+greps for one.
+
+Stages 1–3 are skipped, stages 4–7 reused verbatim. The skip is expressed as data
+(`Preparation::Clean`) on the existing `build_solids`, not as a forked pipeline. It matters
+for correctness, not just tidiness: run `pair_walls` over generated geometry and it will
+look at two partitions 300mm apart and conclude they are the two faces of one 300mm wall.
+`gen` contains no extrusion code, and a test greps for that too.
+
+`plan()` is pure and returns everything generation *would* do, including the assumption
+list, so the approval card can lead with the guesses rather than the walls (I7). `apply()`
+submits it as three commits.
+
+The brief travels with the plan. Without that the compliance panel would find no parameter
+set and report a clean bill of health on a plan it had never checked.
+
+**Two things the tests caught that review would not have.** The first template made both
+toilets a percentage of the frontage, which on a 30 ft plot produced a 6.7 m² attached
+bathroom beside a 4.9 m² kitchen — the PRD's "looks naive to a trained eye" risk, in the
+very first output. Fixtures now take fixed widths and the kitchen takes the remainder
+(2.5 / 9.3 / 3.1 m²), and a test checks every generated room against the ruleset minimum,
+which is the guard that was missing. The second: the done-when says "nothing is silently
+Measured", but once the brief travelled with the plan the document legitimately contained
+Measured tier-1 values. The rule is per-entity — the brief may hold what the architect
+typed; nothing the template produced may.
+
+### F2 — the intake
+
+`Brief` is the form: six questions and a row of ambiguity chips, and nothing else.
+Tier 2 is derived, tier 3 lives in settings, and neither appears on it — a test asserts
+that, because the way a six-question form becomes a thirty-question form is one field at a
+time.
+
+**The form is a generated schema.** The UI renders `form_schema()` rather than a
+hand-written React form, for the same reason the agent's tools are generated (I3): two
+descriptions of the same fields drift, and the drift shows up as a form that quietly stops
+collecting something the solver needs. Each field carries `x-tier` (`ask` or `chip`) plus
+its label and bounds, via `schemars(extend(...))`, so the tier metadata lives in the same
+place as the field.
+
+**Units exist for provenance, not convenience.** Storage is always exact integer
+micrometres, so "30 ft" and "9144 mm" are the same number. But a reason that reads
+*entered as 30 ft (9144 mm)* tells a reviewer something *9144 mm* does not: that the figure
+was a round number in the unit it was thought in, and that 9144 is a conversion rather than
+a measurement. The PRD calls units the classic failure mode of this domain; recording the
+original is how the mistake is spotted later.
+
+**A skipped chip and a declined chip are different records.** `Option<bool>`, not `bool`.
+An architect who tapped "no puja room" told us something and gets `Measured`; one who
+skipped the chip did not, and gets `Assumed` with a reason that says "not asked". Collapsing
+those two into one boolean would be a small lie that the compliance panel then repeats.
+
+Tier 2 is now complete: FAR, built-up, ground coverage and four setbacks (P1), plus the
+staircase footprint from the ruleset's riser and tread, water storage from an occupancy
+estimate, and the room programme. Every reason lets a reviewer re-do the sum — *"19 risers
+at 165mm to climb 3000mm, 280mm treads, two flights with a half landing"*.
+
+The room programme is deliberately **not stored**. It is an intermediate the generator
+consumes; the rooms it actually lays out are what gets committed, with their own
+provenance. Storing both would be two versions of the same number that can disagree.
+
+### P3 — `export-dxf`
+
+Same crate as the importer (`dxf`, ixmilia/dxf-rs, re-checked on crates.io), so the two
+directions cannot disagree about the format. Layer names come from the parameter set's
+tier 3 scheme; a test swaps in a house scheme and asserts the file follows.
+
+**A wall is exported as its centreline carrying its thickness as the polyline's constant
+width**, plus a closed outline on a separate hatch layer. The width is the load-bearing
+part. The importer normally recovers a thickness by pairing two parallel lines, and a lone
+centreline has nothing to pair with — the first version of this exporter round-tripped
+every 230mm wall back as a 100mm default, with the right geometry and the wrong building.
+Stating the width in the file makes the thickness *read* rather than inferred, which is
+also why it comes back `Measured`. The hatch outline lives on its own layer, and the
+bundled rule set classifies that layer as reference, so opening our own export does not
+find every wall twice.
+
+Dimensions are associative `DIMENSION` entities with an empty text field, not lines and
+text pretending to be dimensions — an exploded dimension stops being true the moment a
+wall moves.
+
+**The trap worth knowing.** `Drawing::new()` defaults to R12, which predates both
+`LWPOLYLINE` and `$INSUNITS`, and the writer **drops entities the target version cannot
+represent without erroring**. The first export produced a well-formed 10 KB file
+containing twelve room labels, not one wall, and returned `Ok`. It now targets R2000 and a
+test counts entities in the file against what was asked for, because that failure is
+invisible from the outside.
+
+### F3 — the compliance panel
+
+The panel reads a `ComplianceReport` and shows each metric as value, limit, and standing.
+It stores nothing: diagnostics are computed from the document on demand, which is what
+keeps a stale green tick impossible.
+
+**Every state carries a glyph, a word, and a colour, never colour alone** — `✓ within`,
+`! tight`, `✕ over`, `– not checked`. This came out of `ui-ux-pro-max`; the panel is the
+one surface where a red-green confusion has a building-department consequence. `Tight` is
+its own state rather than a shade of pass, because a setback sitting exactly on the limit
+has no tolerance for a site measurement that comes back 40mm out, and an architect should
+see that before the plan leaves the office.
+
+Failing and warning geometry is coloured on the canvas through `Highlights`, which
+`scene::build_with` takes as an argument rather than reading from the document. The
+renderer stays a pure function of document plus view state, so headless parity (I6) holds.
+
+**Three real defects the checks found in work that already passed its own tests.**
+
+*The generator was breaching every setback.* Walls were placed with their *centrelines* on
+the building line, so every external face projected 115mm past it — four hard violations on
+every plan produced since F1, in the one dimension a sanctioning authority measures first.
+The envelope is now inset by half the external wall. Nothing about the drawing looked
+wrong; only a number compared against a rule caught it.
+
+*Sizing a band by its target instead of its minimum.* The first fix for the resulting
+9.48m² bedroom took each band's depth from `derive_program`'s target area, which produced
+20m² bedrooms and a 1.96m-deep living room. Depth is now `max(proportion, minimum-derived)`
+per band with the surplus shared proportionally, so a room minimum raises a band and never
+decides the plan's shape.
+
+*A rebuild replaced the thicknesses the brief asked for.* `Session::buildSolids` always
+took `Preparation::Messy`. On a generated plan that heals and re-pairs geometry which was
+already clean: each wall has nothing to pair with, falls back to the rule set's 100mm
+importer default, and the 230mm external wall silently becomes 100mm. The compliance panel
+read 2065mm against a 2000mm setback and flagged it `tight`; that 65mm was the only
+outward sign. The binding now picks the preparation from the document — a document
+carrying a brief was generated here and is clean by construction, one without came from
+someone else's drawing and is not — so the choice is not the caller's to get wrong.
+
+All three shared a shape: correct-looking geometry, passing tests, wrong building. The
+checks are worth more as a development instrument than as a feature.
+
+### F4 — the template library
+
+Four templates, one per bedroom count the brief accepts: a 1BHK and a 2BHK with the living
+room to the road, a 3BHK with a side corridor, and a 4BHK around a central hall.
+
+**A template is data, and the solver is the only code.** A template declares *bands*
+running road to rear, each split across into *cells*, plus an optional full-depth *spine*
+for circulation down one side. `Template::instantiate` is the only function that turns any
+of that into geometry.
+
+That split is the whole design, and it is a direct consequence of F3. Every defect that
+phase turned up lived in band arithmetic — the envelope not inset by half a wall, a band
+sized from its target area instead of its minimum — and none of them were visible in the
+drawing. Writing that arithmetic once per template would have been four chances to
+reintroduce each. A new template now cannot contain an arithmetic bug, because it contains
+no arithmetic.
+
+A cell claims its width one of three ways, and the vocabulary is the phase's main idea:
+
+| | | |
+| --- | --- | --- |
+| `Fixed(mm)` | never grows | a toilet is a fixture in a slot |
+| `Share(w)` | always grows | a living room is better for every extra metre |
+| `Capped { w, max }` | grows, then stops | a kitchen |
+
+`Capped` is the case the first library missed. F1 had already learned that a toilet is not
+a percentage of the frontage — that lesson produced a 6.7 m² bathroom beside a 4.9 m²
+kitchen. F4 found the same failure wearing a larger size: on a 60x80 plot the 4BHK
+produced a **5.5m wide, 25.6 m² kitchen**, because nothing in the model could say "grows,
+but only to a point". With the cap the kitchen settles at 15.4 m² and the living room
+takes the 10 m² it handed back.
+
+**A cap yields to tiling.** If a band has no uncapped cell, honouring the cap would leave a
+strip of plot inside no room at all, so the cap is ignored. The visible consequence is that
+a wide 2BHK still gets an over-wide kitchen, because that band holds two fixed toilets and
+the kitchen and nothing else. That is a gap in the library, not the solver: the answer is a
+wide-plot 2BHK with a utility off the kitchen, which is a template somebody should draw.
+
+**Refusals name the band and the shortfall.** The PRD's done-when is "ten fixture parameter
+sets generate valid plans; failures are explicit, not silent", and the second clause is the
+one that matters. A 20x30 plot is told *the buildable envelope is 3866mm wide after
+setbacks; the service band needs at least 4500mm to hold its rooms at the ruleset's minimum
+widths*. `tests/library.rs` refuses five plots by name and asserts the numbers are quoted.
+`cargo run -p tri-gen --example coverage` prints the whole plot-by-bedroom grid, which is
+how the ten fixtures were chosen — by reading what the library does, not by picking sizes
+that make the arithmetic work.
+
+One refusal is worth knowing: **a 60x40 plot refuses every template.** It is 223 m², which
+lands in a deeper setback band and leaves under 7m of buildable depth. Plot area alone does
+not decide what fits.
+
+**Three things this phase found.**
+
+*A hint that contradicted the error beside it.* The first refusal appended "it needs a
+buildable envelope of at least 3000x10736mm", computed at the template's *minimum* width —
+so it told an architect their plot needed to be 10.7m deep when 7.4m would have done, one
+line under an error saying exactly that. `minimum_width_mm` now returns width only, which
+is the only dimension that does not depend on the other.
+
+*A 26 m² space labelled circulation.* The 4BHK's central hall was `kind: "circulation"`,
+which has no ruleset minimum and is skipped by every room check. On a wide plot that is a
+habitable room the size of a small flat, exempt from the rules by a label. It is `living`
+now, and checked like one.
+
+*The proportion check flagging a corridor.* Its own doc comment reads "a room can meet its
+minimum area and still be a corridor" — and then it called the 3BHK's genuine 9021 x 1050
+corridor hard to furnish. Advice with no action behind it, and an amber highlight on a wall
+that was exactly right. Circulation kinds are exempt now. A soft diagnostic an architect
+learns to ignore costs more than it saves, because the next one gets ignored too.
+
+**What is not here.** No stair, on plans the brief says are two storeys. No internal doors —
+only the main door is cut. No selection between two templates for one brief: `select`
+returns every candidate and `solve` takes the first that fits, because ranking them is F5.
+The shell still seeds a 2BHK on 30x40 and names the template it used in the status bar;
+choosing a bedroom count in the browser needs the intake form, which is its own piece.
+
+### F5 — options as branches
+
+A generation now produces three or four plans, each on its own branch, with a thumbnail
+strip along the bottom of the canvas. Selecting one makes it the working plan.
+
+**The PRD's claim that branches were "already structurally supported" was half true.**
+Every `Commit` carries a `parent`, so two commits *can* name the same one. But `History`
+is a `Vec`, and `Sequencer::submit` **rebases** any commit whose parent is stale onto the
+current head rather than forking — deliberately, because two people editing at once must
+converge and refusing a collision would make every concurrent edit a user-visible error.
+Both behaviours are right and they are in tension.
+
+Turning `History` into a general DAG with merge resolution would change what a commit
+means for every caller — the session server, the rebase-and-replay machinery in
+`LocalSession` — to serve a feature whose branches are never merged. So a branch is a
+**forked `Sequencer`**: its own document, its own linear history, growing from a commit id
+the others share. `Sequencer` is already `Clone` and validation is pure, so the fork is
+exact. Options are genuine siblings; they simply live in separate logs, the way a worktree
+does, rather than interleaved in one. The cost is N documents instead of one, against a
+merge algorithm nobody would ever run.
+
+**Lossless is the hard half of "instant and lossless", and it is not automatic.** The
+working sequencer has to be written back into the slot it came from *before* the next one
+is taken. Without that, editing option A, glancing at B and returning discards the edit
+silently. `Branches::switch` does the write-back, and a test edits a branch, leaves and
+returns.
+
+**Where the options come from.** The library does not hold four topologies per bedroom
+count and should not pretend to — inventing three more per count to fill a strip of
+thumbnails is the "looks naive to a trained eye" failure in a new costume. So an option is
+a template *plus* a variant, and F5 added two real second topologies (a 2BHK with the
+service core between the bedrooms, a 3BHK around a central hall) alongside an **emphasis**
+variant that shifts surplus depth toward the living room or the bedrooms. Emphasis acts
+only on surplus, after every band has claimed its ruleset minimum, so it cannot push a
+room under code.
+
+**Two things this phase got wrong first.**
+
+*Ranking on noise, and offering the same plan four times.* The first list read 43.1, 43.1,
+43.1 and 43.1 m². Total habitable area is nearly constant across variants — the envelope is
+fixed, emphasis only moves area *between* rooms — so sorting by it was sorting by rounding,
+and `mirrored`, which changes handedness and nothing else, outranked genuinely different
+variants. Options are now ranked by how many rooms each leaves awkward to furnish and then
+filled **round-robin across templates**, so a second topology always beats a second variant
+of the first. A strip of near-identical thumbnails is worse than one plan, because it
+implies a choice was weighed. Mirroring is no longer offered at all: without knowing which
+side the neighbour, the gate or the sun is on, it is a coin flip dressed as a decision.
+F7 brings the north angle in, and that is when handedness becomes a real question.
+
+*A mirror that inverted every room.* `Layout::mirrored` carried each cell's `max.y` into
+`min` along with the x flip, giving rooms negative depth. The fixture suite caught it only
+because a -24 m² living room then ranked **first** — a room with a negative short side is
+not awkward to furnish either. The transform's own doc comment had promised
+`mirror(mirror(l)) == l` as a test and there wasn't one; there is now.
+
+**Thumbnails, and where the headless path stops.** F5's mechanism is "thumbnails via the
+headless renderer", and `render_to_image` reads the framebuffer back with
+`device.poll(wait)` and a blocking channel receive. That is correct on a server and would
+hang a browser tab: wasm has one thread, and WebGPU resolves the buffer mapping on the
+event loop that the blocking receive is stopping from running. Shipping it as a browser API
+would have been a trap.
+
+So the strip draws each option to its own small canvas — the same `Scene` and the same
+shader, via `render_to_surface`, so a thumbnail cannot disagree with the drawing it is a
+picture of. The headless path is exercised by a `tri-gen` test that renders a branch to an
+image on a machine with no window, which is what a server-side thumbnail or a PDF sheet
+will use. An async readback is worth writing when something actually needs the bytes.
+
+**The strip's interaction** follows `ui-ux-pro-max`: a native `<button>` with
+`aria-pressed` rather than a clickable div (rated Critical), a focus ring distinct from the
+selected ring so tabbing through is legible without selecting, and the selected option
+saying "selected" in words as well as colour — the same rule the compliance panel follows.
+Selection is set from what Rust reports rather than from the key that was clicked, and
+nothing is gated on a transition ending, so clicking through four options quickly cannot
+leave the strip showing one plan and the canvas another.
+
+### F6 — intake
+
+A sentence in, a brief out, shown for confirmation, then generated. `tri-intake` builds
+the request and parses the reply; `tri-server` forwards it with the user's own key.
+
+**The model never emits geometry.** It fills a typed form and a deterministic solver turns
+that into walls. The PRD calls this "the load-bearing decision of the whole product", and
+it is what makes bring-your-own-key viable: the form is small and the schema exact, so a
+mid-tier model does about as well as a frontier one.
+
+**Confirmation is the provenance event, not parsing.** `ParameterSet::from_brief` marks
+every tier-1 value `Measured` — "the architect typed this". A model filling `floors: 2`
+from a sentence that never mentioned floors would turn a guess into a measurement at the
+very first step, with no geometry yet for anything to catch it against. So `Intake::stated`
+records what the brief actually said, the card marks everything else *assumed, check this*,
+and generation waits for a human. Until somebody has looked at it, an intake is a proposal.
+
+**The prompt is generated from the schema.** Invariant I3 keeps agent tool schemas
+generated so they cannot drift from the Rust types; a hand-written prompt listing the
+fields would be a second declaration of `Brief`, and the failure mode is not a compile
+error — it is a model confidently filling a field somebody renamed six months ago. Only the
+instructions are prose.
+
+**The proxy.** `tri-intake` has no HTTP client, deliberately: that keeps it wasm-compilable
+and keeps the thirty-brief eval a pure function of its inputs, because a crate that *could*
+reach the internet eventually has a test that does. The server holds the client. The
+request names a **model, never a URL** — the destination comes from the allowlist, or a
+crafted request could make the server post a user's key anywhere. The key is used once and
+never stored, logged, or put in a URL, and a test asserts it appears in exactly one header
+and nowhere in the body.
+
+**A local parser, and why it is not a stub.** `local::parse` reads the common brief shapes
+with no model and no network. It is the eval's floor — run only against a hosted model,
+"thirty briefs parse" measures the model rather than our schema, coercions and range
+checks. It is also one answer to the PRD's open question about users without a key, and it
+is what the shell uses today.
+
+**What the done-when proves, and what it does not.** "Thirty test briefs parse correctly
+across at least two providers" is two claims. The offline half is verified: thirty briefs
+in `fixtures/intake/briefs.json`, run through the local parser and the model-response path,
+asserting both the parsed values *and* that nothing unstated is reported as stated. Three
+of the thirty must be refused with a question — "I want a nice house" has no site in it.
+
+The model half is not verified here and no amount of offline testing would verify it. It is
+`crates/server/tests/intake_live.rs`, `#[ignore]`d, run deliberately by somebody with a key:
+
+```bash
+TRIMENSION_INTAKE_KEY=sk-... TRIMENSION_INTAKE_MODEL=claude-haiku-4-5-20251001 \
+  cargo test -p tri-server --test intake_live -- --ignored --nocapture
+```
+
+Until that has been run for a model, **the allowlist is a list of models somebody intends
+to measure**, and saying otherwise would be inventing a result.
+
+**Two things this phase got wrong.**
+
+*A repair that broke what it was repairing.* Models sometimes send `"bedrooms": "3"`.
+Coercing every numeric field to `f64` turned that into `3.0`, which `serde_json` will not
+deserialise into a `u8` — so the fix for one model quirk became a hard parse failure. The
+integer fields are now reinserted as integers, and a whole-number float is accepted too.
+
+*Two houses on one plot.* Describing a 4BHK on 60x80 after a 2BHK on 30x40 generated the
+new plan **on top of the old one**: 40 entities, duplicated layers, FAR 5.17 against a
+permitted 1.75. F5's branches fork from the document's current state, which is right for
+the first generation and wrong for the second — a new brief replaces the plan, it does not
+add a building. `Branches::root` now remembers the document as it stood before the first
+generation, so anything that preceded it (an imported drawing) survives every regeneration
+and no plan does. The compliance panel flagged it within a second of the click, which is
+the best argument for the panel there has been.
+
+### P4 — direct canvas manipulation
+
+Drag a wall in plan and it moves, the rooms either side of it resize, the compliance panel
+updates, and it is one commit that undo steps back.
+
+**There is no drag-specific write path, and that is the whole design.** The drag dispatches
+`Command::MoveWall` — the same registry variant an agent calls to say "shift the kitchen
+wall 300mm left". A canvas is the easiest place in this product to reach past the registry
+and mutate the document directly, and the cost of doing so would not show up as a bug in
+the canvas; it would show up as an undo stack that knew about mouse edits and not about
+agent edits. Adding the variant also added it to the agent's tool schema with no separate
+step, which the schema-drift test noticed immediately — I3 working rather than being
+remembered.
+
+**The rooms move with the wall.** A room is its own entity holding a recorded area, width
+and depth. Moving the wall alone would leave all of those stale, and the compliance panel
+reads exactly those numbers — it would go on reporting the areas the template produced
+while the drawing showed something else. Room rectangles and wall centrelines coincide by
+construction, so an edge is matched by exact equality in micrometres rather than a
+tolerance. A moved room's area comes back `Measured` naming who dragged it, where the
+template's was `Assumed`: an architect moving an edge is evidence in a way a proportion
+constant never was.
+
+Two drags are refused rather than recorded. One that would turn a room inside out, because
+`commit::validate` checks that a document is structurally possible and not that a plan
+still makes sense — nothing further down would catch it. And one that slides a wall along
+its own length, which moves nothing; recording that would put an empty commit in the
+history and make undo feel broken.
+
+**Undo is rebuild-and-replay, not inverse ops.** `history.rs` already argued the point when
+rejecting inverse ops for commit rejection: they "would be a second, subtly different
+implementation of every mutation — the exact kind of code that drifts out of sync with
+`apply` and then corrupts a document six months later". Undo has the same shape and gets
+the same answer. `Sequencer` keeps the document it was opened on as a replay base and a
+count of how many commits are applied; stepping back replays a shorter prefix, and every
+commit goes back through `check` on the way. It is O(n) in history length, which is nothing
+for a drafting session; if it ever matters the fix is a periodic snapshot, not an inverse
+of every op.
+
+Two consequences worth stating. `Sequencer::head` is the *applied* head, not the tip of the
+log — a commit parented to the tip after an undo would claim to follow a state the document
+is not in. And committing after an undo abandons what was undone, which is the one place
+the log is not append-only; it is what every editor does and what git does on a reset, and
+keeping those commits would mean `history()` listing work that is not in the document.
+
+Because every edit is a commit, one pair of controls covers all of them: a mouse drag, an
+agent's approved plan, and a whole three-commit generation all step back the same way. A
+stack that only recorded "user actions" would need an opinion about how many commits an
+agent's plan is worth, and would be wrong about it.
+
+**Two things the tests corrected.**
+
+*A fixture that was testing the wrong wall.* The conservation test took the second vertical
+wall it found, which is the left *external* one. Moving that grows the rooms outwards
+instead of trading area between two of them — so area was not conserved and the collapse
+test found nothing to collapse. Both failures were the fixture, not the command.
+
+*An assertion that would have forbidden attribution.* The test for "undo works identically
+for a human drag and an agent call" first asserted the two produced the same document hash.
+They do not, and should not: the room's provenance reason names who moved the edge, and
+provenance is hashed — a deliberate choice from P1 so that a measurement and an assumption
+of the same number are different documents. The test now asserts identical *geometry* and
+*different* records of who made it, which is what I4 is for.
+
+Verified in the browser: one drag, one commit, the compliance panel going from passes to
+three breaches and back, and undo restoring the document hash and the commit depth exactly.
+
+### F7 — Vaastu
+
+Off by default. When the brief asks for it, the options are ranked by directional
+preference as well as by buildability, mirrored plans appear, and every card says what
+choosing it cost.
+
+**It cannot block a plan, and that is structural.** The PRD: Vaastu "ranks and biases
+options; it never blocks generation". `crates/vaastu/Cargo.toml` does not list `tri-gen` or
+`tri-commit`, so the crate cannot name `TemplateError`, `SelectError` or any other refusal;
+`assess` returns an `Assessment`, not a `Result`. It is the same shape `tri-rules` uses to
+keep a bylaw away from `commit::validate`, and a test guards the dependency rather than the
+intention.
+
+**Preferences are data, for a stronger reason than the bylaws are.** BBMP at least has an
+authority. Vaastu has none — it is not a code, nobody enforces it, and its schools disagree
+with each other — so a client's own consultant may want different preferences entirely.
+Encoding one school in Rust would make that a code change. `rulesets/traditional-v0.json`
+carries the five preferences the PRD names plus two companions, each with the reason it
+exists, and `reviewed_by: null`: the provenance line says out loud that no practising
+consultant has seen it **and that it is not a building code**.
+
+**The orientation convention is the thing to get right.** A "north-facing plot" has the
+road to its *north*, so the building faces north and the document's +Y — which runs away
+from the road — points south. Getting that backwards would put every room in the opposite
+sector, and the layer would be confidently wrong rather than obviously broken. It is
+spelled out in `Compass::new` and asserted directly.
+
+The centre of the plot is its own sector rather than one of the eight. The *brahmasthan* is
+the one preference every school agrees on, and folding it into a compass direction would
+lose it.
+
+**Scoring is asymmetric on purpose.** Being in the right place earns two points; being in a
+sector the ruleset asks you to avoid costs three. The complaints a client makes are all
+about the avoid list. A layout the ruleset recognises nothing in scores 50, not zero: a
+corridor-heavy template is not a bad plan, and rounding "no opinion" down to "bad" would
+make the toggle punish templates it cannot read.
+
+**Buildability still outranks it.** Options sort by awkward-room count first and Vaastu
+score second, so the layer decides among plans that are equally furnishable and never
+promotes one that is not — a 2.6:1 kitchen is a room nobody can cook in whichever way it
+faces. In practice most candidates share an awkward count, so it reorders freely.
+
+**Mirroring comes back, which is a promise F5 made.** F5 withheld the mirror variant
+because "without knowing which side the neighbour, the gate or the sun is on, presenting it
+as one of four choices is a coin flip dressed as a decision". With a north angle in play,
+handedness decides which sector the kitchen lands in, so the mirror is offered — and on a
+40x60 3BHK it is frequently the option that wins. A test asserts mirrors appear only with
+Vaastu on, and another asserts they actually change the score, because otherwise it would
+still be a coin flip in better clothes.
+
+**The cost is visible because a bare score cannot be argued with.** The ranking is computed
+twice: once without Vaastu, recording where each option *would* have come, and once with.
+Every card carries the difference — *"ranked 10 without Vaastu, 6.8 m² less room area"*, or
+*"the same plan Vaastu-off would have chosen"*. An architect who turns the layer on is
+entitled to know whether it moved anything and what it gave up.
+
+One consequence of the round-robin diversity rule from F5 shows through here: a card
+showing 76% can sit above one showing 80%, because the two are different topologies and the
+strip alternates between them. Within a template the order is strictly by score.
+
+### P5 — the plan sheet
+
+A printable A3 (or A4, or A2) sheet at 1:50, 1:100 or another scale off a fixed list, with
+room labels, areas, overall dimensions, a scale bar and a title block.
+
+**The exporters had no callers.** P3 built the DXF writer, tested it against a round trip,
+and wired it to nothing. The PRD calls layered DXF "the primary deliverable and the thing
+you will be judged on — an architect opens it in AutoCAD and decides in five seconds
+whether you are serious", and it could not be obtained from the product at all. A crate
+with no caller is a crate nobody can use, so this phase added the download for both
+formats rather than shipping a second unreachable exporter beside the first.
+
+**No PDF dependency.** A plan sheet is vector paths and base-14 Helvetica — no images, no
+embedded fonts, no compression — which by hand is a few hundred lines of a format that has
+not changed since 1993. It buys two things worth more than the lines: it compiles to wasm32
+without argument, so the browser produces the sheet with no round trip, and every
+coordinate on the page is one this crate put there, which is what "prints at correct scale"
+has to mean.
+
+The part that is easy to get wrong is the cross-reference table, which gives each object's
+**byte offset**. A viewer handed a table one byte out either repairs the file silently or
+refuses it with no useful message, and nothing about the bytes looks wrong. So offsets are
+recorded as the bytes are written, never computed afterwards, and a test walks the table
+and checks each entry lands on its own `N 0 obj`.
+
+**The drawing is never scaled to fit.** It is drawn at a scale off `SCALES` and the paper is
+chosen to suit. "1:87 to fill the page" is a picture of a building, not a drawing of one,
+and the entire value of printing it is that a scale rule works on the paper. Text is 2.5mm
+at every scale, which is the smallest a drawing office accepts. A room label that will not
+fit inside its room is left off: a 2.5mm name spilling out of a 1.2m toilet at 1:100 is
+worse than no name.
+
+**The walls on paper are the walls on screen.** `scene::wall_faces` was made public and is
+shared, rather than the sheet computing its own offset. A sheet whose wall faces sat a few
+millimetres off the canvas's would be wrong in exactly the way an architect checks with a
+rule, and nothing else in the system would notice.
+
+The disclaimer travels with the sheet, always. It is the one artefact that leaves the
+building and turns up in a meeting with no compliance panel beside it, so the
+unreviewed-ruleset line is printed in the title block under the project name.
+
+**Two things the tests caught.**
+
+*Dimensions in micrometres.* The first sheet printed `8692000` beside an 8.7m wall, because
+micrometres were passed into a parameter named `metres` and multiplied by a thousand again.
+Obvious on paper, invisible in a byte comparison — the test now parses every number the
+sheet prints and asserts it is a plausible building dimension in millimetres.
+
+*A test that could not read its own file.* The cross-reference check indexed a
+`from_utf8_lossy` view of the bytes. The file opens with a binary comment so that tools
+treat it as binary, and the lossy conversion replaces those four bytes with one replacement
+character — shifting every index past it, and failing on a perfectly good file. It reads
+bytes now.
+
+The render check is the one no amount of structural assertion replaces: the sheet is
+written to a file and handed to macOS Quick Look, which uses the same PDF stack Preview
+does. If a picture comes out, it opens.
+
+### F8 — massing out, and the correction log
+
+The extrusion exports as a mesh, and every edit made after generation is recorded.
+
+**OBJ, by hand, and scoped honestly.** The PRD is careful: "the 3D extrusion exports as a
+simple solid, **useful for massing only**". It is not a BIM model, and the file's own header
+says so, along with its units. Two silent failures are worth the tests they get: OBJ face
+indices are 1-based and **global to the file**, not per-object, and writing them per-object
+produces a mesh that opens as a tangle reaching back to the origin with every index still
+parsing. And OBJ has no unit header, so consumers assume metres — exporting raw
+micrometres opens as a continent, dividing twice opens as a speck. A test asserts the model
+is between three and thirty metres on a side and about three metres tall.
+
+**The log is derived, not recorded.** The obvious implementation is an event stream the UI
+appends to. That is a second account of what happened, kept beside the first, and the two
+disagree the moment anybody forgets a call site — the log says a wall moved 300mm while the
+document says 400mm, and nothing can say which is right.
+
+P4 already made every edit a commit, so the edits are recorded in the one place that cannot
+be wrong about them. `tri-corrections` **replays the history** and reads the corrections out
+of it: for each commit it holds the document as it was before, so a wall move can report
+where the wall *was* as well as where it went — which is the part the PRD actually asks for,
+because the useful question is which wall of which template keeps getting moved.
+
+What cannot be derived is small and explicit: which option is in front, and whether anything
+was exported. Those are the only two things a caller has to remember to say. It is the same
+argument as diagnostics being computed rather than stored, and undo being replay rather
+than inverse ops — a second source of truth is a bug with a delay on it.
+
+Three consequences fall out for free. **Generation is not a correction**: the three commits
+that produced the plan are the thing being corrected, and a log that counted them would
+report every session as heavily edited from the first day. **An undone edit leaves the log**,
+because the log reads the applied prefix — a wall moved and put back is a change of mind,
+not a correction to the template. And **edits after an export do not count toward "median
+under 8 wall edits"**, because that metric measures how close first generation lands, not
+how long somebody kept working.
+
+**Nothing is sent anywhere.** The log is the architect's project data — what they are
+designing and where they disagreed with the solver. `to_json` hands the caller bytes; the
+crate opens no socket and writes no file. The count sits in the status line rather than
+accumulating invisibly, and clicking it downloads the file.
+
+One thing this phase got wrong: `tri-corrections` matched the room component against a
+literal `"room"`, which is not its name — it is `"Room"` — so room resizes were silently
+absent from the log. Exactly the second-definition-that-drifts problem the crate's own doc
+comment argues against, three screens below it. It imports `tri_rules::ROOM_TYPE_NAME` now.
+
+### The I4 hole this phase had to close first
+
+`Component::Custom` plus the type registry is the sanctioned way to extend the document
+without touching `doc` (PRD §4.3). But `CanonicalValue` had no provenance variant and
+`provenance_records()` returned `Vec::new()` for `Custom` — so **every runtime-registered
+component was invisible to I4**. A parameter set stored that way would have held a 230mm
+default with no record it was a default, which is the exact failure the invariant exists to
+prevent.
+
+Fixed by adding `CanonicalValue::Tracked` and making `provenance_records()` walk custom
+components, reporting dotted paths (`setbacks.front`) so nested groups do not collide.
+Provenance is hashed, so two documents differing only in "this 230mm was measured" versus
+"assumed" are different documents.
+
 ## 5. Running it
 
 ```bash
@@ -296,3 +948,31 @@ and `PATH` to it, or install 1.98.1 normally.
 corepack pnpm --filter @trimension/web dev     # shell on :6178
 cargo run -p tri-server                        # session server on :8788
 ```
+
+## 7. What is still missing
+
+Every phase in the PRD's table is implemented. That is not the same as the product being
+finished, and the gap is worth writing down rather than leaving for somebody to discover.
+
+**Both rulesets are unreviewed.** `bbmp-plotted-residential.json` and
+`vaastu/traditional-v0.json` carry `reviewed_by: null` and say so everywhere they are shown,
+including on the printed sheet. They are data written from general knowledge, not checked by
+a practising architect or a consultant. Nothing else in this document matters as much.
+
+**Half of F6's done-when is unverified.** "Thirty briefs across at least two providers" —
+the offline half passes; whether a model fills the form correctly needs keys and real paid
+calls, and lives in an `#[ignore]`d test. Until it has been run for a model, the allowlist
+is a list of models somebody intends to measure.
+
+**The plans are incomplete as drawings.** No staircase, on plans the brief says are two
+storeys. No internal doors — only the main entry is cut. Both are real omissions an
+architect would notice immediately, and neither is hard; they were simply not in a phase.
+
+**The shell is not the PRD's UX.** It is still the four-viewport CAD shell with the intake
+card bolted into the side panel, not "a single centred input, full width, with four or five
+example prompts beneath it". There is no settings panel, so units, wall thicknesses, the
+door schedule, layer names and the LLM key are not adjustable from the product.
+
+**Chat iteration does not exist.** "Make the master bigger" reaches the demo agent, not a
+parameter-set diff and a re-solve. The machinery it needs — branches, the command registry,
+the correction log — is all there; the wiring is not.

@@ -822,3 +822,157 @@ fn errors_are_readable_by_a_human_and_an_agent() {
     assert!(text.contains("e42"), "no entity id in {text:?}");
     assert!(matches!(e, ApplyError::Rejected(_)));
 }
+
+// ---------------------------------------------------------------------------
+// I4 reaches runtime-registered components
+// ---------------------------------------------------------------------------
+
+fn register(name: &str, required: &[&str]) -> Op {
+    Op::RegisterType {
+        def: TypeDef {
+            name: name.to_string(),
+            fields: required.iter().map(|f| (f.to_string(), true)).collect(),
+        },
+    }
+}
+
+#[test]
+fn a_custom_component_can_carry_provenance() {
+    // The hole this closes: `Component::Custom` is the sanctioned way to extend the
+    // document without touching `doc`, but it used to report no provenance at all. Every
+    // runtime-registered component was invisible to I4 — a defaulted dimension could be
+    // stored with no record that it was defaulted, which is the exact failure the
+    // invariant exists to prevent.
+    let mut doc = Document::new();
+    validate_and_apply(
+        &mut doc,
+        &[
+            register("ParameterSet", &["external_wall"]),
+            Op::CreateEntity {
+                components: vec![Component::Custom {
+                    type_name: "ParameterSet".into(),
+                    data: BTreeMap::from([
+                        (
+                            "external_wall".to_string(),
+                            CanonicalValue::assumed(
+                                CanonicalValue::Length(Length::from_mm(230)),
+                                "default, not specified by the architect",
+                            ),
+                        ),
+                        (
+                            "plot_width".to_string(),
+                            CanonicalValue::measured(
+                                CanonicalValue::Length(Length::from_mm(9144)),
+                                "entered as 30ft",
+                            ),
+                        ),
+                    ]),
+                }],
+            },
+        ],
+    )
+    .expect("a registered custom component is valid");
+
+    let (_, set) = doc.iter_entities().next().unwrap();
+    let records = set
+        .get(&ComponentKey::Custom("ParameterSet".into()))
+        .unwrap()
+        .provenance_records();
+
+    assert_eq!(
+        records.len(),
+        2,
+        "custom provenance not reported: {records:?}"
+    );
+    let by_field: BTreeMap<_, _> = records
+        .iter()
+        .map(|(f, p, r)| (f.as_str(), (*p, r.as_str())))
+        .collect();
+    assert_eq!(by_field["external_wall"].0, Provenance::Assumed);
+    assert!(by_field["external_wall"].1.contains("default"));
+    assert_eq!(by_field["plot_width"].0, Provenance::Measured);
+}
+
+#[test]
+fn nested_custom_values_report_a_dotted_path() {
+    // A parameter group must not report a bare `front` that collides with three other
+    // fields called `front`.
+    let v = CanonicalValue::Map(BTreeMap::from([(
+        "setbacks".to_string(),
+        CanonicalValue::Map(BTreeMap::from([
+            (
+                "front".to_string(),
+                CanonicalValue::inferred(
+                    CanonicalValue::Length(Length::from_mm(1500)),
+                    "BBMP table, plot area band 150-300 sqm",
+                ),
+            ),
+            (
+                "rear".to_string(),
+                CanonicalValue::inferred(
+                    CanonicalValue::Length(Length::from_mm(1200)),
+                    "same band",
+                ),
+            ),
+        ])),
+    )]));
+
+    let mut out = Vec::new();
+    v.collect_provenance("", &mut out);
+    let paths: Vec<_> = out.iter().map(|(p, _, _)| p.as_str()).collect();
+    assert_eq!(paths, vec!["setbacks.front", "setbacks.rear"]);
+}
+
+#[test]
+fn a_custom_component_with_an_empty_reason_is_rejected() {
+    // The same I4 gate the built-in components get.
+    let mut doc = Document::new();
+    validate_and_apply(&mut doc, &[register("ParameterSet", &[])]).unwrap();
+
+    let ops = [Op::CreateEntity {
+        components: vec![Component::Custom {
+            type_name: "ParameterSet".into(),
+            data: BTreeMap::from([(
+                "floor_to_floor".to_string(),
+                CanonicalValue::assumed(CanonicalValue::Length(Length::from_mm(3000)), "   "),
+            )]),
+        }],
+    }];
+    let err = check(&doc, &ops).expect_err("an empty reason must be rejected");
+    assert!(
+        format!("{err:?}").contains("EmptyProvenanceReason"),
+        "got {err:?}"
+    );
+}
+
+#[test]
+fn provenance_is_part_of_the_document_hash_for_custom_components() {
+    // Two documents whose only difference is "this 230mm was measured" versus "this
+    // 230mm was assumed" are different documents. A reviewer who signed one has not
+    // signed the other.
+    let build = |p: Provenance| {
+        let mut d = Document::new();
+        validate_and_apply(
+            &mut d,
+            &[
+                register("ParameterSet", &[]),
+                Op::CreateEntity {
+                    components: vec![Component::Custom {
+                        type_name: "ParameterSet".into(),
+                        data: BTreeMap::from([(
+                            "external_wall".to_string(),
+                            CanonicalValue::tracked(
+                                CanonicalValue::Length(Length::from_mm(230)),
+                                p,
+                                "same reason text",
+                            ),
+                        )]),
+                    }],
+                },
+            ],
+        )
+        .unwrap();
+        d.hash()
+    };
+    assert_ne!(build(Provenance::Measured), build(Provenance::Assumed));
+}

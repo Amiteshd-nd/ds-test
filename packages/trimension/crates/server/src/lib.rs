@@ -8,6 +8,7 @@
 //! Anything but `tri-api`. Nothing in the workspace may depend on this crate.
 
 pub mod app;
+pub mod intake;
 pub mod protocol;
 pub mod session;
 pub mod store;
