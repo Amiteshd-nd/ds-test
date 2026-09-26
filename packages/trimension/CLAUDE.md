@@ -1,8 +1,15 @@
 # trimension — agent-native 3D drafting canvas
 
 > Project rules. These override default behaviour and general instincts.
-> Source of truth for intent: [`PRD.md`](./PRD.md) (the PRD's working name was `axon`;
-> the project is named **trimension** here).
+> Source of truth for intent, in two documents:
+>
+> - [`PRD.md`](./PRD.md) — the CAD platform (the PRD's working name was `axon`; the
+>   project is named **trimension** here). Milestones M0–M7.
+> - [`PRD-AI-FLOOR-PLAN-MVP.md`](./PRD-AI-FLOOR-PLAN-MVP.md) — the AI floor plan tool
+>   built on top of it. Phases P0–P5 and F1–F8.
+>
+> Both are kept in the repo rather than linked from elsewhere: a spec that lives in
+> somebody's Downloads folder is not a source of truth, it is a rumour.
 
 ## Project summary
 

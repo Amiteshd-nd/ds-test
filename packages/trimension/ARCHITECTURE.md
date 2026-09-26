@@ -291,7 +291,8 @@ a reviewer nothing.
 
 ## 6. The floor plan track
 
-Built on top of the CAD platform, following `PRD-AI-FLOOR-PLAN-MVP.md`. **Every phase in
+Built on top of the CAD platform, following
+[`PRD-AI-FLOOR-PLAN-MVP.md`](./PRD-AI-FLOOR-PLAN-MVP.md). **Every phase in
 the PRD's table is implemented**: P0–P5 and F1–F8. What is *not* done is listed under
 "What is still missing" at the end of this section — the phases are complete, the product
 is not.
