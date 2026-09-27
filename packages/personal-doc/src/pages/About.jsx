@@ -211,7 +211,7 @@ const About = () => {
             <BlurImage
               src={profileImg}
               alt="Amitesh Debnath"
-              className="w-[231px] h-[309px] rounded-[8px] flex-shrink-0"
+              className="site-plate w-[231px] h-[309px] rounded-lg flex-shrink-0"
               priority
             />
 
@@ -220,11 +220,16 @@ const About = () => {
               <p className="font-space font-bold text-[24px] leading-[1.36] text-light" style={{ letterSpacing: '-0.24px' }}>
                 Hi, I am
               </p>
+              {/* The name was a fixed red-to-orange gradient. Half the themes
+                  ban gradients outright and the two darkest ones could not
+                  hold that pair against their ground, so it is the theme's
+                  own accent now — one colour, and one that always contrasts. */}
               <h1
-                className="font-space font-bold text-[32px] leading-[1.36] bg-clip-text bg-gradient-to-r from-[#b1292c] to-[#cd6115]"
+                className="font-space text-[32px] leading-[1.36]"
                 style={{
                   letterSpacing: '-0.32px',
-                  WebkitTextFillColor: 'transparent'
+                  color: 'var(--site-accent)',
+                  fontWeight: 'var(--site-weight-display)',
                 }}
               >
                 Amitesh Debnath,
@@ -243,88 +248,88 @@ const About = () => {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="flex flex-col gap-8 overflow-x-hidden"
           >
-            <h2 className="font-space font-bold text-2xl leading-[1.36em] text-text-secondary" style={{ letterSpacing: '-0.24px' }}>
+            <h2 className="font-space text-2xl leading-[1.36em] text-text-secondary" style={{ letterSpacing: '-0.24px', fontWeight: 'var(--site-weight-display)' }}>
               Interests
             </h2>
 
             {/* Bento Grid - Desktop */}
-            <div className="hidden md:block w-full">
-              <div className="flex flex-col gap-3">
+            <div className="bento-fluid hidden md:block w-full">
+              <div className="flex flex-col gap-[1.579cqw]">
                 {/* Row 1 */}
-                <div className="flex gap-3">
+                <div className="flex gap-[1.579cqw]">
                   {/* Left Column */}
-                  <div className="flex flex-col gap-3 w-[530px]">
+                  <div className="flex flex-col gap-[1.579cqw] w-[69.737cqw]">
                     {/* Top Row */}
-                    <div className="flex gap-3">
-                      <div className={`bento-tile bento-tile-animated w-[187px] h-[248px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.anime1 ? `tile-${tileAnimations.anime1}` : ''} ${swappingTiles.includes('anime1') ? 'swapping' : ''}`} style={{ animationDelay: '0.1s' }}>
+                    <div className="flex gap-[1.579cqw]">
+                      <div className={`bento-tile bento-tile-animated w-[24.605cqw] h-[32.632cqw] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.anime1 ? `tile-${tileAnimations.anime1}` : ''} ${swappingTiles.includes('anime1') ? 'swapping' : ''}`} style={{ animationDelay: '0.1s' }}>
                         <BlurImage src={tileOrder.anime1} alt="" className="w-full h-full" />
                       </div>
-                      <div className={`bento-tile bento-tile-animated flex-1 h-[248px] rounded-lg overflow-hidden ${tileAnimations.festival ? `tile-${tileAnimations.festival}` : ''} ${swappingTiles.includes('festival') ? 'swapping' : ''}`} style={{ animationDelay: '0.2s' }}>
+                      <div className={`bento-tile bento-tile-animated flex-1 h-[32.632cqw] rounded-lg overflow-hidden ${tileAnimations.festival ? `tile-${tileAnimations.festival}` : ''} ${swappingTiles.includes('festival') ? 'swapping' : ''}`} style={{ animationDelay: '0.2s' }}>
                         <BlurImage src={tileOrder.festival} alt="" className="w-full h-full" />
                       </div>
                     </div>
 
                     {/* Bottom Row */}
-                    <div className="flex gap-3">
-                      <div className="flex flex-col gap-3 w-[320px]">
-                        <div className={`bento-tile bento-tile-animated w-full h-[205px] rounded-lg overflow-hidden ${tileAnimations.jeep ? `tile-${tileAnimations.jeep}` : ''} ${swappingTiles.includes('jeep') ? 'swapping' : ''}`} style={{ animationDelay: '0.3s' }}>
+                    <div className="flex gap-[1.579cqw]">
+                      <div className="flex flex-col gap-[1.579cqw] w-[42.105cqw]">
+                        <div className={`bento-tile bento-tile-animated w-full h-[26.974cqw] rounded-lg overflow-hidden ${tileAnimations.jeep ? `tile-${tileAnimations.jeep}` : ''} ${swappingTiles.includes('jeep') ? 'swapping' : ''}`} style={{ animationDelay: '0.3s' }}>
                           <BlurImage src={tileOrder.jeep} alt="" className="w-full h-full" />
                         </div>
-                        <div className={`bento-tile bento-tile-animated bento-tile-pulse w-full h-[184px] rounded-lg overflow-hidden ${tileAnimations.pingpong ? `tile-${tileAnimations.pingpong}` : ''} ${swappingTiles.includes('pingpong') ? 'swapping' : ''}`} style={{ animationDelay: '0.4s' }}>
+                        <div className={`bento-tile bento-tile-animated bento-tile-pulse w-full h-[24.211cqw] rounded-lg overflow-hidden ${tileAnimations.pingpong ? `tile-${tileAnimations.pingpong}` : ''} ${swappingTiles.includes('pingpong') ? 'swapping' : ''}`} style={{ animationDelay: '0.4s' }}>
                           <BlurImage src={tileOrder.pingpong} alt="" className="w-full h-full" />
                         </div>
                       </div>
-                      <div className={`bento-tile bento-tile-animated w-[198px] h-[401px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.chess ? `tile-${tileAnimations.chess}` : ''} ${swappingTiles.includes('chess') ? 'swapping' : ''}`} style={{ animationDelay: '0.5s' }}>
+                      <div className={`bento-tile bento-tile-animated w-[26.053cqw] h-[52.763cqw] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.chess ? `tile-${tileAnimations.chess}` : ''} ${swappingTiles.includes('chess') ? 'swapping' : ''}`} style={{ animationDelay: '0.5s' }}>
                         <BlurImage src={tileOrder.chess} alt="" className="w-full h-full" />
                       </div>
                     </div>
                   </div>
 
                   {/* Right Column */}
-                  <div className="flex flex-col gap-3 w-[218px]">
-                    <div className={`bento-tile bento-tile-animated w-full h-[327px] rounded-lg overflow-hidden ${tileAnimations.suit ? `tile-${tileAnimations.suit}` : ''} ${swappingTiles.includes('suit') ? 'swapping' : ''}`} style={{ animationDelay: '0.6s' }}>
+                  <div className="flex flex-col gap-[1.579cqw] w-[28.684cqw]">
+                    <div className={`bento-tile bento-tile-animated w-full h-[43.026cqw] rounded-lg overflow-hidden ${tileAnimations.suit ? `tile-${tileAnimations.suit}` : ''} ${swappingTiles.includes('suit') ? 'swapping' : ''}`} style={{ animationDelay: '0.6s' }}>
                       <BlurImage src={tileOrder.suit} alt="" className="w-full h-full" />
                     </div>
-                    <div className={`bento-tile bento-tile-animated bento-tile-pulse w-full h-[322px] rounded-lg overflow-hidden ${tileAnimations.woman1 ? `tile-${tileAnimations.woman1}` : ''} ${swappingTiles.includes('woman1') ? 'swapping' : ''}`} style={{ animationDelay: '0.7s' }}>
+                    <div className={`bento-tile bento-tile-animated bento-tile-pulse w-full h-[42.368cqw] rounded-lg overflow-hidden ${tileAnimations.woman1 ? `tile-${tileAnimations.woman1}` : ''} ${swappingTiles.includes('woman1') ? 'swapping' : ''}`} style={{ animationDelay: '0.7s' }}>
                       <BlurImage src={tileOrder.woman1} alt="" className="w-full h-full" />
                     </div>
                   </div>
                 </div>
 
                 {/* Row 2 */}
-                <div className="flex gap-3">
+                <div className="flex gap-[1.579cqw]">
                   {/* Left Column */}
-                  <div className="flex flex-col gap-3 w-[462px]">
-                    <div className={`bento-tile bento-tile-animated w-full h-[260px] rounded-lg overflow-hidden ${tileAnimations.beach1 ? `tile-${tileAnimations.beach1}` : ''} ${swappingTiles.includes('beach1') ? 'swapping' : ''}`} style={{ animationDelay: '0.8s' }}>
+                  <div className="flex flex-col gap-[1.579cqw] w-[60.789cqw]">
+                    <div className={`bento-tile bento-tile-animated w-full h-[34.211cqw] rounded-lg overflow-hidden ${tileAnimations.beach1 ? `tile-${tileAnimations.beach1}` : ''} ${swappingTiles.includes('beach1') ? 'swapping' : ''}`} style={{ animationDelay: '0.8s' }}>
                       <BlurImage src={tileOrder.beach1} alt="" className="w-full h-full" />
                     </div>
-                    <div className="flex gap-3">
-                      <div className="flex flex-col gap-3 w-[163px]">
-                        <div className={`bento-tile bento-tile-animated w-full h-[107px] rounded-lg overflow-hidden ${tileAnimations.beach2 ? `tile-${tileAnimations.beach2}` : ''} ${swappingTiles.includes('beach2') ? 'swapping' : ''}`} style={{ animationDelay: '0.9s' }}>
+                    <div className="flex gap-[1.579cqw]">
+                      <div className="flex flex-col gap-[1.579cqw] w-[21.447cqw]">
+                        <div className={`bento-tile bento-tile-animated w-full h-[14.079cqw] rounded-lg overflow-hidden ${tileAnimations.beach2 ? `tile-${tileAnimations.beach2}` : ''} ${swappingTiles.includes('beach2') ? 'swapping' : ''}`} style={{ animationDelay: '0.9s' }}>
                           <BlurImage src={tileOrder.beach2} alt="" className="w-full h-full" />
                         </div>
-                        <div className={`bento-tile bento-tile-animated bento-tile-pulse w-full h-[168px] rounded-lg overflow-hidden ${tileAnimations.food ? `tile-${tileAnimations.food}` : ''} ${swappingTiles.includes('food') ? 'swapping' : ''}`} style={{ animationDelay: '1s' }}>
+                        <div className={`bento-tile bento-tile-animated bento-tile-pulse w-full h-[22.105cqw] rounded-lg overflow-hidden ${tileAnimations.food ? `tile-${tileAnimations.food}` : ''} ${swappingTiles.includes('food') ? 'swapping' : ''}`} style={{ animationDelay: '1s' }}>
                           <BlurImage src={tileOrder.food} alt="" className="w-full h-full" />
                         </div>
                       </div>
-                      <div className={`bento-tile bento-tile-animated w-[287px] h-[287px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.woman2 ? `tile-${tileAnimations.woman2}` : ''} ${swappingTiles.includes('woman2') ? 'swapping' : ''}`} style={{ animationDelay: '1.1s' }}>
+                      <div className={`bento-tile bento-tile-animated w-[37.763cqw] h-[37.763cqw] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.woman2 ? `tile-${tileAnimations.woman2}` : ''} ${swappingTiles.includes('woman2') ? 'swapping' : ''}`} style={{ animationDelay: '1.1s' }}>
                         <BlurImage src={tileOrder.woman2} alt="" className="w-full h-full" />
                       </div>
                     </div>
-                    <div className={`bento-tile bento-tile-animated w-full h-[259px] rounded-lg overflow-hidden ${tileAnimations.anime2 ? `tile-${tileAnimations.anime2}` : ''} ${swappingTiles.includes('anime2') ? 'swapping' : ''}`} style={{ animationDelay: '1.2s' }}>
+                    <div className={`bento-tile bento-tile-animated w-full h-[34.079cqw] rounded-lg overflow-hidden ${tileAnimations.anime2 ? `tile-${tileAnimations.anime2}` : ''} ${swappingTiles.includes('anime2') ? 'swapping' : ''}`} style={{ animationDelay: '1.2s' }}>
                       <BlurImage src={tileOrder.anime2} alt="" className="w-full h-full" />
                     </div>
                   </div>
 
                   {/* Right Column */}
-                  <div className="flex flex-col gap-3 w-[286px]">
-                    <div className={`bento-tile bento-tile-animated w-full h-[161px] rounded-lg overflow-hidden ${tileAnimations.shooting ? `tile-${tileAnimations.shooting}` : ''} ${swappingTiles.includes('shooting') ? 'swapping' : ''}`} style={{ animationDelay: '1.3s' }}>
+                  <div className="flex flex-col gap-[1.579cqw] w-[37.632cqw]">
+                    <div className={`bento-tile bento-tile-animated w-full h-[21.184cqw] rounded-lg overflow-hidden ${tileAnimations.shooting ? `tile-${tileAnimations.shooting}` : ''} ${swappingTiles.includes('shooting') ? 'swapping' : ''}`} style={{ animationDelay: '1.3s' }}>
                       <BlurImage src={tileOrder.shooting} alt="" className="w-full h-full" />
                     </div>
-                    <div className={`bento-tile bento-tile-animated bento-tile-pulse w-full h-[430px] rounded-lg overflow-hidden ${tileAnimations.tv ? `tile-${tileAnimations.tv}` : ''} ${swappingTiles.includes('tv') ? 'swapping' : ''}`} style={{ animationDelay: '1.4s' }}>
+                    <div className={`bento-tile bento-tile-animated bento-tile-pulse w-full h-[56.579cqw] rounded-lg overflow-hidden ${tileAnimations.tv ? `tile-${tileAnimations.tv}` : ''} ${swappingTiles.includes('tv') ? 'swapping' : ''}`} style={{ animationDelay: '1.4s' }}>
                       <BlurImage src={tileOrder.tv} alt="" className="w-full h-full" />
                     </div>
-                    <div className={`bento-tile bento-tile-animated w-full h-[215px] rounded-lg overflow-hidden ${tileAnimations.anime3 ? `tile-${tileAnimations.anime3}` : ''} ${swappingTiles.includes('anime3') ? 'swapping' : ''}`} style={{ animationDelay: '1.5s' }}>
+                    <div className={`bento-tile bento-tile-animated w-full h-[28.289cqw] rounded-lg overflow-hidden ${tileAnimations.anime3 ? `tile-${tileAnimations.anime3}` : ''} ${swappingTiles.includes('anime3') ? 'swapping' : ''}`} style={{ animationDelay: '1.5s' }}>
                       <BlurImage src={tileOrder.anime3} alt="" className="w-full h-full" />
                     </div>
                   </div>
@@ -333,82 +338,82 @@ const About = () => {
             </div>
 
             {/* Bento Grid - Mobile */}
-            <div className="block md:hidden w-full overflow-hidden">
-              <div className="scale-[calc((100vw-4rem)/390)] origin-top-left w-[390px]">
-                <div className="flex flex-col gap-3">
+            <div className="bento-fluid block md:hidden w-full">
+              <div className="w-full">
+                <div className="flex flex-col gap-[3.077cqw]">
                   {/* Frame 1 */}
-                  <div className="flex gap-3">
-                    <div className={`bento-tile bento-tile-animated w-[137px] h-[182px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.anime1 ? `tile-${tileAnimations.anime1}` : ''} ${swappingTiles.includes('anime1') ? 'swapping' : ''}`} style={{ animationDelay: '0.1s' }}>
+                  <div className="flex gap-[3.077cqw]">
+                    <div className={`bento-tile bento-tile-animated w-[35.128cqw] h-[46.667cqw] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.anime1 ? `tile-${tileAnimations.anime1}` : ''} ${swappingTiles.includes('anime1') ? 'swapping' : ''}`} style={{ animationDelay: '0.1s' }}>
                       <BlurImage src={tileOrder.anime1} alt="" className="w-full h-full" />
                     </div>
-                    <div className={`bento-tile bento-tile-animated w-[241px] h-[182px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.festival ? `tile-${tileAnimations.festival}` : ''} ${swappingTiles.includes('festival') ? 'swapping' : ''}`} style={{ animationDelay: '0.2s' }}>
+                    <div className={`bento-tile bento-tile-animated w-[61.795cqw] h-[46.667cqw] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.festival ? `tile-${tileAnimations.festival}` : ''} ${swappingTiles.includes('festival') ? 'swapping' : ''}`} style={{ animationDelay: '0.2s' }}>
                       <BlurImage src={tileOrder.festival} alt="" className="w-full h-full" />
                     </div>
                   </div>
 
                   {/* Frame 8 */}
-                  <div className="flex gap-3">
+                  <div className="flex gap-[3.077cqw]">
                     {/* Frame 2 */}
-                    <div className="flex flex-col gap-3">
-                      <div className={`bento-tile bento-tile-animated w-[216px] h-[121px] rounded-lg overflow-hidden ${tileAnimations.beach1 ? `tile-${tileAnimations.beach1}` : ''} ${swappingTiles.includes('beach1') ? 'swapping' : ''}`} style={{ animationDelay: '0.3s' }}>
+                    <div className="flex flex-col gap-[3.077cqw]">
+                      <div className={`bento-tile bento-tile-animated w-[55.385cqw] h-[31.026cqw] rounded-lg overflow-hidden ${tileAnimations.beach1 ? `tile-${tileAnimations.beach1}` : ''} ${swappingTiles.includes('beach1') ? 'swapping' : ''}`} style={{ animationDelay: '0.3s' }}>
                         <BlurImage src={tileOrder.beach1} alt="" className="w-full h-full" />
                       </div>
-                      <div className={`bento-tile bento-tile-animated w-[216px] h-[325px] rounded-lg overflow-hidden ${tileAnimations.tv ? `tile-${tileAnimations.tv}` : ''} ${swappingTiles.includes('tv') ? 'swapping' : ''}`} style={{ animationDelay: '0.4s' }}>
+                      <div className={`bento-tile bento-tile-animated w-[55.385cqw] h-[83.333cqw] rounded-lg overflow-hidden ${tileAnimations.tv ? `tile-${tileAnimations.tv}` : ''} ${swappingTiles.includes('tv') ? 'swapping' : ''}`} style={{ animationDelay: '0.4s' }}>
                         <BlurImage src={tileOrder.tv} alt="" className="w-full h-full" />
                       </div>
                     </div>
                     {/* Frame 3 */}
-                    <div className="flex flex-col gap-3">
-                      <div className={`bento-tile bento-tile-animated w-[162px] h-[283px] rounded-lg overflow-hidden ${tileAnimations.chess ? `tile-${tileAnimations.chess}` : ''} ${swappingTiles.includes('chess') ? 'swapping' : ''}`} style={{ animationDelay: '0.5s' }}>
+                    <div className="flex flex-col gap-[3.077cqw]">
+                      <div className={`bento-tile bento-tile-animated w-[41.538cqw] h-[72.564cqw] rounded-lg overflow-hidden ${tileAnimations.chess ? `tile-${tileAnimations.chess}` : ''} ${swappingTiles.includes('chess') ? 'swapping' : ''}`} style={{ animationDelay: '0.5s' }}>
                         <BlurImage src={tileOrder.chess} alt="" className="w-full h-full" />
                       </div>
-                      <div className={`bento-tile bento-tile-animated w-[162px] h-[163px] rounded-lg overflow-hidden ${tileAnimations.suit ? `tile-${tileAnimations.suit}` : ''} ${swappingTiles.includes('suit') ? 'swapping' : ''}`} style={{ animationDelay: '0.6s' }}>
+                      <div className={`bento-tile bento-tile-animated w-[41.538cqw] h-[41.795cqw] rounded-lg overflow-hidden ${tileAnimations.suit ? `tile-${tileAnimations.suit}` : ''} ${swappingTiles.includes('suit') ? 'swapping' : ''}`} style={{ animationDelay: '0.6s' }}>
                         <BlurImage src={tileOrder.suit} alt="" className="w-full h-full" />
                       </div>
                     </div>
                   </div>
 
                   {/* Frame 4 */}
-                  <div className="flex gap-3">
-                    <div className={`bento-tile bento-tile-animated w-[147px] h-[148px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.woman2 ? `tile-${tileAnimations.woman2}` : ''} ${swappingTiles.includes('woman2') ? 'swapping' : ''}`} style={{ animationDelay: '0.7s' }}>
+                  <div className="flex gap-[3.077cqw]">
+                    <div className={`bento-tile bento-tile-animated w-[37.692cqw] h-[37.949cqw] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.woman2 ? `tile-${tileAnimations.woman2}` : ''} ${swappingTiles.includes('woman2') ? 'swapping' : ''}`} style={{ animationDelay: '0.7s' }}>
                       <BlurImage src={tileOrder.woman2} alt="" className="w-full h-full" />
                     </div>
-                    <div className={`bento-tile bento-tile-animated w-[231px] h-[148px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.jeep ? `tile-${tileAnimations.jeep}` : ''} ${swappingTiles.includes('jeep') ? 'swapping' : ''}`} style={{ animationDelay: '0.8s' }}>
+                    <div className={`bento-tile bento-tile-animated w-[59.231cqw] h-[37.949cqw] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.jeep ? `tile-${tileAnimations.jeep}` : ''} ${swappingTiles.includes('jeep') ? 'swapping' : ''}`} style={{ animationDelay: '0.8s' }}>
                       <BlurImage src={tileOrder.jeep} alt="" className="w-full h-full" />
                     </div>
                   </div>
 
                   {/* Frame 9 */}
-                  <div className="flex gap-3">
+                  <div className="flex gap-[3.077cqw]">
                     {/* Frame 5 */}
-                    <div className="flex flex-col gap-3">
-                      <div className={`bento-tile bento-tile-animated w-[226px] h-[130px] rounded-lg overflow-hidden ${tileAnimations.pingpong ? `tile-${tileAnimations.pingpong}` : ''} ${swappingTiles.includes('pingpong') ? 'swapping' : ''}`} style={{ animationDelay: '0.9s' }}>
+                    <div className="flex flex-col gap-[3.077cqw]">
+                      <div className={`bento-tile bento-tile-animated w-[57.949cqw] h-[33.333cqw] rounded-lg overflow-hidden ${tileAnimations.pingpong ? `tile-${tileAnimations.pingpong}` : ''} ${swappingTiles.includes('pingpong') ? 'swapping' : ''}`} style={{ animationDelay: '0.9s' }}>
                         <BlurImage src={tileOrder.pingpong} alt="" className="w-full h-full" />
                       </div>
-                      <div className={`bento-tile bento-tile-animated w-[226px] h-[110px] rounded-lg overflow-hidden ${tileAnimations.beach2 ? `tile-${tileAnimations.beach2}` : ''} ${swappingTiles.includes('beach2') ? 'swapping' : ''}`} style={{ animationDelay: '1s' }}>
+                      <div className={`bento-tile bento-tile-animated w-[57.949cqw] h-[28.205cqw] rounded-lg overflow-hidden ${tileAnimations.beach2 ? `tile-${tileAnimations.beach2}` : ''} ${swappingTiles.includes('beach2') ? 'swapping' : ''}`} style={{ animationDelay: '1s' }}>
                         <BlurImage src={tileOrder.beach2} alt="" className="w-full h-full" />
                       </div>
-                      <div className={`bento-tile bento-tile-animated w-[226px] h-[127px] rounded-lg overflow-hidden ${tileAnimations.anime2 ? `tile-${tileAnimations.anime2}` : ''} ${swappingTiles.includes('anime2') ? 'swapping' : ''}`} style={{ animationDelay: '1.1s' }}>
+                      <div className={`bento-tile bento-tile-animated w-[57.949cqw] h-[32.564cqw] rounded-lg overflow-hidden ${tileAnimations.anime2 ? `tile-${tileAnimations.anime2}` : ''} ${swappingTiles.includes('anime2') ? 'swapping' : ''}`} style={{ animationDelay: '1.1s' }}>
                         <BlurImage src={tileOrder.anime2} alt="" className="w-full h-full" />
                       </div>
                     </div>
                     {/* Frame 6 */}
-                    <div className="flex flex-col gap-3">
-                      <div className={`bento-tile bento-tile-animated w-[152px] h-[156px] rounded-lg overflow-hidden ${tileAnimations.food ? `tile-${tileAnimations.food}` : ''} ${swappingTiles.includes('food') ? 'swapping' : ''}`} style={{ animationDelay: '1.2s' }}>
+                    <div className="flex flex-col gap-[3.077cqw]">
+                      <div className={`bento-tile bento-tile-animated w-[38.974cqw] h-[40cqw] rounded-lg overflow-hidden ${tileAnimations.food ? `tile-${tileAnimations.food}` : ''} ${swappingTiles.includes('food') ? 'swapping' : ''}`} style={{ animationDelay: '1.2s' }}>
                         <BlurImage src={tileOrder.food} alt="" className="w-full h-full" />
                       </div>
-                      <div className={`bento-tile bento-tile-animated w-[152px] h-[223px] rounded-lg overflow-hidden ${tileAnimations.woman1 ? `tile-${tileAnimations.woman1}` : ''} ${swappingTiles.includes('woman1') ? 'swapping' : ''}`} style={{ animationDelay: '1.3s' }}>
+                      <div className={`bento-tile bento-tile-animated w-[38.974cqw] h-[57.179cqw] rounded-lg overflow-hidden ${tileAnimations.woman1 ? `tile-${tileAnimations.woman1}` : ''} ${swappingTiles.includes('woman1') ? 'swapping' : ''}`} style={{ animationDelay: '1.3s' }}>
                         <BlurImage src={tileOrder.woman1} alt="" className="w-full h-full" />
                       </div>
                     </div>
                   </div>
 
                   {/* Frame 7 */}
-                  <div className="flex gap-3">
-                    <div className={`bento-tile bento-tile-animated w-[152px] h-[128px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.anime3 ? `tile-${tileAnimations.anime3}` : ''} ${swappingTiles.includes('anime3') ? 'swapping' : ''}`} style={{ animationDelay: '1.4s' }}>
+                  <div className="flex gap-[3.077cqw]">
+                    <div className={`bento-tile bento-tile-animated w-[38.974cqw] h-[32.821cqw] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.anime3 ? `tile-${tileAnimations.anime3}` : ''} ${swappingTiles.includes('anime3') ? 'swapping' : ''}`} style={{ animationDelay: '1.4s' }}>
                       <BlurImage src={tileOrder.anime3} alt="" className="w-full h-full" />
                     </div>
-                    <div className={`bento-tile bento-tile-animated w-[227px] h-[128px] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.shooting ? `tile-${tileAnimations.shooting}` : ''} ${swappingTiles.includes('shooting') ? 'swapping' : ''}`} style={{ animationDelay: '1.5s' }}>
+                    <div className={`bento-tile bento-tile-animated w-[57.949cqw] h-[32.821cqw] rounded-lg overflow-hidden flex-shrink-0 ${tileAnimations.shooting ? `tile-${tileAnimations.shooting}` : ''} ${swappingTiles.includes('shooting') ? 'swapping' : ''}`} style={{ animationDelay: '1.5s' }}>
                       <BlurImage src={tileOrder.shooting} alt="" className="w-full h-full" />
                     </div>
                   </div>
@@ -417,7 +422,7 @@ const About = () => {
             </div>
           </motion.section>
 
-          {/* Flexing Section */}
+          {/* Happy Hours Section */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -425,8 +430,8 @@ const About = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="flex flex-col gap-8"
           >
-            <h2 className="font-space font-bold text-2xl leading-[1.36em] text-text-secondary" style={{ letterSpacing: '-0.24px' }}>
-              Flexing
+            <h2 className="font-space text-2xl leading-[1.36em] text-text-secondary" style={{ letterSpacing: '-0.24px', fontWeight: 'var(--site-weight-display)' }}>
+              Happy Hours
             </h2>
 
             {/* Carousel */}
@@ -440,8 +445,8 @@ const About = () => {
                 <BlurImage
                   key={index}
                   src={img}
-                  alt={`Flexing ${(index % flexingImages.length) + 1}`}
-                  className="flex-shrink-0 h-[300px] rounded-lg"
+                  alt={`Happy Hours ${(index % flexingImages.length) + 1}`}
+                  className="site-plate flex-shrink-0 h-[300px] rounded-lg"
                   style={{ width: index % flexingImages.length === 1 ? '169px' : '380px' }}
                 />
               ))}
@@ -456,7 +461,7 @@ const About = () => {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="flex flex-col gap-8"
           >
-            <h2 className="font-space font-bold text-2xl leading-[1.36em] text-text-secondary" style={{ letterSpacing: '-0.24px' }}>
+            <h2 className="font-space text-2xl leading-[1.36em] text-text-secondary" style={{ letterSpacing: '-0.24px', fontWeight: 'var(--site-weight-display)' }}>
               My Book Shelf
             </h2>
 
@@ -472,7 +477,7 @@ const About = () => {
                   key={index}
                   src={img}
                   alt={`Book ${(index % bookImages.length) + 1}`}
-                  className="flex-shrink-0 w-[165px] h-[254px] rounded-lg"
+                  className="site-plate flex-shrink-0 w-[165px] h-[254px] rounded-lg"
                 />
               ))}
             </div>
@@ -535,7 +540,7 @@ const About = () => {
 
         {/* Bottom Footer */}
         <footer className="text-center mt-16">
-          <p className="font-outfit text-base leading-[1.34em] text-text-quaternary" style={{ letterSpacing: '-0.32px' }}>
+          <p className="font-outfit text-base leading-[1.34em]" style={{ letterSpacing: '-0.32px', color: 'var(--site-fg-2)' }}>
             © 2025 Made with ❤️ by Amitesh using Claude code and Figma MCP
           </p>
         </footer>
@@ -547,8 +552,14 @@ const About = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 50 }}
-          className="fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg z-50"
-          style={{ background: 'var(--site-fg)', color: 'var(--site-bg)' }}
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg z-50"
+          style={{
+            background: 'var(--site-fg)',
+            color: 'var(--site-bg)',
+            /* `shadow-lg` was a fixed soft drop, which is a blur in a theme
+               that has banned blurs. */
+            boxShadow: 'var(--site-card-lift)',
+          }}
         >
           <p className="font-space font-bold text-base">
             {toastMessage === 'Email copied!' ? toastMessage : `Copy failed. ${toastMessage}`}

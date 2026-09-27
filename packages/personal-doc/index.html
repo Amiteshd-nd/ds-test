@@ -6,15 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Amitesh Debnath | Portfolio</title>
     <!-- Set the theme before first paint, so a visitor who chose light never
-         sees a frame of dark. Deliberately inline and dependency free. -->
+         sees a frame of dark. Deliberately inline and dependency free.
+
+         The OS is not consulted. This used to fall back to
+         `prefers-color-scheme` when nothing was stored, which meant the site
+         picked a side on the visitor's behalf before they had said anything —
+         and a visitor on a light OS never saw the design as it was built. Dark
+         is the site's own default now, and the only thing that moves it is the
+         toggle in the header. -->
     <script>
       (function () {
         try {
           var stored = localStorage.getItem('site-theme');
-          var light = stored
-            ? stored === 'light'
-            : window.matchMedia('(prefers-color-scheme: light)').matches;
-          document.documentElement.dataset.siteTheme = light ? 'light' : 'dark';
+          document.documentElement.dataset.siteTheme = stored === 'light' ? 'light' : 'dark';
         } catch (e) {
           document.documentElement.dataset.siteTheme = 'dark';
         }

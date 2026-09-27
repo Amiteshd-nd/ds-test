@@ -39,7 +39,13 @@ const SPRING_C = 3.4;
 const GRAB_PULL = 14.0;       // spring coupling toward a held pointer
 const MAX_SPIN = 14.0;        // rad/s, so a violent flick stays legible
 
-const ENERGY = { idle: 0.55, typing: 0.85, thinking: 1.5, answering: 0.95 };
+/* Ambient spin rate per phase, and also the shader's `uEnergy`.
+ *
+ * Thinking and answering are deliberately far above idle: the cube is the only
+ * thing on screen that can show the assistant is working, so the gap has to be
+ * obvious at a glance rather than a subtle lift. Answering sits below thinking
+ * because by then the text itself is doing the reporting. */
+const ENERGY = { idle: 0.55, typing: 0.9, thinking: 3.2, answering: 2.0 };
 
 /* The theme's ink, defaulted to "none" so the component still renders as pure
  * glass when nobody passes one. */
@@ -111,7 +117,16 @@ function buildProgram(gl) {
   return prog;
 }
 
-function GlassCube({ phase = 'idle', material = GLASS, className = '', style }) {
+function GlassCube({
+  phase = 'idle',
+  material = GLASS,
+  className = '',
+  style,
+  /* The big cube above the prompt is a toy you can throw. The same cube at
+     28px beside a message is a status light — it should not take a grab
+     cursor, swallow a drag, or invite a pointer at all. */
+  interactive = true,
+}) {
   const hostRef = useRef(null);
   const canvasRef = useRef(null);
   const phaseRef = useRef(phase);
@@ -355,10 +370,12 @@ function GlassCube({ phase = 'idle', material = GLASS, className = '', style }) 
 
     const ro = new ResizeObserver(resize);
     ro.observe(host);
-    canvas.addEventListener('pointerdown', onDown);
-    canvas.addEventListener('pointermove', onMove);
-    canvas.addEventListener('pointerup', onUp);
-    canvas.addEventListener('pointercancel', onUp);
+    if (interactive) {
+      canvas.addEventListener('pointerdown', onDown);
+      canvas.addEventListener('pointermove', onMove);
+      canvas.addEventListener('pointerup', onUp);
+      canvas.addEventListener('pointercancel', onUp);
+    }
     canvas.addEventListener('webglcontextlost', onLost);
     document.addEventListener('visibilitychange', onVisibility);
 
@@ -374,7 +391,7 @@ function GlassCube({ phase = 'idle', material = GLASS, className = '', style }) 
       gl.deleteProgram(prog);
       gl.deleteVertexArray(vao);
     };
-  }, [reduce]);
+  }, [interactive, reduce]);
 
   return (
     <div ref={hostRef} className={`relative ${className}`} style={style}>
@@ -392,7 +409,9 @@ function GlassCube({ phase = 'idle', material = GLASS, className = '', style }) 
       ) : (
         <canvas
           ref={canvasRef}
-          className={`block h-full w-full touch-none select-none ${held ? 'cursor-grabbing' : 'cursor-grab'}`}
+          className={`block h-full w-full touch-none select-none ${
+            interactive ? (held ? 'cursor-grabbing' : 'cursor-grab') : 'pointer-events-none'
+          }`}
           aria-hidden="true"
         />
       )}

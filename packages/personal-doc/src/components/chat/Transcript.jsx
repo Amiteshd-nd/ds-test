@@ -3,6 +3,7 @@ import { motion } from '@cloud-march/motion/react';
 import { Link } from 'react-router-dom';
 import { PROJECTS } from '../../lib/portfolioBrain';
 import { IconCheck, IconCopy, IconExternal, IconRefresh } from './Icons';
+import GlassCube from './GlassCube';
 
 /* Rendering for the conversation.
  *
@@ -206,23 +207,49 @@ function Block({ block, wordLimit }) {
 
 /* ---------------------------------------------------------------- messages */
 
-function Avatar() {
+/*
+ * The assistant's mark: the cube, not a coloured disc.
+ *
+ * Only one of these is ever a live canvas. GlassCube builds its own WebGL2
+ * context, browsers cap a page at roughly sixteen of them, and past the cap
+ * the oldest are dropped — so a cube on every reply would quietly blank the
+ * top of a long conversation. The newest assistant message and the typing
+ * indicator get the real thing, because that is where the motion carries
+ * information; everything above them gets a still mark at the same size.
+ *
+ * The still mark is a flat isometric cube rather than a frozen render. A
+ * stopped simulation reads as broken, whereas an obviously drawn glyph reads
+ * as history — and it costs no context at all.
+ */
+function AssistantMark({ live = false, phase = 'idle', material }) {
   return (
-    <span
-      aria-hidden="true"
-      className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full"
-      style={{
-        background: 'var(--lg-avatar-fill)',
-        boxShadow: 'var(--lg-avatar-shadow)',
-      }}
-    />
+    <span aria-hidden="true" className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center">
+      {live ? (
+        <GlassCube
+          phase={phase}
+          material={material}
+          interactive={false}
+          className="h-7 w-7"
+        />
+      ) : (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="opacity-45">
+          <path
+            d="m12 3.6 7.4 4.2v8.4L12 20.4 4.6 16.2V7.8Z"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+          <path d="M12 12v8.4M12 12l7.4-4.2M12 12 4.6 7.8" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+        </svg>
+      )}
+    </span>
   );
 }
 
-export function TypingIndicator() {
+export function TypingIndicator({ material }) {
   return (
     <div className="flex items-start gap-3 py-1">
-      <Avatar />
+      <AssistantMark live phase="thinking" material={material} />
       <div className="flex items-center gap-1.5 pt-2" role="status" aria-label="Thinking">
         {[0, 1, 2].map((i) => (
           <motion.span
@@ -237,7 +264,7 @@ export function TypingIndicator() {
   );
 }
 
-function AssistantMessage({ message, onFollowUp, onRegenerate }) {
+function AssistantMessage({ message, onFollowUp, onRegenerate, live = false, phase, material }) {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
@@ -265,7 +292,7 @@ function AssistantMessage({ message, onFollowUp, onRegenerate }) {
 
   return (
     <motion.div {...rise} className="flex items-start gap-3">
-      <Avatar />
+      <AssistantMark live={live} phase={phase} material={material} />
       <div className="min-w-0 flex-1">
         <div className="flex flex-col gap-4">
           {visible.map((block, i) => (
@@ -331,7 +358,22 @@ function UserMessage({ text }) {
   );
 }
 
-export default function Transcript({ messages, thinking, onFollowUp, onRegenerate }) {
+export default function Transcript({
+  messages,
+  thinking,
+  onFollowUp,
+  onRegenerate,
+  phase = 'idle',
+  material,
+}) {
+  /* The last assistant reply, which is the only one that gets a live cube —
+     unless the typing indicator is up, in which case that owns it instead and
+     every reply above is history. See AssistantMark for why it is only ever
+     one. */
+  const liveId = thinking
+    ? null
+    : [...messages].reverse().find((m) => m.role === 'assistant')?.id;
+
   return (
     <div className="flex flex-col gap-7" role="log" aria-live="polite" aria-label="Conversation">
       {messages.map((m) =>
@@ -343,10 +385,13 @@ export default function Transcript({ messages, thinking, onFollowUp, onRegenerat
             message={m}
             onFollowUp={onFollowUp}
             onRegenerate={onRegenerate}
+            live={m.id === liveId}
+            phase={phase}
+            material={material}
           />
         ),
       )}
-      {thinking && <TypingIndicator />}
+      {thinking && <TypingIndicator material={material} />}
     </div>
   );
 }

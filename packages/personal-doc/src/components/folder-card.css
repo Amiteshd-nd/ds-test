@@ -14,14 +14,19 @@
 .fc {
   /* The card's outer corner. Generous, against the minimal corners inside: the
      tab's shape is the detail, and a soft outer edge is what lets it read as a
-     detail rather than as one more hard angle among several. */
-  --fc-radius: 20px;
+     detail rather than as one more hard angle among several.
+
+     It follows the theme now. A folder with a 20px corner inside a design
+     system whose every other edge is square does not read as a folder, it
+     reads as the one component nobody updated. `--site-radius-card` is
+     Tailwind's `--radius-card`, which the theme bridge in index.css rebinds. */
+  --fc-radius: var(--radius-card, 20px);
   --fc-bezel-width: 5px;
 
   /* The only rounding inside the card: the tab's outer left corner and the
      sheet's outer right corner. Small enough to read as a softened edge rather
-     than as a rounded box. */
-  --fc-corner: 5px;
+     than as a rounded box, and it goes to zero with the card. */
+  --fc-corner: min(5px, var(--fc-radius));
 
   /* Horizontal run of the diagonal, written by the card at runtime as a ratio
    * of the tab's height so the angle holds when a title wraps to two lines. A
@@ -34,6 +39,20 @@
      together, so it cannot be a constant. The tab reserves it as padding. */
   --fc-turn-run: 9px;
 
+  /* The cursor, in the card's own coordinates: -1 at the left/top edge, +1 at
+     the right/bottom, 0 at rest. Written by the card as spring-smoothed motion
+     values, read by everything below. `--fc-hot` is how lit the card is, 0 to
+     1, and it is the only thing gating the sheen — nothing here needs a
+     `:hover` selector, because at rest the numbers are all zero. */
+  --fc-px: 0;
+  --fc-py: 0;
+  --fc-hot: 0;
+
+  /* Shallow enough that the tilt reads as the face catching the light rather
+     than as the card turning to look at you. At 900px a 2.5 degree tip moves
+     the near edge under two pixels, which the bezel absorbs. */
+  perspective: 900px;
+
   --fc-sheet: var(--site-card);
   --fc-ink: var(--site-fg);
   --fc-ink-2: var(--site-fg-2);
@@ -43,7 +62,13 @@
   display: block;
   border-radius: var(--fc-radius);
   background: var(--fc-bezel);
+  /* The theme's own edge, around the bezel. In Glass this is the hairline the
+     card always had; in Neo it is the 2px ink outline the style is built on. */
+  border: var(--site-edge-width) solid var(--site-edge);
   padding: var(--fc-bezel-width);
+  /* At rest, not only on hover — see --site-card-rest in index.css for why a
+     hard offset shadow cannot wait for the cursor. */
+  box-shadow: var(--site-card-rest);
   overflow: hidden;
   isolation: isolate;
   transition:
@@ -54,12 +79,21 @@
 .fc-inner {
   position: relative;
   width: 100%;
-  border-radius: calc(var(--fc-radius) - var(--fc-bezel-width));
+  border-radius: max(0px, calc(var(--fc-radius) - var(--fc-bezel-width)));
   overflow: hidden;
   /* The reference is square, but the reference is one showcase card. A grid of
      these is a list, and a list wants label proportions. The eyebrow moved into
      the sheet on tiles, so the height it was protecting is no longer needed. */
   aspect-ratio: 8 / 7;
+
+  /*
+   * The face tips away from the cursor — the corner under the pointer is the
+   * one that recedes, which is what makes it feel pressed rather than magnetic.
+   * Two and a half degrees is the whole budget: any more and the text on the
+   * sheet starts to keystone, and a card you cannot read is a card that lost
+   * the argument.
+   */
+  transform: rotateX(calc(var(--fc-py) * -2.5deg)) rotateY(calc(var(--fc-px) * 2.5deg));
 }
 
 /* ------------------------------------------------------------------ art --- */
@@ -70,7 +104,73 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+
+  /*
+   * The art slides against the cursor while the sheet stays put. Opposite, not
+   * with: a background layer that lags behind the frame is what reads as depth,
+   * and it is also the direction the tilt is already implying.
+   *
+   * The overscan is not a hover effect — it is on at rest, because a scale that
+   * animated in would be a second, competing motion, and because the drift has
+   * to have somewhere to go. 6% covers the 9px of travel on the narrowest card
+   * with room to spare, and the artwork is a blurred gradient, so cropping it
+   * costs nothing.
+   *
+   * This is a transform on the SVG's own root element, not on its children. The
+   * note below about CSS transforms inside an SVG never repainting does not
+   * apply here: the root is an ordinary replaced box and composites normally.
+   */
+  transform: translate3d(calc(var(--fc-px) * -9px), calc(var(--fc-py) * -7px), 0) scale(1.06);
 }
+
+/*
+ * The cursor's light.
+ *
+ * A white core at the pointer, falling off before it reaches the edges, laid
+ * over the art in soft-light so it lifts the exposure's own colour instead of
+ * dropping a grey disc on top of it. Sheet and tab are above it in the stack,
+ * so the title never sits in the glare.
+ *
+ * The centre moves by painting, not by transform, which is the one place here
+ * that repaints per frame. It is one small box, on one card at a time — the
+ * alternative is a fixed-size element translated by a percentage of its own
+ * width, which costs a layer and a round of arithmetic nobody can read.
+ */
+.fc-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--fc-hot);
+  mix-blend-mode: soft-light;
+  background: radial-gradient(
+    38% 52% at calc(50% + var(--fc-px) * 50%) calc(50% + var(--fc-py) * 50%),
+    rgb(255 255 255 / 0.85),
+    rgb(255 255 255 / 0.3) 45%,
+    transparent 100%
+  );
+}
+
+/* Targeted, and only while the card is actually under the cursor: a standing
+   `will-change` on every card promotes eleven layers that are not moving. */
+@media (hover: hover) {
+  .fc:hover .fc-inner,
+  .fc:hover .fc-art {
+    will-change: transform;
+  }
+}
+
+/*
+ * The artwork drifts, but not from here.
+ *
+ * This held CSS keyframes animating the SVG's own children. They ran — the
+ * computed transform changed every frame — and never repainted a single pixel,
+ * because the browser rasterises an SVG subtree once and does not invalidate it
+ * for a CSS transform applied inside. The only cards that appeared to work were
+ * ones that happened to still carry a `filter` on an ancestor, which forces a
+ * re-raster. The drift lives in ProjectMark as SMIL now, which drives the SVG
+ * DOM and therefore always invalidates. Do not move it back here.
+ */
 
 .fc-eyebrow {
   position: absolute;
@@ -78,7 +178,7 @@
   right: 16px;
   z-index: 2;
   text-align: right;
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--site-font);
   font-weight: 600;
   font-size: 13px;
   line-height: 1.24;
@@ -161,8 +261,8 @@
 }
 
 .fc-title {
-  font-family: 'Outfit', sans-serif;
-  font-weight: 600;
+  font-family: var(--site-font);
+  font-weight: var(--site-weight-strong);
   font-size: 15.5px;
   line-height: 1.2;
   letter-spacing: -0.02em;
@@ -171,7 +271,7 @@
 }
 
 .fc-sub {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--site-font);
   font-size: 13.5px;
   line-height: 1.3;
   letter-spacing: -0.015em;
@@ -180,7 +280,7 @@
 }
 
 .fc-body {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--site-font);
   font-size: 13px;
   line-height: 1.42;
   letter-spacing: -0.01em;
@@ -208,8 +308,8 @@
 }
 
 .fc-stat {
-  font-family: 'Outfit', sans-serif;
-  font-weight: 700;
+  font-family: var(--site-font);
+  font-weight: var(--site-weight-display);
   font-size: 21px;
   line-height: 1;
   letter-spacing: -0.04em;
@@ -226,12 +326,23 @@
 }
 
 .fc-note {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--site-font);
   font-weight: 600;
   font-size: 12.5px;
   letter-spacing: -0.015em;
   color: var(--fc-ink);
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Nudged up a hair: the lock's optical centre sits above its bounding box,
+   because the shackle is thin and the body is solid. */
+.fc-lock {
+  flex-shrink: 0;
+  margin-top: -1px;
+  opacity: 0.75;
 }
 
 /* ---------------------------------------------------------------- state --- */
@@ -239,7 +350,7 @@
 @media (hover: hover) {
   .fc:hover {
     transform: translateY(-4px);
-    box-shadow: var(--site-card-shadow);
+    box-shadow: var(--site-card-lift);
   }
 }
 
@@ -252,6 +363,22 @@
   .fc,
   .fc:hover {
     transform: none;
+  }
+
+  /* The rig never writes the variables under reduced motion, but it can be
+     switched on mid-session, and whatever the cursor last set would then stay
+     frozen on the card. Pin them here. The art keeps its overscan so the
+     framing does not jump. */
+  .fc-inner {
+    transform: none;
+  }
+
+  .fc-art {
+    transform: scale(1.06);
+  }
+
+  .fc-sheen {
+    opacity: 0;
   }
 }
 

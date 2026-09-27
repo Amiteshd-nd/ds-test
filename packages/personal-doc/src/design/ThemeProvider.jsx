@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 
-import { DEFAULT_BY_MODE, DEFAULT_THEME, STORAGE_KEY, THEMES, getTheme, isTheme } from './themes';
+import { DEFAULT_THEME, FALLBACK_THEME, STORAGE_KEY, THEMES, getTheme, isTheme } from './themes';
 import { SITE_THEME_EVENT, applyTheme, currentTheme } from '../hooks/useSiteTheme';
 import { ThemeContext } from './useTheme';
 import './themes.css';
@@ -18,23 +18,27 @@ import './themes.css';
  * for.
  */
 
+/* What the visitor last chose, or Original.
+ *
+ * Nothing is second-guessed here. This used to compare the remembered theme
+ * against the remembered mode and, when they disagreed, discard the theme and
+ * substitute the default for that mode — so a visitor could return to the site
+ * and find themselves in a design system they had never picked.
+ *
+ * That check only ever fired because the OS could move the mode behind the
+ * visitor's back. It cannot any more: the mode changes only when the toggle is
+ * pressed, and pressing it already moves the theme in step (see the effects
+ * below), so the two values in storage are written together and cannot drift
+ * apart. With the cause gone the correction is not a safety net, it is just a
+ * way to lose someone's choice. */
 function readStored() {
-  let saved = DEFAULT_THEME;
   try {
     const value = localStorage.getItem(STORAGE_KEY);
-    if (isTheme(value)) saved = value;
+    if (isTheme(value)) return value;
   } catch {
     // Private mode / blocked storage — the default is a fine answer.
   }
-
-  /* The site-wide light/dark choice outranks the remembered theme.
-   *
-   * The other way round is worse than it sounds: someone who set the site to
-   * light, and whose last theme here was Liquid Glass, would land on this page
-   * and have it quietly flip the whole site back to dark. Better to open in the
-   * light member and let the drawer take it from there. */
-  const mode = currentTheme();
-  return getTheme(saved).mode === mode ? saved : DEFAULT_BY_MODE[mode];
+  return DEFAULT_THEME;
 }
 
 /* Last theme used in each mode, so dark -> light -> dark returns you to the
@@ -78,20 +82,21 @@ export function ThemeProvider({ children }) {
     }
   }, [themeId]);
 
-  // Separate from the write above so it fires only on unmount, not on every
-  // change. Combining them would strip the attribute between themes.
-  useEffect(
-    () => () => {
-      document.documentElement.removeAttribute('data-lg-theme');
-    },
-    [],
-  );
+  /* The attribute is deliberately never removed. It used to be stripped on
+     unmount, back when the provider lived inside Home 2.2 and the theme was
+     that one page's business. The provider now sits at the root and the theme
+     dresses the whole site, so there is no longer a moment where taking it off
+     would be correct — doing so would drop the site back to its untinted
+     tokens mid-session. */
 
   /* The site toggle is the mode control; the drawer is the theme control. They
    * write to each other so the two never disagree: flipping the toggle moves to
    * a theme of that mode, and picking a theme moves the toggle to its mode. */
   useEffect(() => {
     const mode = getTheme(themeId).mode;
+    /* An `auto` theme has no mode to impose — it wears whichever the toggle is
+       already set to, so pushing the site either way here would be wrong. */
+    if (mode === 'auto') return;
     lastByMode[mode] = themeId;
     if (currentTheme() !== mode) applyTheme(mode);
   }, [themeId]);
@@ -100,8 +105,11 @@ export function ThemeProvider({ children }) {
     const follow = (e) => {
       const mode = e.detail;
       setThemeId((current) => {
-        if (getTheme(current).mode === mode) return current;
-        return lastByMode[mode] || DEFAULT_BY_MODE[mode];
+        const currentMode = getTheme(current).mode;
+        /* Flipping light/dark while on `auto` keeps you on it: it renders in
+           both, so there is nothing to move you to. */
+        if (currentMode === 'auto' || currentMode === mode) return current;
+        return lastByMode[mode] || FALLBACK_THEME;
       });
     };
 

@@ -281,35 +281,49 @@ export default function PromptBar({
               <IconPlus size={17} />
             </button>
 
-            <MenuChip
-              open={menu === 'tone'}
-              onToggle={() => setMenu(menu === 'tone' ? null : 'tone')}
-              onDismiss={() => setMenu(null)}
-              label={activeTone.label}
-              items={TONES}
-              active={tone}
-              onPick={(id) => {
-                onToneChange(id);
-                setMenu(null);
-                textareaRef.current?.focus();
-              }}
-            />
+            {/*
+              * Tone and depth pickers, hidden.
+              *
+              * `display: none` rather than deleted: the answers still run at
+              * whatever `tone` and `depth` default to, so the machinery behind
+              * these two has to stay wired either way. Hiding keeps the one
+              * decision in one place — delete this wrapper to bring them back.
+              *
+              * Not `visibility` or opacity: those leave a button in the tab
+              * order and in the accessibility tree, so a keyboard or screen
+              * reader user would still reach a control nobody can see.
+              */}
+            <div className="hidden">
+              <MenuChip
+                open={menu === 'tone'}
+                onToggle={() => setMenu(menu === 'tone' ? null : 'tone')}
+                onDismiss={() => setMenu(null)}
+                label={activeTone.label}
+                items={TONES}
+                active={tone}
+                onPick={(id) => {
+                  onToneChange(id);
+                  setMenu(null);
+                  textareaRef.current?.focus();
+                }}
+              />
 
-            <MenuChip
-              open={menu === 'depth'}
-              onToggle={() => setMenu(menu === 'depth' ? null : 'depth')}
-              onDismiss={() => setMenu(null)}
-              label={activeDepth.label}
-              icon={<DepthIcon size={15} />}
-              accent
-              items={DEPTHS}
-              active={depth}
-              onPick={(id) => {
-                onDepthChange(id);
-                setMenu(null);
-                textareaRef.current?.focus();
-              }}
-            />
+              <MenuChip
+                open={menu === 'depth'}
+                onToggle={() => setMenu(menu === 'depth' ? null : 'depth')}
+                onDismiss={() => setMenu(null)}
+                label={activeDepth.label}
+                icon={<DepthIcon size={15} />}
+                accent
+                items={DEPTHS}
+                active={depth}
+                onPick={(id) => {
+                  onDepthChange(id);
+                  setMenu(null);
+                  textareaRef.current?.focus();
+                }}
+              />
+            </div>
 
             <div className="flex-1" />
 

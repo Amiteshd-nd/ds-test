@@ -19,16 +19,41 @@
 
 export const STORAGE_KEY = 'ad:home-2.2:theme';
 
-/* Which theme the site-wide light/dark toggle lands on for each mode.
+/* Where the light/dark toggle lands a visitor who is on a theme that cannot
+ * follow it.
  *
- * Dark keeps the default. Light is Minimal & Direct because it is the neutral
- * counterpart: someone flipping a toggle wants a plainly light version of the
- * page, not an opinion. `real` is arguably the truer pair for `glass` (it is
- * the only other theme that leaves the cube refractive), but it is a strong
- * look to hand someone who only asked for light. The drawer is still there. */
-export const DEFAULT_BY_MODE = { dark: 'glass', light: 'min' };
+ * Only reachable in one situation: the visitor picked a mode-locked theme —
+ * Neo Brutalism, say, which is light-only — and then flipped the toggle the
+ * other way. That theme's tokens have no dark member, so something has to
+ * give, and the honest answer is the site's own design, which renders in both.
+ *
+ * It used to be Liquid Glass going dark and Neo Brutalism going light, which
+ * meant flipping the toggle could hand you a design system you had never asked
+ * for. Original is the one theme that is not an opinion.
+ *
+ * This is the fallback, not the first answer: `lastByMode` returns you to the
+ * theme you were actually last in for that mode, and only an empty slot gets
+ * here. */
+export const FALLBACK_THEME = 'orig';
 
 export const THEMES = [
+  {
+    /*
+     * The site's own design, and the only theme that belongs to both modes.
+     *
+     * `mode: 'auto'` is not a third ground — it means this theme declines to
+     * have one. Every other theme is light or dark and the site toggle moves
+     * you between them; this one simply follows whatever the toggle says,
+     * because the `--site-*` tokens it defers to already do.
+     */
+    id: 'orig',
+    mode: 'auto',
+    name: 'Original',
+    hint: 'The site as it was built',
+    icon: 'home',
+    swatch: ['#05100e', '#ff7a18', '#faffd8'],
+    material: { flat: 0, tint: [1, 1, 1], bands: 6, pixel: 0 },
+  },
   {
     id: 'glass',
     mode: 'dark',

@@ -65,10 +65,44 @@
   --site-line: #232832;
   --site-accent: #ff7a18;
   --site-card-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
-  --site-nav: rgb(30 40 39 / 0.7);
+  /* Glass, so it has to stay translucent enough for the blur to be visible
+     at all — 0.7 was opaque enough that the backdrop-filter did nothing you
+     could see. See docs/glass-nav.md §3: if the nav ever stops looking like
+     glass, this alpha is the first thing to check. */
+  --site-nav: rgb(30 40 39 / 0.55);
+  /* The drawer, which is not glass and must not be.
+   *
+   * It used to share --site-nav, and raising that for the drawer's sake took
+   * the nav's glass with it. They want opposite things: the nav floats over
+   * body copy and earns its effect by being see-through, while the drawer is
+   * fourteen rows of 12px text that can open over a 64px headline, and a 22px
+   * blur does almost nothing to type that large. Two surfaces, two tokens. */
+  --site-panel: rgb(24 32 31 / 0.93);
+  --site-nav-solid: rgb(24 32 31 / 0.96);
+  --site-nav-rim: rgb(255 255 255 / 0.1);
+  --site-nav-shadow: 0 14px 40px rgb(0 0 0 / 0.45);
   /* The hero display line. Pale citrus carries on near-black; on paper it has
      to become ink, because the same yellow measures about 1.2:1 there. */
   --site-display: #faffd8;
+
+  /*
+   * Aloha: the colour of the microphone listening.
+   *
+   * Its own token rather than `--site-accent`, because it is not saying the
+   * same thing. The accent is the site's voice — it marks focus, links, the
+   * things the site wants you to notice, and it changes with the theme because
+   * it belongs to the theme. This marks a live microphone, and a state that
+   * means "you are being recorded" should not be a different colour in every
+   * design system for the same reason a record light is red in every camera
+   * ever made.
+   *
+   * Turquoise also puts real distance between "listening" and the warm accent
+   * that is already all over this page. Orange next to orange meant the only
+   * thing separating a focused field from a recording one was a waveform.
+   *
+   * 11.2:1 on the dark card — brighter than the accent it replaced, which
+   * measured 6.96. The light pair is the same hue taken to ink strength. */
+  --site-voice: #2fe3c7;
 }
 
 [data-site-theme='light'] {
@@ -81,14 +115,285 @@
   --site-line: #dcd8cd;
   --site-accent: #c2410c;
   --site-card-shadow: 0 18px 40px rgba(20, 24, 26, 0.14);
-  --site-nav: rgb(255 255 255 / 0.72);
+  --site-nav: rgb(255 255 255 / 0.6);
+  --site-panel: rgb(255 255 255 / 0.94);
+  --site-nav-solid: rgb(255 255 255 / 0.96);
+  --site-nav-rim: rgb(255 255 255 / 0.7);
+  --site-nav-shadow: 0 14px 34px rgb(20 24 26 / 0.16);
   --site-display: #14181a;
+  /* The same aloha, taken down to something that survives paper: 5.2:1 on the
+     light card against the dark pair's 11.2 on the dark one. Bright turquoise
+     measures about 1.6:1 on near-white, which is a colour you can see and not
+     a colour you can read. */
+  --site-voice: #0f766e;
+}
+
+/*
+ * Structure, as opposed to colour.
+ *
+ * Everything above is a colour and flips with light/dark. These do not: a
+ * border is 1px and a corner is 20px in both, because that is the site's own
+ * design rather than a property of the ground it is drawn on.
+ *
+ * They exist as tokens only so the theme bridge below has something to rebind.
+ * Before it did, picking Neo Brutalism repainted the ground and left every
+ * card soft-cornered, hairline-bordered and blur-shadowed — the complaint that
+ * prompted this block. A theme is a border width, a corner, a shadow and a
+ * typeface at least as much as it is a palette, so those are now named here
+ * and derived from `--lg-*` when a theme is active.
+ *
+ * `orig` never reaches the bridge, so the values below are exactly what the
+ * site rendered before any of this existed.
+ */
+:root {
+  --site-edge-width: 1px;
+  --site-edge: var(--site-line);
+
+  /* The resting shadow is none and the lift is the soft drop: the site's cards
+     sit flat on the page and only rise under the cursor. A flat theme inverts
+     that — see the bridge. */
+  --site-card-rest: none;
+  --site-card-lift: var(--site-card-shadow);
+  --site-tile-shadow: none;
+
+  /* Does this theme model light? Glass and the two realist themes do; the flat
+     ones do not, and their tiles drop the gloss sweep rather than carrying a
+     gradient the style forbids. Mirrors --lg-specular-display. */
+  --site-specular: block;
+
+  --site-blur: blur(22px) saturate(180%);
+
+  /* Faces. Split three ways because the site uses three: a body sans, a slab
+     for the display line, and the script the welcome line is set in. A theme
+     that ships one typeface collapses all three onto it. */
+  --site-font: 'Outfit', sans-serif;
+  --site-font-display: 'Roboto Slab', serif;
+  --site-font-script: 'Rancho', cursive;
+  --site-weight-strong: 600;
+  --site-weight-display: 500;
+  --site-display-transform: none;
+  --site-display-shadow: none;
+  --site-hero-wrap: nowrap;
+}
+
+/*
+ * The bridge between the two theme vocabularies.
+ *
+ * The site chrome, the cards and the two home pages are all written against
+ * `--site-*`, which knew only light and dark. The thirteen themes speak
+ * `--lg-*`. Rather than rewrite every surface, the site tokens are redefined in
+ * terms of the active theme whenever one is set — so picking a theme now
+ * dresses the whole site, not just the chat surface.
+ *
+ * Everything is derived from `--lg-ink` and the ground, because those are the
+ * only two things every theme is guaranteed to define as a plain colour.
+ * `--lg-line` is `transparent` in one theme and `--lg-surface-bg` is a gradient
+ * in another; mixing against ink instead gives a value that behaves in all
+ * thirteen.
+ *
+ * `--lg-ground` is the flat stand-in for the background: `--lg-bg` is a texture
+ * in one theme and a gradient in another, and `color-mix` needs a colour. The
+ * eleven themes with a flat background fall through to `--lg-bg` itself.
+ *
+ * `orig` is excluded on purpose. That theme *is* the site's own design, so the
+ * right thing for it to do is nothing: the `--site-*` values above stand, and
+ * the light/dark toggle keeps driving them exactly as it did before any of this
+ * existed.
+ *
+ * The `--color-*` scale above is deliberately untouched. The v1 project pages
+ * are white by design and read their colours from there; remapping it would
+ * turn their dark ink light-on-light.
+ */
+[data-lg-theme]:not([data-lg-theme='orig']) {
+  --site-ground: var(--lg-ground, var(--lg-bg));
+
+  --site-bg: var(--lg-bg);
+  --site-fg: var(--lg-ink);
+  --site-fg-2: color-mix(in oklab, var(--lg-ink) 62%, transparent);
+  --site-display: var(--lg-ink);
+  --site-accent: var(--lg-accent);
+
+  /* The card is the theme's own panel, not a tint of the ground. Every theme
+     already describes one — paper white in Neo, cream under a double ring in
+     the handheld theme, a fibre texture in Realism — and that description is
+     the thing that was going to waste. */
+  --site-card: var(--lg-surface-bg);
+  --site-bezel: color-mix(in oklab, var(--lg-ink) 16%, var(--site-ground));
+  --site-line: color-mix(in oklab, var(--lg-ink) 18%, transparent);
+  --site-card-shadow: 0 18px 40px color-mix(in oklab, var(--lg-ink) 22%, transparent);
+
+  /* The edge. `--lg-border` is 0 in Glass and 4px in Brutalism, and that
+     spread is most of what separates the two on sight. */
+  --site-edge-width: var(--lg-border);
+  --site-edge: var(--lg-line);
+
+  /*
+   * Aloha, carried across thirteen grounds.
+   *
+   * The hue is fixed — that is the point of a state colour — but the value
+   * cannot be, because a theme brings its own paper. Neo's card is white while
+   * `data-site-theme` is still dark, so the bright turquoise defined up in the
+   * dark block would land on it at about 1.6:1.
+   *
+   * Mixed against `--lg-ink` for the same reason everything else in this block
+   * is: ink is the one thing all thirteen define as a plain colour, and it
+   * always points away from that theme's ground. On a light theme the mix
+   * deepens the turquoise into something that reads on paper; on a dark one it
+   * lifts it off the ground.
+   *
+   * Half, and half is not a round number picked for looking like one. The two
+   * halves of the set pull in opposite directions — the paper themes want more
+   * ink, the black ones want less — so the worst case across all thirteen is a
+   * V with its floor at 50%. Measured against each theme's own card: 3.82:1 at
+   * the handheld theme's cream, which is the floor, and 16.6:1 at Glass. Every
+   * other mix tested puts at least one theme under the 3:1 a graphic needs —
+   * 74% left the handheld theme at 2.14. */
+  --site-voice: color-mix(in oklab, #2fe3c7 50%, var(--lg-ink));
+
+  /* Flat themes invert the site's shadow contract. Their shadow is an offset
+     block rather than a cast, so it belongs at rest — a 4px hard shadow that
+     only appears on hover reads as a glitch, not as a lift. Holding it through
+     the hover means the translate alone does the lifting, which is exactly how
+     the style draws a raised card. Themes whose shadow is `none` (Brutalism,
+     Swiss, Minimal, Magazine) get nothing in either state, as they should. */
+  --site-card-rest: var(--lg-surface-shadow);
+  --site-card-lift: var(--lg-surface-shadow);
+  --site-tile-shadow: var(--lg-flat-shadow);
+
+  --site-specular: var(--lg-specular-display);
+
+  /* The nav takes the panel recipe whole — fill, blur and rim together. They
+     have to move as a set: Neo's fill is opaque because its blur is `none`,
+     and taking one without the other leaves labels on raw page content. */
+  --site-nav: var(--lg-surface-bg);
+  /* Opaque rather than the panel fill: same reasoning as the base themes, the
+     drawer's small text has to win over whatever is behind it. */
+  --site-panel: color-mix(in oklab, var(--lg-ink) 4%, var(--site-ground));
+  --site-nav-solid: color-mix(in oklab, var(--lg-ink) 4%, var(--site-ground));
+  --site-nav-rim: var(--lg-rim-a);
+  --site-nav-shadow: var(--lg-surface-shadow);
+  --site-blur: var(--lg-surface-blur);
+
+  /* Corner. Rebinding Tailwind's own radius scale is what carries this to
+     markup this file never sees: `rounded-card`, `rounded-lg` and friends
+     compile to `var(--radius-*)`, so the whole site squares off at once when a
+     theme asks it to. The steps below the card are ratios rather than a second
+     set of numbers, so a theme declares one corner and gets a scale.
+
+     `rounded-full` is the exception and stays round: Tailwind compiles it to a
+     literal, and chasing it would square avatars and status dots across pages
+     that are not asking for it. A circle inside a sharp card is within the
+     style anyway. */
+  --radius-card: var(--lg-radius);
+  --radius-nav: var(--lg-radius);
+  --radius-nav-item: calc(var(--lg-radius) * 0.4);
+  --radius-sm: calc(var(--lg-radius) * 0.2);
+  --radius-md: calc(var(--lg-radius) * 0.3);
+  --radius-lg: calc(var(--lg-radius) * 0.4);
+  --radius-xl: calc(var(--lg-radius) * 0.6);
+  --radius-2xl: calc(var(--lg-radius) * 0.8);
+  --radius-3xl: var(--lg-radius);
+
+  /* Type. A theme that ships a face ships it site-wide, the same way it
+     already reaches every child of the chat surface. Themes that set
+     `inherit` — Neo among them — leave the site's own faces standing and
+     change only the weight, which is the correct reading of a style whose
+     typographic instruction is "bold", not "this typeface". */
+  --site-font: var(--lg-font, 'Outfit', sans-serif);
+  --site-font-display: var(--lg-font-display, 'Roboto Slab', serif);
+  --site-font-script: var(--lg-font-display, 'Rancho', cursive);
+  --site-weight-strong: var(--lg-weight-strong);
+  --site-weight-display: var(--lg-display-weight);
+  --site-display-transform: var(--lg-display-transform);
+  --site-display-shadow: var(--lg-display-shadow);
+  --site-hero-wrap: normal;
+
+  /* The named faces in @theme are what the markup actually asks for — the
+     pages are full of `font-outfit` and `font-space`, and a body rule alone
+     would lose to every one of them. Mono is left alone: the card kickers are
+     set in it as a device, not as a default. */
+  --font-outfit: var(--site-font);
+  --font-space: var(--site-font);
+  --font-inter: var(--site-font);
+  --font-redhat: var(--site-font);
+  --font-roboto-sans: var(--site-font);
+  --font-roboto: var(--site-font-display);
+  --font-rancho: var(--site-font-script);
+}
+
+/*
+ * Glass and Neo declare `--lg-font: inherit`, and so does Original.
+ *
+ * Inside `.lg-root` that is exactly right: the chat surface sets
+ * `font-family: var(--lg-font)` on its own root, so `inherit` there means "keep
+ * whatever the site is already set in". Site-wide there is nothing above to
+ * inherit from, and the same value walks up to <html> and lands on the browser
+ * default serif. So the two themes that decline to ship a typeface name the
+ * site's own faces back instead.
+ *
+ * The `html` rule below is the floor under this: any future theme that says
+ * `inherit` degrades to the site's body sans rather than to Times.
+ */
+/* The repeated `:not()` is not decoration. It matches the bridge's selector
+   shape so this rule is equally specific, which is what lets being later in the
+   file decide it. A bare `[data-lg-theme='glass']` is one step less specific,
+   loses to the bridge outright, and does nothing at all — found the hard way
+   on the edge override below. */
+[data-lg-theme='glass']:not([data-lg-theme='orig']),
+[data-lg-theme='neo']:not([data-lg-theme='orig']) {
+  --site-font: 'Outfit', sans-serif;
+  --site-font-display: 'Roboto Slab', serif;
+  --site-font-script: 'Rancho', cursive;
+  /* Same faces as the site, so the same line still fits. */
+  --site-hero-wrap: nowrap;
+}
+
+/* Glass models its edge with light rather than with a line: `--lg-border` is 0
+   and `--lg-line` is transparent, which is right on the chat surface where a
+   gradient rim paints the edge instead, and wrong on the site chrome where
+   there is no rim to take over. It keeps the ink hairline it already had. */
+[data-lg-theme='glass']:not([data-lg-theme='orig']) {
+  --site-edge-width: 1px;
+  --site-edge: var(--site-line);
 }
 
 /* Two chrome assets are white-stroke SVGs drawn for a dark ground. Inverting
    them is honest here: they are line art with no colour to lose. */
 [data-site-theme='light'] .site-invert-asset {
   filter: invert(1);
+}
+
+/*
+ * No scrollbar, anywhere.
+ *
+ * The page, the theme drawer, the chat transcript and the drag carousels all
+ * scroll; none of them draws a gutter for it. Asked for explicitly, and it is
+ * what lets a theme's ground run to the edge of the window instead of stopping
+ * against a strip of browser chrome that belongs to no design system.
+ *
+ * Only the painting is removed. Wheel, trackpad, touch, keyboard (arrows, Page
+ * Up/Down, Home/End, space) and programmatic scrolling are untouched, and no
+ * container is switched to `overflow: hidden` — which is the version of this
+ * that would actually trap content. Focused elements still scroll into view.
+ *
+ * The universal selector is deliberate: the alternative is finding every
+ * scrollable container on five pages and a lazy route, and missing the next
+ * one. `.lg-scroll` in liquid-glass.css is a class and would outrank this, so
+ * it hides itself at its own definition rather than being fought here.
+ */
+html,
+body,
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 /* The chrome and the home/works surfaces follow the theme. */
@@ -100,6 +405,74 @@
 .site-fg-2 { color: var(--site-fg-2); }
 .site-line { border-color: var(--site-line); }
 
+/*
+ * Frosted glass for the floating nav.
+ *
+ * `saturate` alongside the blur is what separates glass from fog: blurring
+ * alone greys out whatever is behind, and pushing saturation back up keeps the
+ * colour of the page readable through it.
+ *
+ * The inset rim is the highlight a real edge catches. It is one inset shadow
+ * rather than a pseudo-element so it composes with the drop shadow and needs
+ * no extra stacking context.
+ */
+.site-glass {
+  background: var(--site-nav);
+  border: var(--site-edge-width) solid var(--site-edge);
+  -webkit-backdrop-filter: var(--site-blur);
+  backdrop-filter: var(--site-blur);
+  box-shadow:
+    inset 0 1px 0 var(--site-nav-rim),
+    var(--site-nav-shadow);
+}
+
+/* The same recipe, minus the translucency.
+ *
+ * For a surface that carries dense text rather than three nav labels. It keeps
+ * the border, rim and shadow so it still belongs to the same family, and only
+ * swaps the fill — the blur stays on, which still does something at the edges
+ * where the panel meets the page. */
+.site-glass-panel {
+  background: var(--site-panel);
+}
+
+/* Without backdrop-filter the translucency has nothing to blur and the labels
+   would sit on raw page content. Fall back to a near-solid ground. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .site-glass {
+    background: var(--site-nav-solid);
+  }
+}
+
+/*
+ * The theme drawer's rows.
+ *
+ * These were `bg-white/10` and `hover:bg-white/[0.055]`. White works on a dark
+ * ground and disappears on a light one, and this drawer opens over the site
+ * chrome in all fourteen themes. Tinting with the ink instead means the
+ * selected row reads as a lift whichever way round the theme is.
+ */
+.lg-row-on {
+  background: color-mix(in oklab, var(--site-fg) 12%, transparent);
+}
+
+.lg-row-off:hover {
+  background: color-mix(in oklab, var(--site-fg) 7%, transparent);
+}
+
+/*
+ * A framed photograph.
+ *
+ * The About page is mostly pictures — a portrait, two drag carousels — and a
+ * bare image cannot carry a design system. This gives each one the same edge,
+ * corner and shadow the cards get, so the page reads as the active theme
+ * rather than as photographs on a coloured ground.
+ */
+.site-plate {
+  border: var(--site-edge-width) solid var(--site-edge);
+  box-shadow: var(--site-card-rest);
+}
+
 @layer base {
   * {
     @apply box-border;
@@ -108,7 +481,8 @@
   body {
     /* Follows the site theme rather than the fixed dark, so overscroll and any
        area the shell does not cover match the page instead of flashing black. */
-    @apply font-outfit antialiased;
+    @apply antialiased;
+    font-family: var(--site-font);
     background: var(--site-bg);
     color: var(--site-fg);
     margin: 0;
@@ -117,20 +491,38 @@
 
   html {
     @apply scroll-smooth;
+    /* The bottom of every `inherit` chain. See the note above the glass/neo
+       font block: a theme that ships no typeface has to land somewhere, and
+       the site's body sans is the right somewhere. */
+    font-family: 'Outfit', sans-serif;
   }
 }
 
 @layer utilities {
   /* Responsive heading styles */
   .heading-responsive {
-    font-family: 'Roboto Slab', serif;
+    font-family: var(--site-font-display);
     font-size: 32px;
-    font-weight: 500;
+    font-weight: var(--site-weight-display);
     line-height: 120%;
     letter-spacing: -1.6px;
+    text-transform: var(--site-display-transform);
+    text-shadow: var(--site-display-shadow);
   }
 
+  /* Three tiers, not two. 64px is sized for the width the hero gets when the
+     card row is three across; below that the prompt moves up under the
+     headline and the column narrows, and 64px starts wrapping "platter." onto
+     a line of its own. 48px is the same type at three quarters, with the
+     tracking scaled to match so the letterfit does not change with it. */
   @media (min-width: 768px) {
+    .heading-responsive {
+      font-size: 48px;
+      letter-spacing: -2.4px;
+    }
+  }
+
+  @media (min-width: 1080px) {
     .heading-responsive {
       font-size: 64px;
       letter-spacing: -3.2px;
@@ -138,7 +530,7 @@
   }
 
   .subheading-responsive {
-    font-family: 'Rancho', cursive;
+    font-family: var(--site-font-script);
     font-size: 32px;
     font-weight: 400;
     line-height: 120%;
@@ -149,6 +541,11 @@
     .subheading-responsive {
       font-size: 40px;
       letter-spacing: -2px;
+      /* One line, but only in the face this was measured in. Rancho at 40px
+         fits the sentence across a 672px column; Helvetica Neue and VT323 do
+         not, and under `nowrap` they ran off the side of the page rather than
+         wrapping. A theme that brings its own display face wraps instead. */
+      white-space: var(--site-hero-wrap);
     }
   }
 
@@ -255,6 +652,22 @@
     }
   }
 
+  /*
+   * The bento grids are drawn at a fixed design width — 760 on desktop, 390 on
+   * mobile — and every tile inside is sized in `cqw`, a percentage of this
+   * element's width. So the whole composition keeps its proportions exactly
+   * while filling whatever width it is given, heights included.
+   *
+   * This replaces a `transform: scale(calc(100vw ...))` on the mobile grid that
+   * silently produced no transform at all, leaving it pinned at 390px inside a
+   * much wider column. A transform would have been wrong even had it worked:
+   * it does not affect layout, so the reserved height never matches what you
+   * see.
+   */
+  .bento-fluid {
+    container-type: inline-size;
+  }
+
   /* Windows Phone style dynamic tiles */
   .bento-tile {
     position: relative;
@@ -262,6 +675,12 @@
     transition: all 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
     backface-visibility: hidden;
     -webkit-font-smoothing: antialiased;
+    /* The grid is fifteen photographs and nothing else, so the frame around
+       each one is the only place a theme can speak here. Under Neo that is a
+       2px ink outline and a hard offset; under Glass it is the hairline it
+       always had. */
+    border: var(--site-edge-width) solid var(--site-edge);
+    box-shadow: var(--site-tile-shadow);
   }
 
   .bento-tile img {
@@ -278,7 +697,9 @@
 
   .bento-tile:hover {
     transform: scale(1.02);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    /* Was a fixed black drop, which was a soft cast under a flat theme and a
+       second shadow under a themed tile that already had one. */
+    box-shadow: var(--site-card-lift);
     z-index: 10;
   }
 
@@ -336,9 +757,12 @@
     animation: slide-in 0.5s ease-out backwards;
   }
 
-  /* Shimmer effect overlay */
+  /* Shimmer effect overlay. `display` rather than removing it outright: a flat
+     theme's whole premise is that nothing models light, and a gradient sweep
+     across a tile is exactly the thing Neo Brutalism and Brutalism rule out. */
   .bento-tile::before {
     content: '';
+    display: var(--site-specular);
     position: absolute;
     top: -50%;
     left: -50%;

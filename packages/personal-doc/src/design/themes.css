@@ -24,7 +24,8 @@
  * original surface rather than nothing. */
 
 :root,
-[data-lg-theme='glass'] {
+[data-lg-theme='glass'],
+[data-lg-theme='orig'] {
   /* ground */
   --lg-bg: #060609;
   --lg-wash:
@@ -87,6 +88,80 @@
   --lg-spectrum: conic-gradient(from 0deg, #ff2d55, #ff9500, #ffd60a, #34c759, #32ade6, #5e5ce6, #bf5af2, #ff2d55);
   --lg-spectrum-blur: 6px;
   --lg-spectrum-blur-hover: 9px;
+  /* How hard the crisp ring is painted over the bloom behind it. Glass wants
+     it held back — the ring there is refracted light and should read as part
+     of the halo. A metal ring is the opposite: it is a solid object, and at
+     half strength its white bands come out grey, which is the single thing
+     that stops chrome looking like chrome. */
+  --lg-ring-opacity: 0.5;
+  --lg-ring-opacity-hover: 0.75;
+  /* How far the ring reaches past the well, i.e. how thick it reads. Glass
+     wants a hairline, because its ring is a rim light rather than an object.
+     A material needs enough width to show what it is made of. */
+  --lg-ring-inset: -1.5px;
+  /* How far the blurred halo reaches past the ring. Separate from the ring's
+     own width so a theme can have a wide glow on a thin bezel, or neither. */
+  --lg-bloom-inset: -5px;
+  /* Full `animation` shorthands, so a theme that wants a still ring says
+     nothing and gets `none`. Keyframes live in liquid-glass.css beside the
+     other decorative loops. */
+  --lg-ring-motion: none;
+  --lg-bloom-motion: none;
+  /* Only meaningful with a sweep: the gradient is painted larger than the
+     layer so there is somewhere for `background-position` to travel to. At
+     100% the tile is exactly the layer and moving it does nothing. */
+  --lg-ring-bg-size: 100% 100%;
+  /* `background-blend-mode` for the ring's own layers. Only means anything to
+     a theme that paints more than one — see Original, which separates the
+     colour channels and screens them back together. */
+  --lg-ring-blend: normal;
+  /* The blurred halo behind the bezel. A theme with a hard edge can switch it
+     off entirely rather than having a soft second ring outside its first. */
+  --lg-bloom-opacity: 0.8;
+  --lg-bloom-opacity-hover: 1;
+  /* What the halo layer paints. Defaults to the ring's own gradient, i.e. a
+     blurred copy of the whole ring — which is a halo, not a glow. A theme
+     wanting a glow paints a mostly-transparent image with one bright arc in
+     it instead, so only that arc throws light. */
+  --lg-bloom-image: var(--lg-spectrum);
+  --lg-bloom-bg-size: var(--lg-ring-bg-size);
+  /* `screen` keeps whatever is brighter, so transparent and dark parts of the
+     halo add nothing at all and only the bright arc lifts off the page. With
+     `normal` even a fully transparent gradient's blurred edges grey the page. */
+  --lg-bloom-blend: normal;
+  /* Applied before the blend. Contrast separates highlights from mid-tones so
+     the glow lands only on the former; saturation compensates for the blur
+     averaging neighbouring hues towards grey. */
+  --lg-bloom-contrast: 1;
+  --lg-bloom-saturate: 1;
+
+  /* The prism button's own pill, behind the bezel. Off, for every theme.
+   *
+   * It started as the `lg-surface` recipe, and it is the one place that recipe
+   * cannot work: the bezel is round, the pill is round and slightly larger, so
+   * whatever the pill is filled with comes out as a band around the bezel
+   * rather than as a surface behind it. Original worked this out first and
+   * switched its own off; every other theme was still wearing one, and in the
+   * bordered ones — Neo, Neubrutalism, Brutalism — it was a hard ring around
+   * the prism that read as a second, wronger bezel outside the real one.
+   *
+   * All five are off rather than only the fill. A transparent element still
+   * blurs what is behind it, still casts its shadow, and still carries the
+   * theme's border, so switching off the background alone leaves a soft disc,
+   * a drop shadow and a ring where the pill used to be.
+   *
+   * These are the pill's own tokens and nothing else reads them. Every other
+   * surface in the app still goes through --lg-surface-* and is untouched. A
+   * theme that wants the pill back sets them; none currently does. */
+  --lg-pill-bg: transparent;
+  --lg-pill-shadow: none;
+  --lg-pill-blur: none;
+  --lg-pill-hairline: none;
+  --lg-pill-border: none;
+  /* Stamped, rather than laid on top. Dark below and light above is the
+     two-shadow trick that makes a glyph read as cut into metal. `none` for
+     every theme whose well is not metal. */
+  --lg-well-emboss: none;
   --lg-well-fill: radial-gradient(120% 120% at 50% 0%, #26262c 0%, #121216 60%, #0d0d10 100%);
   --lg-well-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -2px 6px rgba(0, 0, 0, 0.7);
 
@@ -97,6 +172,13 @@
   --lg-theme-transition: background-color 0.28s ease, color 0.28s ease, border-color 0.28s ease;
 
   /* layout — the column the surface reads in, and the rhythm inside it */
+  /* corner — the card radius the whole site rounds to. Named here rather
+     than left to the utility layer because the site pages outside the chat
+     surface are the ones that need it, and `rounded-card` cannot follow a
+     theme on its own. Small parts derive from it rather than declaring a
+     second number: see --site-radius-sm in index.css. */
+  --lg-radius: 20px;
+
   --lg-measure: 720px;
   --lg-measure-wide: 840px;
   --lg-leading: 1.68;
@@ -115,6 +197,349 @@
   --lg-label-tracking: 0.14em;
 }
 
+/* --------------------------------------------------------------- 1b. orig */
+/* The Original theme, for the chat surface.
+ *
+ * Everywhere else this theme does nothing and lets `--site-*` stand. Home 2.2
+ * is the exception: it reads `--lg-*` and would have nothing to render with, so
+ * the palette is derived from the site tokens instead. Structure — blurs,
+ * shadows, radii — is inherited from Liquid Glass via the shared selector
+ * above; only the colours are restated here.
+ *
+ * Because every value traces back to `--site-*`, this block follows the
+ * light/dark toggle for free, which is the whole point of a theme that belongs
+ * to both modes.
+ */
+[data-lg-theme='orig'] {
+  --lg-bg: var(--site-bg);
+  --lg-ink: var(--site-fg);
+  --lg-accent: var(--site-accent);
+  --lg-accent-soft: var(--site-accent);
+  --lg-accent-warm: var(--site-accent);
+  /*
+   * `--lg-on-well` is the one value that cannot trace back to `--site-*`.
+   *
+   * It names the ink on the prism button's well, and that well is not this
+   * theme's ground: `--lg-well-fill` is not restated here, so it stays Glass's
+   * dark radial in BOTH modes. Deriving its ink from `--site-bg` tied it to the
+   * page, so in dark mode it computed to #05100e and painted near-black on
+   * near-black — the disc icon simply vanished. White, like every other theme,
+   * because the surface it lands on is dark whichever way the toggle is set.
+   *
+   * `--lg-on-accent` is the send button's icon, and that one *does* trace back
+   * now: the button is filled with `--site-fg` below, so its ink is the ground.
+   */
+  --lg-on-accent: var(--site-bg);
+  --lg-on-well: #ffffff;
+  --lg-line: var(--site-line);
+  --lg-wash: none;
+  --lg-vignette: none;
+  --lg-scrim: none;
+  --lg-surface-bg: color-mix(in oklab, var(--site-fg) 7%, var(--site-bg));
+  --lg-flat-bg: color-mix(in oklab, var(--site-fg) 5%, var(--site-bg));
+  --lg-display: var(--site-display);
+
+  /*
+   * The bezel: a bright polished ring that splits the light at its shoulders.
+   *
+   * Three attempts got the balance backwards before this one. An even rainbow
+   * is a prism. Three tinted highlights in a field of near-black is a dark
+   * ring with glints. Neutral grey banding is closer, but it is still mostly
+   * dark, and a polished ring is not mostly dark — it catches light round
+   * almost its whole circumference. That is the correction here: this is a
+   * bright ring with a few short dips, not a dark ring with a few highlights.
+   *
+   * The colour is the other half, and it is not spread around the ring. Each
+   * dip is preceded by a splinter of spectrum about eight degrees wide,
+   * running red to gold to green to blue. That is chromatic aberration: a
+   * curved polished edge refracts what it reflects, and the split only shows
+   * where the reflection is falling off a shoulder into shadow. Spread the
+   * same colours evenly and you are back to a prism; confine them to the
+   * shoulders and they read as fire on metal.
+   *
+   * So the cycle, four times around: white plateau, short spectral splinter,
+   * a dip, climb back out. Two ratios carry it. The plateaus are wide and the
+   * splinters are narrow — that is what keeps it metal rather than prism. And
+   * the dips bottom out at a visible charcoal rather than at black: on a dark
+   * page a near-black dip is not a shadow on the ring, it is a hole in it, and
+   * the bezel stops being one object and becomes four separate arcs.
+   */
+  --lg-spectrum:
+    conic-gradient(
+      from -11deg,
+      rgb(28, 0, 0) 0deg,
+      rgb(28, 0, 0) 12deg,
+      rgb(255, 0, 0) 32deg,
+      rgb(255, 0, 0) 56deg,
+      rgb(28, 0, 0) 76deg,
+      rgb(28, 0, 0) 100deg,
+      rgb(28, 0, 0) 116deg,
+      rgb(255, 0, 0) 143deg,
+      rgb(255, 0, 0) 176deg,
+      rgb(28, 0, 0) 203deg,
+      rgb(28, 0, 0) 235deg,
+      rgb(28, 0, 0) 250deg,
+      rgb(255, 0, 0) 275deg,
+      rgb(255, 0, 0) 305deg,
+      rgb(28, 0, 0) 330deg,
+      rgb(28, 0, 0) 360deg
+    ),
+    conic-gradient(
+      from 0deg,
+      rgb(0, 28, 0) 0deg,
+      rgb(0, 28, 0) 12deg,
+      rgb(0, 255, 0) 32deg,
+      rgb(0, 255, 0) 56deg,
+      rgb(0, 28, 0) 76deg,
+      rgb(0, 28, 0) 100deg,
+      rgb(0, 28, 0) 116deg,
+      rgb(0, 255, 0) 143deg,
+      rgb(0, 255, 0) 176deg,
+      rgb(0, 28, 0) 203deg,
+      rgb(0, 28, 0) 235deg,
+      rgb(0, 28, 0) 250deg,
+      rgb(0, 255, 0) 275deg,
+      rgb(0, 255, 0) 305deg,
+      rgb(0, 28, 0) 330deg,
+      rgb(0, 28, 0) 360deg
+    ),
+    conic-gradient(
+      from 11deg,
+      rgb(0, 0, 28) 0deg,
+      rgb(0, 0, 28) 12deg,
+      rgb(0, 0, 255) 32deg,
+      rgb(0, 0, 255) 56deg,
+      rgb(0, 0, 28) 76deg,
+      rgb(0, 0, 28) 100deg,
+      rgb(0, 0, 28) 116deg,
+      rgb(0, 0, 255) 143deg,
+      rgb(0, 0, 255) 176deg,
+      rgb(0, 0, 28) 203deg,
+      rgb(0, 0, 28) 235deg,
+      rgb(0, 0, 28) 250deg,
+      rgb(0, 0, 255) 275deg,
+      rgb(0, 0, 255) 305deg,
+      rgb(0, 0, 28) 330deg,
+      rgb(0, 0, 28) 360deg
+    );
+  --lg-ring-blend: screen, screen, normal;
+
+  /*
+   * Just oversized enough for the sweep to have somewhere to go.
+   *
+   * This was 235%, which drove the conic's origin right outside the ring. That
+   * was survivable while every stop was bright — the ring sampled a narrow
+   * angular slice and the slice looked much like the whole. It stopped being
+   * survivable the moment half the gradient became dark holds: the slice could
+   * land entirely inside one of them and the bezel simply went out.
+   *
+   * At 150% the origin can travel about a quarter of the layer's width from
+   * centre — roughly 12px on a 50px ring — which is enough displacement to see
+   * without letting the origin leave the ring. 125% was safe but the movement
+   * was barely legible; 235% was the other extreme and could park the whole
+   * visible arc inside one band.
+   */
+  --lg-ring-bg-size: 150% 150%;
+
+  /* The halo's blur, not the bezel's — the crisp ring is never filtered.
+     4px now the halo is plain white blobs rather than a blurred copy of the
+     whole ring. It can take a wider radius than before precisely because it
+     no longer carries the contrast boost that used to amplify the spread —
+     that was the reason 5px was painting 20px of haze. This is just softening
+     six small white shapes into bloom. */
+  --lg-spectrum-blur: 4px;
+  --lg-spectrum-blur-hover: 6px;
+
+
+  /* Full strength. See --lg-ring-opacity in the base block: a white band at
+     half opacity is a grey band, and grey bands are not chrome. */
+  --lg-ring-opacity: 1;
+  --lg-ring-opacity-hover: 1;
+
+  /*
+   * The band's width, since the well covers everything inside it: the ring
+   * reaches this far past the well and that reach is the whole of what you
+   * see. 3px rather than the 2 it sat at, which gives the gradient room for
+   * both halves of each cycle to register.
+   *
+   * On the gradient: it is not a rainbow. The reference implementation
+   * (github.com/seangeng/argent, built on Paper Design's WebGL shaders) paints
+   * metal as grey and white bands — `colorBack: #a7abb1`, `colorTint: #fff`,
+   * `repetition: 2-3` — and gets every bit of its colour from `shiftRed` and
+   * `shiftBlue`, which offset the red and blue channels against green. The
+   * hues live in the fringing at the band edges, not in the material.
+   *
+   * That is what this reproduces without a shader. The same band pattern is
+   * painted three times, once per channel, each rotated a few degrees off the
+   * others, and `background-blend-mode: screen` recombines them. Where the
+   * three coincide you get white; where the offset pulls them apart at a band
+   * edge you get the aberration, warm on one side and cool on the other. It is
+   * the mechanism rather than an impression of it, which is why it holds up
+   * where hand-painted rainbow stops kept looking like a painted rainbow.
+   *
+   * The three cycles are 100, 135 and 125 degrees wide rather than three even
+   * 120s. Even spacing reads as a radial sweep — a diagram of a reflection.
+   * Real turned metal is uneven because what it reflects is.
+   *
+   * The shadows bottom out around #1a, not black. Below that they stop being
+   * shadow on the ring and become gaps in it, and the bezel reads as four
+   * floating arcs — found the hard way earlier in this same file.
+   */
+  --lg-ring-inset: -3px;
+  /*
+   * The glow: the ring's own bright parts, throwing light.
+   *
+   * The version before this was an independent white arc on its own rotation,
+   * which was wrong twice over. It turned at a constant rate, and a constant
+   * rotation on a static page is the one motion that reads as a spinner. And
+   * being its own image on its own timer, it drifted off the highlights it was
+   * supposed to be light *from* — the ring would be bright in one place and
+   * glowing in another.
+   *
+   * Same gradient as the bezel now, same size, same sweep, so the light sits
+   * on the white plateaus and moves when they move. `screen` is what stops
+   * that being a blurred copy of the whole ring: screening keeps whichever is
+   * brighter, so mid-tones vanish into the page and only near-whites and the
+   * saturated fringes lift off it. `contrast` widens that gap before the blend
+   * sees it, which is what confines the glow to the highlights instead of
+   * letting the whole circumference haze over — the failure mode of the first
+   * two attempts.
+   */
+  /* White, and only white — and the same bands as the ring.
+   *
+   * It used to be a blurred copy of the whole gradient, so the haze came out
+   * in the ring's colours: an orange smear under one fleck, a cyan one under
+   * the next. That is not how a glow works, and the reference is unambiguous
+   * — the ring is iridescent and the bloom around it is plain white.
+   *
+   * These are the identical band angles, painted as white-to-transparent
+   * instead of as channels. So the haze peaks exactly where the three channels
+   * coincide into white and fades to nothing across the dark bands. No
+   * saturate (there is no colour to push) and no contrast (the image is
+   * already only the bright parts). */
+  --lg-bloom-image: conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0) 0deg,
+    rgba(255, 255, 255, 0) 12deg,
+    rgba(255, 255, 255, 1) 32deg,
+    rgba(255, 255, 255, 1) 56deg,
+    rgba(255, 255, 255, 0) 76deg,
+    rgba(255, 255, 255, 0) 116deg,
+    rgba(255, 255, 255, 1) 143deg,
+    rgba(255, 255, 255, 1) 176deg,
+    rgba(255, 255, 255, 0) 203deg,
+    rgba(255, 255, 255, 0) 250deg,
+    rgba(255, 255, 255, 1) 275deg,
+    rgba(255, 255, 255, 1) 305deg,
+    rgba(255, 255, 255, 0) 330deg,
+    rgba(255, 255, 255, 0) 360deg
+  );
+  --lg-bloom-bg-size: var(--lg-ring-bg-size);
+  --lg-bloom-contrast: 1;
+  --lg-bloom-saturate: 1;
+  /* Just clear of the bezel's outer edge. With the blur this tight the layer
+     no longer needs room to bloom into — it only has to peek past the rim. */
+  --lg-bloom-inset: -4px;
+  --lg-bloom-opacity: 0.85;
+  --lg-bloom-opacity-hover: 1;
+  --lg-bloom-blend: screen;
+
+  /* The pill that used to be switched off here is switched off in the base
+     block now, for every theme — see the note there. Original's reasoning
+     turned out to be everyone's. */
+
+  /*
+   * The drift.
+   *
+   * Two layers, turning at different rates in opposite directions, and that
+   * is the whole trick: neither one alone changes shape, but the bright lobes
+   * of the halo slide in and out of register with the bezel's, so the shape of
+   * the reflection is never the same twice. The periods are 23s and 31s, which
+   * share no factor — the pair does not return to its starting arrangement for
+   * about twelve minutes, so nothing about it reads as a loop.
+   *
+   * The keyframes are deliberately uneven. A constant rotation is a spinner,
+   * and a spinner on a page that is not loading is a lie about what the
+   * interface is doing. Mildly irregular steps read as a highlight wandering
+   * across metal instead.
+   */
+  --lg-ring-motion: lg-ring-sweep 10s ease-in-out infinite;
+  /* The bezel's sweep, deliberately identical. Any other name, duration or
+     easing and the glow wanders off the highlight it is meant to be coming
+     from. Locked together, the two layers travel as one while the gradient
+     under both of them goes on changing shape. */
+  --lg-bloom-motion: lg-ring-sweep 10s ease-in-out infinite;
+
+  /* The glyph, stamped into the plate. Dark below and a one-pixel light lift
+     above: the same pair of shadows a physical engraved mark casts, and the
+     cheapest way to stop an icon looking printed on. */
+  --lg-well-emboss: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45))
+    drop-shadow(0 -1px 0 rgba(255, 255, 255, 0.28));
+
+  /* The site's own corner. This theme is the site's own design, so the
+     radius it hands back is the one --radius-card already declares. */
+  --lg-radius: 20px;
+
+  /*
+   * ------------------------------------------------ the chat surface, flat
+   *
+   * Everything above restates colour. This restates structure, which until now
+   * was inherited wholesale from Liquid Glass — the comment at the top of this
+   * block said as much, and it was the wrong call. It meant the Ask Amitesh
+   * surface came up in the site's palette wearing Glass's material: 20px
+   * backdrop blurs, a violet focus bloom, a magenta-to-blue send button and a
+   * specular sheen across the prompt bar. None of that is the site's design;
+   * it is another theme's, tinted.
+   *
+   * So: no blur anywhere, no bloom, no sheen, no gradient rim. Panels are the
+   * site's card colour inside the site's hairline, and the send button is the
+   * same inverted disc the home page's ask box uses. The chat surface should
+   * be recognisably the same product as the page it opens from.
+   *
+   * The prism ring on the theme control is untouched by all of this — it lives
+   * on --lg-spectrum / --lg-ring-* / --lg-bloom-* / --lg-pill-*, which are set
+   * above and are the one place this theme is allowed to be luminous.
+   */
+  --lg-surface-bg: var(--site-card);
+  --lg-surface-blur: none;
+  --lg-surface-shadow: none;
+  --lg-flat-bg: color-mix(in oklab, var(--site-fg) 5%, var(--site-bg));
+  --lg-flat-blur: none;
+  --lg-flat-shadow: none;
+
+  /* A real hairline, so the panels still have an edge once the rim gradient
+     and the drop shadows are gone. */
+  --lg-border: 1px;
+  --lg-rim-a: transparent;
+  --lg-rim-b: transparent;
+  --lg-hairline-display: none;
+  --lg-specular-display: none;
+
+  /* Focus: a hairline and a breath of haze, in the ink rather than the accent.
+     A coloured ring on a text field reads as a state — valid, invalid, active —
+     and there is no state here to report; the field is simply where the caret
+     is. One pixel to mark the edge and a soft 8px falloff to lift it off the
+     page is enough to see without announcing anything. */
+  --lg-focus-bloom:
+    0 0 0 1px color-mix(in oklab, var(--site-fg) 24%, transparent),
+    0 0 8px 0 color-mix(in oklab, var(--site-fg) 12%, transparent);
+  /* The keyboard outline is a different job and stays at full strength — it
+     has to be unmissable when tabbing. Neutral, but not faint. */
+  --lg-focus-ring: var(--site-fg);
+
+  /* The send button, matching the home page's: the ink inverted into a disc. */
+  --lg-send-fill: var(--site-fg);
+  --lg-send-shadow: none;
+  --lg-busy-fill: color-mix(in oklab, var(--site-fg) 16%, transparent);
+
+  /* Plain ink. A coloured dot in front of every list item is decoration that
+     has to be read past on the way to the words. */
+  --lg-bullet-fill: var(--site-fg);
+  --lg-quote-line: var(--site-line);
+  --lg-live-glow: none;
+  --lg-bloom-blur: 0px;
+}
+
 /* ----------------------------------------------------------------- 2. neo */
 /* Neo-brutalism: paper, ink, a single electric accent, and shadows that are
  * offsets rather than light. Nothing blurs, nothing glows — every token that
@@ -129,10 +554,11 @@
 [data-lg-theme='neo'] {
   /* ground */
   --lg-bg: #efede6;
-  --lg-wash:
-    radial-gradient(circle at 6% 6%, #f6a93b 0 min(20vw, 190px), rgba(0, 0, 0, 0) min(20vw, 190px)),
-    radial-gradient(circle at 97% 12%, #d98cf2 0 min(16vw, 150px), rgba(0, 0, 0, 0) min(16vw, 150px)),
-    radial-gradient(circle at 96% 92%, #0a6cff 0 min(18vw, 170px), rgba(0, 0, 0, 0) min(18vw, 170px));
+  /* No wash. This carried three hard-edged corner discs — orange, lilac and
+     blue — and the ground reads as a cleaner printed sheet without them. The
+     accent colour still does its work on fills, edges and corner blocks, where
+     it never sits under small text. */
+  --lg-wash: none;
   /* the dot grid — a printed sheet, not a vignette */
   --lg-wash-blend: normal;
   --lg-vignette: radial-gradient(rgba(11, 11, 15, 0.16) 1.2px, rgba(0, 0, 0, 0) 1.2px) 0 0 / 22px 22px;
@@ -193,6 +619,13 @@
   --lg-theme-transition: background-color 0.28s ease, color 0.28s ease, border-color 0.28s ease;
 
   /* layout — the column the surface reads in, and the rhythm inside it */
+  /* corner — the card radius the whole site rounds to. Named here rather
+     than left to the utility layer because the site pages outside the chat
+     surface are the ones that need it, and `rounded-card` cannot follow a
+     theme on its own. Small parts derive from it rather than declaring a
+     second number: see --site-radius-sm in index.css. */
+  --lg-radius: 6px;
+
   --lg-measure: 720px;
   --lg-measure-wide: 840px;
   --lg-leading: 1.68;
@@ -296,6 +729,13 @@
   --lg-theme-transition: background-color 0.28s ease, color 0.28s ease, border-color 0.28s ease;
 
   /* layout — the column the surface reads in, and the rhythm inside it */
+  /* corner — the card radius the whole site rounds to. Named here rather
+     than left to the utility layer because the site pages outside the chat
+     surface are the ones that need it, and `rounded-card` cannot follow a
+     theme on its own. Small parts derive from it rather than declaring a
+     second number: see --site-radius-sm in index.css. */
+  --lg-radius: 0px;
+
   --lg-measure: 720px;
   --lg-measure-wide: 840px;
   --lg-leading: 1.68;
@@ -412,6 +852,13 @@
   --lg-theme-transition: background-color 0.28s ease, color 0.28s ease, border-color 0.28s ease;
 
   /* layout — the column the surface reads in, and the rhythm inside it */
+  /* corner — the card radius the whole site rounds to. Named here rather
+     than left to the utility layer because the site pages outside the chat
+     surface are the ones that need it, and `rounded-card` cannot follow a
+     theme on its own. Small parts derive from it rather than declaring a
+     second number: see --site-radius-sm in index.css. */
+  --lg-radius: 0px;
+
   --lg-measure: 720px;
   --lg-measure-wide: 840px;
   --lg-leading: 1.68;
@@ -536,6 +983,13 @@
   --lg-theme-transition: none;
 
   /* layout — the column the surface reads in, and the rhythm inside it */
+  /* corner — the card radius the whole site rounds to. Named here rather
+     than left to the utility layer because the site pages outside the chat
+     surface are the ones that need it, and `rounded-card` cannot follow a
+     theme on its own. Small parts derive from it rather than declaring a
+     second number: see --site-radius-sm in index.css. */
+  --lg-radius: 0px;
+
   --lg-measure: 720px;
   --lg-measure-wide: 840px;
   --lg-leading: 1.68;
@@ -645,6 +1099,13 @@
 
   /* layout — the style's two actual numbers. One column: the landing dock and
      the conversation read at the same width instead of two. */
+  /* corner — the card radius the whole site rounds to. Named here rather
+     than left to the utility layer because the site pages outside the chat
+     surface are the ones that need it, and `rounded-card` cannot follow a
+     theme on its own. Small parts derive from it rather than declaring a
+     second number: see --site-radius-sm in index.css. */
+  --lg-radius: 8px;
+
   --lg-measure: 640px;
   --lg-measure-wide: 640px;
   --lg-leading: 1.75;
@@ -775,6 +1236,13 @@
   --lg-theme-transition: background-color 0.28s ease, color 0.28s ease, border-color 0.28s ease;
 
   /* layout */
+  /* corner — the card radius the whole site rounds to. Named here rather
+     than left to the utility layer because the site pages outside the chat
+     surface are the ones that need it, and `rounded-card` cannot follow a
+     theme on its own. Small parts derive from it rather than declaring a
+     second number: see --site-radius-sm in index.css. */
+  --lg-radius: 0px;
+
   --lg-measure: 720px;
   --lg-measure-wide: 840px;
   --lg-leading: 1.6;
@@ -924,6 +1392,13 @@
   --lg-theme-transition: none;
 
   /* layout */
+  /* corner — the card radius the whole site rounds to. Named here rather
+     than left to the utility layer because the site pages outside the chat
+     surface are the ones that need it, and `rounded-card` cannot follow a
+     theme on its own. Small parts derive from it rather than declaring a
+     second number: see --site-radius-sm in index.css. */
+  --lg-radius: 10px;
+
   --lg-measure: 720px;
   --lg-measure-wide: 840px;
   --lg-leading: 1.72;
@@ -1051,6 +1526,13 @@
   --lg-theme-transition: background-color 0.28s ease, color 0.28s ease, border-color 0.28s ease;
 
   /* layout */
+  /* corner — the card radius the whole site rounds to. Named here rather
+     than left to the utility layer because the site pages outside the chat
+     surface are the ones that need it, and `rounded-card` cannot follow a
+     theme on its own. Small parts derive from it rather than declaring a
+     second number: see --site-radius-sm in index.css. */
+  --lg-radius: 0px;
+
   --lg-measure: 720px;
   --lg-measure-wide: 840px;
   --lg-leading: 1.6;
@@ -1204,6 +1686,13 @@
   /* layout — wide where the minimal theme is narrow. The guide's 1200px is a
      container, not a measure: running text still stops at a readable line
      length, because legibility is the whole argument of this style. */
+  /* corner — the card radius the whole site rounds to. Named here rather
+     than left to the utility layer because the site pages outside the chat
+     surface are the ones that need it, and `rounded-card` cannot follow a
+     theme on its own. Small parts derive from it rather than declaring a
+     second number: see --site-radius-sm in index.css. */
+  --lg-radius: 0px;
+
   --lg-measure: 780px;
   --lg-measure-wide: 1120px;
   --lg-leading: 1.65;
@@ -1293,6 +1782,9 @@
      came out near-white and the paper stopped separating from it. A surface
      that will be lit has to start below the value you want to end at. */
   --lg-bg: url('../assets/textures/plate-brushed.webp') 0 0 / 300px 300px repeat, #c2c4c7;
+  /* A flat stand-in for the textured ground. The site tokens mix against this:
+     `color-mix` needs a colour, and this theme's background is an image. */
+  --lg-ground: #c2c4c7;
   --lg-wash:
     linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0) 42%, rgba(0, 0, 0, 0.08) 100%),
     repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.022) 0 1px, rgba(255, 255, 255, 0.03) 1px 3px);
@@ -1379,6 +1871,13 @@
   --lg-theme-transition: background-color 0.28s ease, color 0.28s ease, border-color 0.28s ease;
 
   /* layout */
+  /* corner — the card radius the whole site rounds to. Named here rather
+     than left to the utility layer because the site pages outside the chat
+     surface are the ones that need it, and `rounded-card` cannot follow a
+     theme on its own. Small parts derive from it rather than declaring a
+     second number: see --site-radius-sm in index.css. */
+  --lg-radius: 10px;
+
   --lg-measure: 720px;
   --lg-measure-wide: 860px;
   --lg-leading: 1.68;
@@ -1523,6 +2022,8 @@
 [data-lg-theme='y2k'] {
   /* ground — the guide's two anchors with a violet between them */
   --lg-bg: linear-gradient(135deg, #ff8ecb 0%, #c79bff 46%, #8ceeff 100%);
+  /* The midpoint of the gradient above, as a flat colour to mix against. */
+  --lg-ground: #c79bff;
   --lg-wash:
     radial-gradient(70% 50% at 18% 6%, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0) 62%),
     radial-gradient(60% 45% at 88% 92%, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0) 62%);
@@ -1597,6 +2098,13 @@
   --lg-theme-transition: background-color 0.28s ease, color 0.28s ease, border-color 0.28s ease;
 
   /* layout */
+  /* corner — the card radius the whole site rounds to. Named here rather
+     than left to the utility layer because the site pages outside the chat
+     surface are the ones that need it, and `rounded-card` cannot follow a
+     theme on its own. Small parts derive from it rather than declaring a
+     second number: see --site-radius-sm in index.css. */
+  --lg-radius: 18px;
+
   --lg-measure: 720px;
   --lg-measure-wide: 840px;
   --lg-leading: 1.66;
@@ -1765,6 +2273,13 @@
   --lg-theme-transition: none;
 
   /* layout */
+  /* corner — the card radius the whole site rounds to. Named here rather
+     than left to the utility layer because the site pages outside the chat
+     surface are the ones that need it, and `rounded-card` cannot follow a
+     theme on its own. Small parts derive from it rather than declaring a
+     second number: see --site-radius-sm in index.css. */
+  --lg-radius: 0px;
+
   --lg-measure: 720px;
   --lg-measure-wide: 840px;
   --lg-leading: 1.7;
@@ -1825,6 +2340,13 @@
  * Scoped to .lg-root: the rest of the site is a separate design and must not
  * see this. Browsers without color-mix() fall back to Tailwind's baked #fff,
  * which is the pre-existing behaviour, not a regression. */
+
+/* Original, in light mode only. The other entries here are light themes and
+   rebind unconditionally; this theme serves both modes, so in dark it must be
+   left alone — white-alpha text is already correct on its dark ground. */
+[data-lg-theme='orig'][data-site-theme='light'] .lg-root {
+  --color-white: var(--site-fg);
+}
 
 [data-lg-theme='neo'] .lg-root {
   --color-white: #0b0b0f;
@@ -1887,18 +2409,18 @@
  * hard way: the magazine theme's kicker rule matched, computed, and was
  * silently overridden by this block because both landed on (0,3,0). */
 
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/20) { color: color-mix(in oklab, var(--color-white) 42%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/25) { color: color-mix(in oklab, var(--color-white) 46%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/28) { color: color-mix(in oklab, var(--color-white) 52%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/30) { color: color-mix(in oklab, var(--color-white) 54%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/35) { color: color-mix(in oklab, var(--color-white) 58%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/40) { color: color-mix(in oklab, var(--color-white) 62%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/45) { color: color-mix(in oklab, var(--color-white) 64%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/50) { color: color-mix(in oklab, var(--color-white) 68%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/55) { color: color-mix(in oklab, var(--color-white) 72%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/60) { color: color-mix(in oklab, var(--color-white) 76%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/70) { color: color-mix(in oklab, var(--color-white) 82%, transparent); }
-:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k']) .lg-root :where(.text-white\/75) { color: color-mix(in oklab, var(--color-white) 86%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k'], [data-lg-theme='orig'][data-site-theme='light']) .lg-root :where(.text-white\/20) { color: color-mix(in oklab, var(--color-white) 42%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k'], [data-lg-theme='orig'][data-site-theme='light']) .lg-root :where(.text-white\/25) { color: color-mix(in oklab, var(--color-white) 46%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k'], [data-lg-theme='orig'][data-site-theme='light']) .lg-root :where(.text-white\/28) { color: color-mix(in oklab, var(--color-white) 52%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k'], [data-lg-theme='orig'][data-site-theme='light']) .lg-root :where(.text-white\/30) { color: color-mix(in oklab, var(--color-white) 54%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k'], [data-lg-theme='orig'][data-site-theme='light']) .lg-root :where(.text-white\/35) { color: color-mix(in oklab, var(--color-white) 58%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k'], [data-lg-theme='orig'][data-site-theme='light']) .lg-root :where(.text-white\/40) { color: color-mix(in oklab, var(--color-white) 62%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k'], [data-lg-theme='orig'][data-site-theme='light']) .lg-root :where(.text-white\/45) { color: color-mix(in oklab, var(--color-white) 64%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k'], [data-lg-theme='orig'][data-site-theme='light']) .lg-root :where(.text-white\/50) { color: color-mix(in oklab, var(--color-white) 68%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k'], [data-lg-theme='orig'][data-site-theme='light']) .lg-root :where(.text-white\/55) { color: color-mix(in oklab, var(--color-white) 72%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k'], [data-lg-theme='orig'][data-site-theme='light']) .lg-root :where(.text-white\/60) { color: color-mix(in oklab, var(--color-white) 76%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k'], [data-lg-theme='orig'][data-site-theme='light']) .lg-root :where(.text-white\/70) { color: color-mix(in oklab, var(--color-white) 82%, transparent); }
+:is([data-lg-theme='neo'], [data-lg-theme='gba'], [data-lg-theme='neub'], [data-lg-theme='brutal'], [data-lg-theme='min'], [data-lg-theme='chaos'], [data-lg-theme='raw'], [data-lg-theme='mag'], [data-lg-theme='swiss'], [data-lg-theme='real'], [data-lg-theme='y2k'], [data-lg-theme='orig'][data-site-theme='light']) .lg-root :where(.text-white\/75) { color: color-mix(in oklab, var(--color-white) 86%, transparent); }
 
 /* Hover states resolve to the full ink, which is already the rule. */
 

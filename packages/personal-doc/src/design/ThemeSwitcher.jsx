@@ -9,6 +9,7 @@ import {
   IconChrome,
   IconColumns,
   IconGlass,
+  IconHome,
   IconKeycap,
   IconMeasure,
   IconPixel,
@@ -34,6 +35,7 @@ import { useTheme } from './useTheme';
  */
 
 const THEME_ICONS = {
+  home: IconHome,
   glass: IconGlass,
   slab: IconSlab,
   pixel: IconPixel,
@@ -119,10 +121,20 @@ export default function ThemeSwitcher() {
           {...trigger}
         />
       </span>
+      {/* `--site-fg`, not `text-white/80`.
+          The white-alpha utilities only follow the ink inside `.lg-root`,
+          where `--color-white` is rebound per theme. This button lives in the
+          navbar, so the utility stayed literally white and the half-disc was
+          white-on-white the moment the theme's ground went light — invisible
+          in eleven of the fourteen. Full ink rather than the secondary the
+          light/dark toggle beside it uses: this one is the trigger for the
+          whole appearance system, and the filled half of the disc is what
+          makes it read as a contrast glyph at all. */}
       <button
         type="button"
         aria-label="Theme"
-        className="lg-surface lg-focus grid h-10 w-10 place-items-center rounded-full text-white/80 sm:hidden"
+        className="lg-surface lg-focus grid h-10 w-10 place-items-center rounded-full sm:hidden"
+        style={{ color: 'var(--site-fg)' }}
         {...trigger}
       >
         <IconTheme size={17} />
@@ -136,7 +148,8 @@ export default function ThemeSwitcher() {
             id={tipId}
             role="tooltip"
             {...TIP}
-            className="lg-surface pointer-events-none absolute right-0 top-[calc(100%+8px)] z-40 hidden whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[12.5px] text-white/80 sm:block"
+            className="lg-surface pointer-events-none absolute right-0 top-[calc(100%+8px)] z-40 hidden whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[12.5px] sm:block"
+            style={{ color: 'var(--site-fg)' }}
           >
             Theme
           </motion.span>
@@ -159,17 +172,33 @@ export default function ThemeSwitcher() {
               aria-label="Appearance"
               {...DRAWER}
               /* 300px, not 272: the hint line has to survive a monospace theme,
-                 where the same 26 characters are about 30% wider. */
-              className="lg-surface absolute right-0 top-[calc(100%+10px)] z-40 w-[300px] max-w-[calc(100vw-2rem)] origin-top-right overflow-hidden rounded-2xl p-1.5"
+                 where the same 26 characters are about 30% wider.
+                 The `min()` is the narrow-screen escape. This is anchored to
+                 the right of a button that already sits near the right edge, so
+                 at 390px a fixed 300 put the drawer's left edge at -14 and the
+                 swatches were cut off. Below roughly 410px it takes what is
+                 there instead, and the hints truncate rather than leave. */
+              /* `site-glass`, not `lg-surface`. The drawer opens over the
+                 site chrome now, not only over the chat surface, so it wants
+                 the chrome's own frosted recipe — translucent ground, blur and
+                 saturate, inset rim — which is documented in
+                 docs/glass-nav.md and already follows the active theme. */
+              className="site-glass site-glass-panel absolute right-0 top-[calc(100%+10px)] z-40 w-[min(300px,calc(100vw-7rem))] origin-top-right overflow-hidden rounded-2xl p-1.5"
             >
               <span
                 className="lg-hairline"
                 style={{ background: 'linear-gradient(180deg, var(--lg-rim-a), var(--lg-rim-b))' }}
               />
 
+              {/* 76%, not the 35% this label used to be. The drawer opens over
+                  a translucent ground that is light in eleven of the fourteen
+                  themes, and a faint label measured 2.9:1 on the palest of
+                  them. Measured across every theme, this is the floor that
+                  clears AA on all of them. */}
               <p
-                className="px-2.5 pb-1.5 pt-2 text-[11px] text-white/35"
+                className="px-2.5 pb-1.5 pt-2 text-[11px]"
                 style={{
+                  color: 'color-mix(in oklab, var(--site-fg) 76%, transparent)',
                   fontWeight: 'var(--lg-weight-strong)',
                   textTransform: 'var(--lg-label-transform)',
                   letterSpacing: 'var(--lg-label-tracking)',
@@ -178,6 +207,20 @@ export default function ThemeSwitcher() {
                 Appearance
               </p>
 
+              {/*
+                * The list scrolls, the label does not.
+                *
+                * Fourteen rows is taller than a laptop viewport, and the drawer
+                * hangs from the navbar — so its room is the window minus the bar
+                * minus its own offset, which is what the `calc` says. `svh`
+                * rather than `vh` because on mobile `vh` is the *largest*
+                * viewport, i.e. it assumes browser chrome that may be on screen,
+                * and the drawer would run under it.
+                *
+                * `overscroll-contain` stops a flick at the end of the list from
+                * carrying on into the page behind.
+                */}
+              <div className="max-h-[min(calc(100svh-9rem),30rem)] overflow-y-auto overscroll-contain">
               {themes.map((t) => {
                 const Icon = THEME_ICONS[t.icon] || IconGlass;
                 const on = t.id === themeId;
@@ -191,41 +234,47 @@ export default function ThemeSwitcher() {
                       setTheme(t.id);
                       setOpen(false);
                     }}
-                    className={`lg-focus flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-colors ${
-                      on ? 'bg-white/10' : 'hover:bg-white/[0.055]'
+                    className={`lg-focus flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition-colors ${
+                      on ? 'lg-row-on' : 'lg-row-off'
                     }`}
                   >
                     {/* the swatch doubles as the icon well, so the row shows
                         the theme's palette rather than asserting it in words */}
                     <span
                       aria-hidden="true"
-                      className="relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-lg"
+                      className="relative grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-lg"
                       style={{
                         background: `linear-gradient(135deg, ${t.swatch[0]} 0 42%, ${t.swatch[1]} 42% 72%, ${t.swatch[2]} 72%)`,
                         boxShadow: 'inset 0 0 0 1px rgba(128,128,128,0.45)',
                       }}
                     >
-                      <Icon size={17} style={{ color: '#ffffff', mixBlendMode: 'difference' }} />
+                      <Icon size={15} style={{ color: '#ffffff', mixBlendMode: 'difference' }} />
                     </span>
 
                     <span className="min-w-0 flex-1">
                       <span
-                        className="block truncate text-[14px] text-white"
-                        style={{ fontWeight: 'var(--lg-weight-strong)' }}
+                        className="block truncate text-[13.5px]"
+                        style={{ fontWeight: 'var(--lg-weight-strong)', color: 'var(--site-fg)' }}
                       >
                         {t.name}
                       </span>
-                      <span className="block truncate text-[12.5px] text-white/45">{t.hint}</span>
+                      <span
+                        className="block truncate text-[12px]"
+                        style={{ color: 'color-mix(in oklab, var(--site-fg) 84%, transparent)' }}
+                      >
+                        {t.hint}
+                      </span>
                     </span>
 
                     {on && (
-                      <span className="shrink-0" style={{ color: 'var(--lg-accent-soft)' }}>
+                      <span className="shrink-0" style={{ color: 'var(--site-accent)' }}>
                         <IconCheck size={15} />
                       </span>
                     )}
                   </button>
                 );
               })}
+              </div>
             </motion.div>
           </>
         )}

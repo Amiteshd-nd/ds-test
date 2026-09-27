@@ -55,6 +55,20 @@
       "autoPort": false
     },
     {
+      "name": "personal-doc-alt",
+      "runtimeExecutable": "corepack",
+      "runtimeArgs": [
+        "pnpm",
+        "--filter",
+        "personal-doc",
+        "dev",
+        "--port",
+        "6185"
+      ],
+      "port": 6185,
+      "autoPort": false
+    },
+    {
       "name": "discovery",
       "runtimeExecutable": "corepack",
       "runtimeArgs": [
@@ -97,6 +111,18 @@
         "packages/file-compressor"
       ],
       "port": 6179
+    },
+    {
+      "name": "runner",
+      "runtimeExecutable": "corepack",
+      "runtimeArgs": [
+        "pnpm",
+        "--filter",
+        "runner",
+        "dev"
+      ],
+      "port": 6184,
+      "autoPort": false
     }
   ]
 }

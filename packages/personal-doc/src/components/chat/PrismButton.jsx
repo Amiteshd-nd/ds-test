@@ -1,5 +1,5 @@
 import { memo, useState } from 'react';
-import { motion, useReducedMotion } from '@cloud-march/motion/react';
+import { motion } from '@cloud-march/motion/react';
 import { Link } from 'react-router-dom';
 import { IconHome } from './Icons';
 
@@ -8,26 +8,32 @@ import { IconHome } from './Icons';
  * to read as light refracting through a bevel rather than as a printed border.
  *
  * Three layers do the work:
- *   1. a blurred conic spectrum, oversized, rotating   -> the refraction
- *   2. a crisp conic spectrum at low opacity           -> the hard edge glint
- *   3. an opaque inner disc                            -> punches the well out
+ *   1. a blurred conic spectrum, oversized   -> the refraction
+ *   2. a crisp conic spectrum at low opacity -> the hard edge glint
+ *   3. an opaque inner disc                  -> punches the well out
  *
- * Hover pushes rotation speed and bloom up on a spring, so it accelerates into
- * motion instead of snapping.
+ * Whether the ring moves is the theme's call, not this component's. It is a
+ * plain `animation` shorthand in a token, so a theme that says nothing gets a
+ * still ring. Original sweeps its two layers — the gradient's centre travels,
+ * the layer does not turn — at periods that do not divide into each other.
+ * See --lg-ring-motion, and the sweep note in liquid-glass.css where the
+ * keyframes and the reduced-motion override live.
+ *
+ * What it must never go back to is one layer turning at a constant rate:
+ * that reads as a spinner, and a spinner in a fixed header says the page is
+ * loading when it is not.
  *
  * The spectrum, its blur radius and the well are all tokens, so a flat theme
- * gets the same three layers with a hard four-stop wheel and no bloom — the
- * component's structure is the constant, its material is not.
+ * gets the same three layers with a hard four-stop wheel and no bloom, and the
+ * Original theme gets a polished-steel wheel — the component's structure is
+ * the constant, its material is not.
  */
 
-// Stable references: the parent re-renders continuously while an answer
-// streams, and a fresh `animate` object each time would restart the rotation
-// from 0 forever, leaving the ring visually stuck.
-const SPIN = { rotate: 360 };
-const STILL = {};
-const SPIN_FAST = { duration: 2.6, ease: 'linear', repeat: Infinity };
-const SPIN_SLOW = { duration: 7, ease: 'linear', repeat: Infinity };
 const POP = { type: 'spring', stiffness: 420, damping: 26 };
+
+/* The bloom lifts on hover rather than snapping to it. Opacity and blur only:
+ * nothing moves, so this stays appropriate under reduced motion. */
+const BLOOM = 'opacity 180ms ease-out, filter 180ms ease-out';
 
 function PrismButton({
   to = '/',
@@ -39,10 +45,6 @@ function PrismButton({
   ...rest
 }) {
   const [hover, setHover] = useState(false);
-  const reduce = useReducedMotion();
-
-  const spin = reduce ? STILL : SPIN;
-  const spinTransition = hover ? SPIN_FAST : SPIN_SLOW;
 
   const content = (
     <motion.span
@@ -56,31 +58,64 @@ function PrismButton({
       className={`lg-surface lg-focus relative inline-flex items-center gap-3 rounded-full py-2 ${
         showLabel ? 'pl-2 pr-5' : 'px-2'
       } ${className}`}
+      /* The pill reads its own tokens rather than `lg-surface`'s directly, and
+         they are all off: a round surface behind a round bezel only ever comes
+         out as a band around it. `border` is in the set because `lg-surface`
+         paints one too, and in the bordered themes that ring was the loudest
+         part of what had to go. See --lg-pill-* in themes.css. */
+      style={{
+        background: 'var(--lg-pill-bg)',
+        border: 'var(--lg-pill-border)',
+        boxShadow: 'var(--lg-pill-shadow)',
+        backdropFilter: 'var(--lg-pill-blur)',
+        WebkitBackdropFilter: 'var(--lg-pill-blur)',
+      }}
     >
-      <span className="lg-hairline" style={{ background: 'linear-gradient(180deg, var(--lg-rim-a), var(--lg-rim-b))' }} />
+      <span
+        className="lg-hairline"
+        style={{
+          display: 'var(--lg-pill-hairline)',
+          background: 'linear-gradient(180deg, var(--lg-rim-a), var(--lg-rim-b))',
+        }}
+      />
 
       {/* icon well */}
       <span className="relative grid h-11 w-11 shrink-0 place-items-center">
         {/* 1 — refracted bloom */}
-        <motion.span
+        <span
           aria-hidden="true"
-          className="absolute rounded-full"
+          className="lg-ring-layer absolute rounded-full"
           style={{
-            inset: -5,
-            background: 'var(--lg-spectrum)',
-            filter: `blur(var(${hover ? '--lg-spectrum-blur-hover' : '--lg-spectrum-blur'}))`,
-            opacity: hover ? 1 : 0.8,
+            inset: 'var(--lg-bloom-inset)',
+            /* `backgroundImage`, not `background`. The shorthand resets every
+               other background longhand, so pairing it with backgroundSize
+               here made React warn and let the two fight on re-render. */
+            backgroundImage: 'var(--lg-bloom-image)',
+            backgroundSize: 'var(--lg-bloom-bg-size)',
+            filter: `blur(var(${
+              hover ? '--lg-spectrum-blur-hover' : '--lg-spectrum-blur'
+            })) contrast(var(--lg-bloom-contrast)) saturate(var(--lg-bloom-saturate))`,
+            opacity: `var(${hover ? '--lg-bloom-opacity-hover' : '--lg-bloom-opacity'})`,
+            mixBlendMode: 'var(--lg-bloom-blend)',
+            transition: BLOOM,
+            animation: 'var(--lg-bloom-motion)',
           }}
-          animate={spin}
-          transition={spinTransition}
         />
         {/* 2 — hard glint */}
-        <motion.span
+        <span
           aria-hidden="true"
-          className="absolute rounded-full"
-          style={{ inset: -1.5, background: 'var(--lg-spectrum)', opacity: hover ? 0.75 : 0.5 }}
-          animate={spin}
-          transition={spinTransition}
+          className="lg-ring-layer absolute rounded-full"
+          style={{
+            inset: 'var(--lg-ring-inset)',
+            backgroundImage: 'var(--lg-spectrum)',
+            backgroundSize: 'var(--lg-ring-bg-size)',
+            /* A theme may paint the ring as several layers — Original splits
+               the colour channels — so they need recombining. */
+            backgroundBlendMode: 'var(--lg-ring-blend)',
+            opacity: `var(${hover ? '--lg-ring-opacity-hover' : '--lg-ring-opacity'})`,
+            transition: BLOOM,
+            animation: 'var(--lg-ring-motion)',
+          }}
         />
         {/* 3 — the well itself */}
         <span
@@ -90,7 +125,7 @@ function PrismButton({
             boxShadow: 'var(--lg-well-shadow)',
           }}
         >
-          <Icon size={19} style={{ color: 'var(--lg-on-well)' }} />
+          <Icon size={19} style={{ color: 'var(--lg-on-well)', filter: 'var(--lg-well-emboss)' }} />
         </span>
       </span>
 

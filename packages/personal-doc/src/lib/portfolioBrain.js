@@ -499,7 +499,6 @@ export const SUGGESTIONS = [
   { icon: 'grid', label: 'Design systems', prompt: 'What did you build for the Gazebo design system?' },
   { icon: 'pulse', label: 'Outcomes', prompt: 'How do you measure whether a design worked?' },
   { icon: 'spark', label: 'Process', prompt: 'What does your design process actually look like?' },
-  { icon: 'mail', label: 'Get in touch', prompt: 'How can I reach you about a role?' },
 ];
 
 /* The rotating headline. These read as things a real visitor would type. */
@@ -509,4 +508,9 @@ export const TYPED_PROMPTS = [
   'What belongs in a design system?',
   'Show me something you shipped under pressure',
   'Are you actually an AI?',
+  'What do you do when research says no?',
+  'How do you design for someone under time pressure?',
+  'Which decision here would you take back?',
+  'What does a defect lifecycle actually look like?',
+  'How can I reach you about a role?',
 ];

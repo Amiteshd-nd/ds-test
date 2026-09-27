@@ -25,8 +25,23 @@ export const IconChevron = (p) => (
   <Svg {...p}><path d="m6 9 6 6 6-6" /></Svg>
 );
 
+/* An arrow, not a paper plane.
+ *
+ * The plane had two problems at the 17px these buttons render it. Its tail
+ * notch is a 3px detail that turns to mush, and the silhouette is bottom-left
+ * heavy, so inside a circular button it sat visibly off-centre no matter how
+ * the button was padded.
+ *
+ * It was also saying the wrong thing. A paper plane means "send this to
+ * someone"; these two buttons submit a prompt and get an answer back, which is
+ * why every assistant interface settled on an upward arrow for it. Two strokes,
+ * no detail below 6px, and symmetric about the vertical so it centres itself.
+ */
 export const IconSend = (p) => (
-  <Svg {...p}><path d="M5 12.5 19.5 5l-4.2 14.6-3.1-5.9-5.2-1.2Z" /></Svg>
+  <Svg {...p}>
+    <path d="M12 19V5" />
+    <path d="M6.2 10.8 12 5l5.8 5.8" />
+  </Svg>
 );
 
 export const IconStop = (p) => (
@@ -36,6 +51,24 @@ export const IconStop = (p) => (
 export const IconVoice = (p) => (
   <Svg {...p}>
     <path d="M5 10v4M9 7v10M13 9v6M17 11v2M21 10v4" />
+  </Svg>
+);
+
+/* A microphone, not a waveform.
+ *
+ * `IconVoice` above is five bars, which is the picture of what dictation
+ * *produces*. The control that starts it wants the picture of the instrument:
+ * every assistant interface uses a capsule-on-a-stand, and a glyph people have
+ * to learn is a glyph that costs a tap to discover.
+ *
+ * Three strokes and nothing under 3px, so it survives the 17px these buttons
+ * render at. The pickup arc stops short of the capsule on both sides rather
+ * than wrapping it — at this size a closed loop fills in and reads as a blob. */
+export const IconMic = (p) => (
+  <Svg {...p}>
+    <rect x="9.25" y="3" width="5.5" height="10.5" rx="2.75" />
+    <path d="M5.75 11.25a6.25 6.25 0 0 0 12.5 0" />
+    <path d="M12 17.5V21" />
   </Svg>
 );
 

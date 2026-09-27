@@ -2,12 +2,21 @@ import { motion } from '@cloud-march/motion/react';
 import { SUGGESTIONS } from '../../lib/portfolioBrain';
 import { ICONS } from './iconMap';
 
-/* Recommended openers.
+/* Recommended openers, as chips.
  *
- * One component, two densities — a snapping horizontal rail where width is
- * scarce, a two-column grid where it is not. Same markup, same data; the
- * layout rule changes, not the component. (Airbnb's DLS calls this the
- * "universal" principle: adapt the system, do not fork it.)
+ * Each chip shows only its short label — "Start here", "Outcomes" — and sends
+ * the full question on click. The question itself used to sit under the label
+ * as a second line; a chip cannot carry a sentence and stay a chip.
+ *
+ * That split means the visible text and the action are no longer the same
+ * words, so the accessible name carries both. It is built label-first because
+ * WCAG 2.5.3 asks that the accessible name *contain* the visible label —
+ * "Outcomes" alone would leave a speech-input user saying a word the button
+ * does not answer to, and the prompt alone would strand them the other way.
+ *
+ * One component, two densities: a scrolling row where width is scarce, a
+ * wrapping cluster where it is not. Same markup, same data; the layout rule
+ * changes, not the component.
  */
 
 export default function SuggestionRail({ onPick, variant = 'grid' }) {
@@ -17,8 +26,14 @@ export default function SuggestionRail({ onPick, variant = 'grid' }) {
     <div
       className={
         rail
-          ? 'lg-rail -mx-4 flex gap-2.5 overflow-x-auto px-4 pb-1'
-          : 'grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3'
+          ? /* Deliberately not centred. On a scroll container `justify-center`
+               overflows in both directions, and the overflow past the start
+               edge cannot be scrolled back to — the first chip becomes
+               unreachable the moment the row is wider than the viewport, which
+               on the rail is the normal case. `margin: auto` on the items has
+               the same flaw. */
+            'lg-rail -mx-4 flex gap-2 overflow-x-auto px-4 pb-1'
+          : 'flex flex-wrap justify-center gap-2'
       }
       role="list"
       aria-label="Suggested questions"
@@ -31,30 +46,26 @@ export default function SuggestionRail({ onPick, variant = 'grid' }) {
             type="button"
             role="listitem"
             onClick={() => onPick(s.prompt)}
+            aria-label={`${s.label}: ${s.prompt}`}
+            title={s.prompt}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.06 * i + 0.1, type: 'spring', stiffness: 320, damping: 30 }}
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.985 }}
-            className={`lg-surface lg-focus group relative flex items-start gap-3 rounded-2xl p-3.5 text-left ${
-              rail ? 'w-[228px] shrink-0 scroll-ml-4 snap-start' : ''
+            className={`lg-surface lg-focus group relative inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-left ${
+              rail ? 'shrink-0 scroll-ml-4 snap-start' : ''
             }`}
           >
             <span
               className="lg-hairline"
               style={{ background: 'linear-gradient(180deg, var(--lg-rim-a), var(--lg-rim-b))' }}
             />
-            <span className="mt-0.5 shrink-0 text-white/45 transition-colors group-hover:text-[color:var(--lg-accent-soft)]">
-              <Icon size={17} />
+            <span className="shrink-0 text-white/45 transition-colors group-hover:text-[color:var(--lg-accent-soft)]">
+              <Icon size={15} />
             </span>
-            <span className="min-w-0">
-              <span
-                data-lg-kicker=""
-                className="block text-[11px] font-medium uppercase tracking-[0.1em] text-white/35"
-              >
-                {s.label}
-              </span>
-              <span className="mt-1 block text-[14px] leading-snug text-white/85">{s.prompt}</span>
+            <span className="whitespace-nowrap text-[13px] font-medium text-white/85">
+              {s.label}
             </span>
           </motion.button>
         );

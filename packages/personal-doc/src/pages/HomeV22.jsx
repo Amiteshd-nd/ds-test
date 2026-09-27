@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from '@cloud-march/motion/react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import GlassCube from '../components/chat/GlassCube';
 import PromptBar from '../components/chat/PromptBar';
 import SuggestionRail from '../components/chat/SuggestionRail';
 import TypedHeadline from '../components/chat/TypedHeadline';
 import Transcript from '../components/chat/Transcript';
-import { IconArrowDown, IconNew } from '../components/chat/Icons';
-import { ThemeProvider, ThemeSwitcher, useTheme } from '../design';
+import { IconArrowDown, IconChevron, IconNew } from '../components/chat/Icons';
+import { ThemeSwitcher, useTheme } from '../design';
 import ThemeToggle from '../components/ThemeToggle';
 import { respond } from '../lib/portfolioBrain';
 import '../styles/liquid-glass.css';
@@ -45,20 +45,23 @@ const PAGE_FADE = {
 
 const ORB_SPRING = { type: 'spring', stiffness: 220, damping: 30 };
 
-/* The page is wrapped rather than themed in place: ThemeProvider has to be
- * above everything that reads a theme, and the surface's own header is one of
- * those readers. */
+/* Shared by the two forms the back control takes — a button when there is
+   history to walk, a link when there is not. Same pixels either way. */
+const BACK_CLASS =
+  'lg-surface-flat lg-focus grid h-9 w-9 shrink-0 place-items-center rounded-full text-white/70 transition-colors hover:text-white';
+
+/* No ThemeProvider here any more — it sits at the root of the app so the theme
+ * outlives this route. Wrapping again would create a second, independent copy
+ * of the theme state, and the two would disagree the moment either changed. */
 export default function HomeV22() {
-  return (
-    <ThemeProvider>
-      <ChatSurface />
-    </ThemeProvider>
-  );
+  return <ChatSurface />;
 }
 
 function ChatSurface() {
   const reduce = useReducedMotion();
   const { theme } = useTheme();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -129,6 +132,51 @@ function ChatSurface() {
     },
     [clearTimers, depth, reduce, tone],
   );
+
+  /*
+   * A question handed over from the home page's ask box, as `?q=`.
+   *
+   * Two things make this fiddlier than it looks.
+   *
+   * The parameter is stripped with `history.replaceState`, not the router's
+   * `navigate`. Routing to the same path re-renders this tree and unmounts the
+   * component, and the unmount cleanup clears the pending think timer — the
+   * question posted and then sat on the thinking dots forever. `replaceState`
+   * tidies the URL without telling the router anything happened.
+   *
+   * And the ask is deferred by a tick, with the guard released on cleanup,
+   * because StrictMode runs every effect twice in development: mount, clean up,
+   * mount again. A timer created on the first pass is killed by the cleanup in
+   * between, and a guard that survives that cleanup stops the second pass from
+   * ever recreating it. Scheduling the work and cancelling it on cleanup means
+   * exactly one ask survives, whether the effect runs once or twice.
+   */
+  const [searchParams] = useSearchParams();
+
+  /* Captured once, on mount. The `?q=` handover below rewrites the URL with
+     `replaceState`, and reading the key after that would be reading whatever
+     that call left behind rather than how this entry was reached. */
+  const [canGoBack] = useState(() => location.key !== 'default');
+  const handedOver = useRef(false);
+
+  useEffect(() => {
+    if (handedOver.current) return undefined;
+
+    const q = searchParams.get('q');
+    if (!q?.trim()) return undefined;
+
+    handedOver.current = true;
+    /* `window.history.state`, not `{}`. React Router keeps the entry's own
+       bookkeeping in there, and blanking it detaches this entry from the
+       router's history stack — which broke going back. */
+    window.history.replaceState(window.history.state, '', window.location.pathname);
+
+    const id = setTimeout(() => ask(q), 0);
+    return () => {
+      clearTimeout(id);
+      handedOver.current = false;
+    };
+  }, [ask, searchParams]);
 
   const stop = useCallback(() => {
     clearTimers();
@@ -258,16 +306,46 @@ function ChatSurface() {
       {/* ------------------------------------------------------------ top */}
       <header className="relative z-30 flex shrink-0 items-center justify-between gap-3 px-4 pt-4 md:px-7 md:pt-5">
         <div className="flex min-w-0 items-center gap-2.5">
-          <span
-            aria-hidden="true"
-            className="h-2 w-2 shrink-0 rounded-full"
-            style={{ background: 'var(--lg-live)', boxShadow: 'var(--lg-live-glow)' }}
-          />
-          <span className="truncate text-[13.5px] text-white/55">
-            <span className="font-medium text-white/85">Ask Amitesh</span>
-            <span className="mx-1.5 text-white/20">/</span>
-            Home 2.2
-          </span>
+          {/*
+            * Back to wherever you came from.
+            *
+            * This surface is reachable from the home page's ask box, from the
+            * Works list and from the Museum, so a fixed `to="/works"` sent two
+            * of those three visitors somewhere they had not been. Walking the
+            * history back one entry is the only thing that answers all three.
+            *
+            * The objection to `navigate(-1)` was always the cold open — a
+            * pasted `?q=` link has nothing behind it, and going back would
+            * leave the site. `location.key` settles it: React Router stamps
+            * every pushed entry with a key and leaves the first one in a
+            * session as the literal string 'default'. So a key means there is
+            * somewhere of ours to return to, and no key falls back to a link.
+            *
+            * Icon only. The breadcrumb beside it already says where you are,
+            * and with the destination no longer fixed there is nothing
+            * truthful to name in the label.
+            */}
+          {canGoBack ? (
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              aria-label="Go back"
+              title="Go back"
+              className={BACK_CLASS}
+            >
+              <IconChevron size={16} className="rotate-90" />
+            </button>
+          ) : (
+            <Link to="/works" aria-label="Back to works" title="Back to works" className={BACK_CLASS}>
+              <IconChevron size={16} className="rotate-90" />
+            </Link>
+          )}
+
+          {/* Just the name. The green dot said "live", which was never true of
+              anything here — the answers are written, not streamed from a
+              service — and "/ Home 2.2" was an internal build label leaking
+              into the interface. */}
+          <span className="truncate text-[13.5px] font-medium text-white/85">Ask Amitesh</span>
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
@@ -323,6 +401,8 @@ function ChatSurface() {
               thinking={thinking}
               onFollowUp={ask}
               onRegenerate={regenerate}
+              phase={phase}
+              material={theme.material}
             />
           </div>
         </div>

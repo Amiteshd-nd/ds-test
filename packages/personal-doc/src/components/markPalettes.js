@@ -2,7 +2,8 @@
  * Palettes for the generated project artwork: [deep, mid, hot, spark].
  *
  * Deep is the ground, spark is the one near-white highlight that makes the smear
- * read as light rather than as paint. Kept in its own module so ProjectMark can
+ * read as light rather than as paint. Deep is the original near-black: the cards were reading as a bright
+ * smear on a black card instead of as one lit surface. Kept in its own module so ProjectMark can
  * stay a component file and keep fast refresh.
  */
 export const MARK_PALETTES = {

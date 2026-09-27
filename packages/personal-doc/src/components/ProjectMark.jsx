@@ -1,4 +1,5 @@
 import { useId, useMemo } from 'react';
+import { useReducedMotion } from '@cloud-march/motion/react';
 import { MARK_PALETTES } from './markPalettes';
 
 /*
@@ -40,6 +41,27 @@ function rng(seed) {
 export default function ProjectMark({ palette = 'ember', seed = '', className = '', label }) {
   const uid = useId().replace(/:/g, '');
   const colors = MARK_PALETTES[palette] || MARK_PALETTES.ember;
+  const reduce = useReducedMotion();
+
+  /*
+   * The drift is SMIL, not a CSS animation, and that is not a style choice.
+   *
+   * A CSS transform animating an element *inside* an SVG updates in computed
+   * style and does not repaint: the browser rasterises the SVG subtree once and
+   * never invalidates it. The mark measured as moving every frame and sat there
+   * visibly frozen. The only cards that did move were the ones that still had a
+   * stray `filter` on an ancestor, because a filter forces a re-raster — the
+   * effect was working by accident on those and not at all on the rest.
+   *
+   * SMIL drives the SVG DOM itself, so the invalidation is never in question.
+   */
+  const drift = !reduce;
+
+  /* Where in the drift loop this card starts.
+     Derived from the same seed as the artwork, so a card's phase is stable
+     across reloads and no two cards next to each other move in lockstep — a
+     row of marks all sliding together reads as the page moving, not the art. */
+  const phase = useMemo(() => seedOf(`drift:${palette}:${seed}`) % 44, [palette, seed]);
 
   const streaks = useMemo(() => {
     const random = rng(seedOf(`${palette}:${seed}`));
@@ -76,6 +98,7 @@ export default function ProjectMark({ palette = 'ember', seed = '', className = 
       viewBox="0 0 400 240"
       preserveAspectRatio="xMidYMid slice"
       className={className}
+      style={{ '--fc-art-phase': phase }}
       role={label ? 'img' : 'presentation'}
       aria-label={label || undefined}
       aria-hidden={label ? undefined : 'true'}
@@ -85,6 +108,43 @@ export default function ProjectMark({ palette = 'ember', seed = '', className = 
           <stop offset="0%" stopColor={colors[0]} />
           <stop offset="55%" stopColor={colors[1]} />
           <stop offset="100%" stopColor={colors[0]} />
+          {/* Moving the gradient's own endpoints sweeps the colour bands across
+              the card. Four clocks, no two of them sharing a factor, so the
+              corner the light comes from keeps wandering instead of pacing a
+              loop. Negative `begin` starts each card somewhere else in its own
+              cycle, so a column of them never moves in step. */}
+          {drift && (
+            <>
+              <animate
+                attributeName="x1"
+                values="0;0.6;0"
+                dur="11s"
+                begin={`-${phase % 11}s`}
+                repeatCount="indefinite"
+              />
+              <animate
+                attributeName="y1"
+                values="0;0.5;0"
+                dur="13s"
+                begin={`-${phase % 13}s`}
+                repeatCount="indefinite"
+              />
+              <animate
+                attributeName="x2"
+                values="1;0.4;1"
+                dur="17s"
+                begin={`-${phase % 17}s`}
+                repeatCount="indefinite"
+              />
+              <animate
+                attributeName="y2"
+                values="1;0.55;1"
+                dur="19s"
+                begin={`-${phase % 19}s`}
+                repeatCount="indefinite"
+              />
+            </>
+          )}
         </linearGradient>
         {/* One blur for the body of the smear, a tighter one for the highlights,
             so the sparks stay bright instead of dissolving into the streaks. */}
@@ -99,6 +159,16 @@ export default function ProjectMark({ palette = 'ember', seed = '', className = 
       <rect width="400" height="240" fill={`url(#${uid}-ground)`} />
 
       <g filter={`url(#${uid}-soft)`}>
+        {drift && (
+          <animateTransform
+            attributeName="transform"
+            type="translate"
+            values="-20 12; 20 -12; -20 12"
+            dur="23s"
+            begin={`-${phase % 23}s`}
+            repeatCount="indefinite"
+          />
+        )}
         {streaks.map((s, i) => (
           <ellipse
             key={i}
@@ -114,6 +184,16 @@ export default function ProjectMark({ palette = 'ember', seed = '', className = 
       </g>
 
       <g filter={`url(#${uid}-tight)`}>
+        {drift && (
+          <animateTransform
+            attributeName="transform"
+            type="translate"
+            values="16 -14; -16 14; 16 -14"
+            dur="29s"
+            begin={`-${phase % 29}s`}
+            repeatCount="indefinite"
+          />
+        )}
         {sparks.map((s, i) => (
           <ellipse
             key={i}

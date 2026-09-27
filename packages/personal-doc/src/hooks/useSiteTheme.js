@@ -7,8 +7,11 @@ import { useEffect, useState } from 'react';
  * paint, so a visitor who has chosen light does not get a frame of dark first.
  * This hook only keeps React in step with it.
  *
- * A visitor who has never chosen follows the OS and keeps following it. Once
- * they pick, the choice is theirs and the OS stops being consulted.
+ * Nothing here moves the mode on its own. It used to follow
+ * `prefers-color-scheme` until the visitor picked, which meant the OS — and,
+ * on a machine that switches at sunset, the time of day — could repaint the
+ * site mid-session without anyone touching anything. Dark is the default and
+ * the toggle is the only thing that changes it.
  */
 
 const KEY = 'site-theme';
@@ -39,29 +42,14 @@ export default function useSiteTheme() {
   const [theme, setTheme] = useState(currentTheme);
 
   useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: light)');
-
-    const follow = (e) => {
-      let stored = null;
-      try {
-        stored = localStorage.getItem(KEY);
-      } catch {
-        /* Private mode. Fall through to the OS. */
-      }
-      if (stored) return;
-      applyTheme(e.matches ? 'light' : 'dark', { remember: false });
-    };
-
-    /* Another surface can move the mode too: picking Magazine in Home 2.2's
-       drawer is a choice of a light theme, and the toggle has to agree. */
+    /* Another surface can move the mode too: picking Magazine in the theme
+       drawer is a choice of a light theme, and the toggle has to agree. That
+       is still the visitor choosing — it is one of their actions reaching two
+       controls, not the site deciding for them. */
     const sync = (e) => setTheme(e.detail);
 
-    mq.addEventListener('change', follow);
     window.addEventListener(SITE_THEME_EVENT, sync);
-    return () => {
-      mq.removeEventListener('change', follow);
-      window.removeEventListener(SITE_THEME_EVENT, sync);
-    };
+    return () => window.removeEventListener(SITE_THEME_EVENT, sync);
   }, []);
 
   const toggle = () => applyTheme(currentTheme() === 'light' ? 'dark' : 'light');

@@ -108,6 +108,42 @@
   animation: lg-spin 7s linear infinite;
 }
 
+/*
+ * The prism ring's sweep.
+ *
+ * Not a rotation. Rotating the layer turns the gradient rigidly: every
+ * highlight keeps its width and its spacing from its neighbours, and the whole
+ * thing reads as a wheel going round — which is what a spinner looks like.
+ *
+ * This moves the gradient's *centre* instead. The conic is painted at a little
+ * over twice the layer's size (--lg-ring-bg-size), so there is room for
+ * `background-position` to drive its origin well off the ring's own centre.
+ * With the two centres apart, the angle from the gradient's origin to a point
+ * on the ring no longer advances evenly as you travel round it: one side gets
+ * compressed and the opposite side stretched. Animate the offset and the
+ * highlights slide, widen and narrow as they go. Nothing keeps its shape,
+ * which is the difference between a reflection and a wheel.
+ *
+ * Both layers run this same path on the same clock. They used to differ, so
+ * that the bezel and its halo would fall in and out of register — which is a
+ * nice effect for a halo and a wrong one for a glow, because the light ends up
+ * somewhere the ring is not bright. One path keeps them welded together.
+ *
+ * Five waypoints rather than four, at uneven times (19/37/58/79 rather than
+ * 25/50/75), and the path doubles back on itself between the third and fourth
+ * instead of walking the corners in order. A four-corner loop on even timing
+ * is a circle however you dress it, and the eye picks that up as orbiting.
+ */
+@keyframes lg-ring-sweep {
+  0%   { background-position: 6% 18%; }
+  19%  { background-position: 88% 8%; }
+  37%  { background-position: 62% 61%; }
+  58%  { background-position: 94% 88%; }
+  79%  { background-position: 11% 72%; }
+  100% { background-position: 6% 18%; }
+}
+
+
 @keyframes lg-rise {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: none; }
@@ -119,21 +155,25 @@
 
 /* --------------------------------------------------------------- scrolling */
 
+/*
+ * The transcript scrolls without drawing a scrollbar.
+ *
+ * This used to paint a thin themed thumb, which is why the two --lg-scroll-*
+ * tokens exist and why every theme still declares them: nothing reads them
+ * now, and they are kept rather than deleted so a themed thumb is one rule
+ * away if it is ever wanted back.
+ *
+ * Only the drawn gutter goes. Wheel, trackpad, touch, keyboard and the
+ * overscroll containment below all behave exactly as before, so nothing here
+ * costs a keyboard or screen-reader user anything.
+ */
 .lg-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: var(--lg-scroll-thumb) transparent;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   overscroll-behavior: contain;
 }
 
-.lg-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
-.lg-scroll::-webkit-scrollbar-track { background: transparent; }
-.lg-scroll::-webkit-scrollbar-thumb {
-  background: var(--lg-scroll-thumb);
-  border-radius: 99px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
-.lg-scroll::-webkit-scrollbar-thumb:hover { background: var(--lg-scroll-thumb-hover); background-clip: content-box; }
+.lg-scroll::-webkit-scrollbar { width: 0; height: 0; display: none; }
 
 .lg-rail {
   scrollbar-width: none;
@@ -154,7 +194,8 @@
 @media (prefers-reduced-motion: reduce) {
   .lg-caret,
   .lg-spin,
-  .lg-rise {
+  .lg-rise,
+  .lg-ring-layer {
     animation: none !important;
   }
   .lg-caret { opacity: 1; }

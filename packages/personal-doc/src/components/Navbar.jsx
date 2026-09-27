@@ -2,6 +2,11 @@ import { motion, useScroll, useMotionValueEvent } from '@cloud-march/motion/reac
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
+import { ThemeSwitcher } from '../design';
+/* The switcher is dressed in `lg-*` classes. That stylesheet used to arrive
+   only with Home 2.2, which is lazy — so on any other route the control would
+   have rendered unstyled until you had visited that page once. */
+import '../styles/liquid-glass.css';
 import Logo from '../assets/icons/logo.svg';
 import ReadCvLogoBg from '../assets/icons/readcv-logo-bg.svg';
 import ReadCvLogoFg from '../assets/icons/readcv-logo-fg.svg';
@@ -48,7 +53,16 @@ const Navbar = () => {
       animate={hidden ? "hidden" : "visible"}
       transition={{ duration: 0.35, ease: "easeInOut" }}
       className="fixed top-0 left-0 right-0 z-50 backdrop-blur-none"
-      style={{ background: 'linear-gradient(to bottom, var(--site-bg), transparent)' }}
+      /* `--site-ground`, not `--site-bg`. Two themes describe their ground as
+         something other than a colour — Realism with a brushed-metal texture,
+         Y2K with a gradient — and a `url()` or a gradient in a colour stop
+         makes the whole declaration invalid, which left the bar with no scrim
+         at all and the logo sitting on whatever scrolled under it. The ground
+         token is the flat stand-in that exists for exactly this. */
+      style={{
+        background:
+          'linear-gradient(to bottom, var(--site-ground, var(--site-bg)), transparent)',
+      }}
     >
       <div className="max-w-[1400px] mx-auto px-8 py-4">
         <div className="flex justify-between items-center">
@@ -64,7 +78,7 @@ const Navbar = () => {
           </Link>
 
           {/* Right section */}
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-4">
             {/* Time - hidden on mobile */}
             <span
               className="hidden md:block text-base leading-[1.34em] font-outfit"
@@ -102,6 +116,14 @@ const Navbar = () => {
                 Resume
               </span>
             </motion.a>
+
+            {/* The theme drawer, site-wide. It does not replace the light/dark
+                toggle: that one is the one-tap flip between modes, this is the
+                choice of thirteen. It sits last because it is the only control
+                here that opens something — a drawer anchored to the bar's own
+                right edge has the whole width to fall into, where one parked
+                mid-row would have had to reach back across the Resume link. */}
+            <ThemeSwitcher />
           </div>
         </div>
       </div>
