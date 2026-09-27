@@ -1,0 +1,40 @@
+---
+/**
+ * Layout family: sticky heading beside a divided list.
+ *
+ * Explicitly not three equal cards in a row. That grid is the most recognisable
+ * shape in AI-built pages, and it flattens four things of different weight into
+ * four things of identical weight. A divided list lets one service be longer
+ * than another, which is usually true.
+ */
+import { site } from '../site';
+
+const { offer } = site;
+---
+
+<section id="offer" class="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
+  <div class="grid gap-10 lg:grid-cols-[0.6fr_1.4fr] lg:gap-16">
+    <h2 class="text-3xl sm:text-4xl lg:sticky lg:top-28 lg:self-start">
+      {offer.heading}
+    </h2>
+
+    <ul class="divide-y divide-line border-t border-line" role="list">
+      {
+        offer.services.map((service, i) => (
+          <li class="grid gap-2 py-7 sm:grid-cols-[auto_1fr] sm:gap-8">
+            <span
+              class="font-display text-sm tabular-nums text-muted sm:pt-1"
+              aria-hidden="true"
+            >
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <div>
+              <h3 class="text-xl font-medium">{service.title}</h3>
+              <p class="mt-2 max-w-[62ch] leading-relaxed text-muted">{service.body}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

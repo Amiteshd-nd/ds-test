@@ -1,0 +1,37 @@
+---
+/**
+ * Layout family: native disclosure list.
+ *
+ * <details> rather than a JavaScript accordion: it is keyboard accessible and
+ * findable with the browser's own find-in-page without a line of script, and a
+ * customer looking for "what does it cost" uses find-in-page.
+ */
+import { Icon } from 'astro-icon/components';
+import { site } from '../site';
+
+const { questions } = site;
+---
+
+<section id="questions" class="border-t border-line">
+  <div class="mx-auto max-w-3xl px-4 py-20 sm:px-6 lg:py-28">
+    <h2 class="text-3xl sm:text-4xl">{questions.heading}</h2>
+
+    <div class="mt-10 divide-y divide-line border-y border-line">
+      {
+        questions.items.map((item) => (
+          <details class="group py-5">
+            <summary class="flex cursor-pointer list-none items-start justify-between gap-6 text-lg font-medium [&::-webkit-details-marker]:hidden">
+              {item.q}
+              <Icon
+                name="ph:plus"
+                class="mt-1.5 size-4 shrink-0 text-muted transition-transform duration-200 group-open:rotate-45"
+                aria-hidden="true"
+              />
+            </summary>
+            <p class="mt-3 max-w-[62ch] leading-relaxed text-muted">{item.a}</p>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>

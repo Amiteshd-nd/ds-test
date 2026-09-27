@@ -1,0 +1,116 @@
+/*
+ * Runner's surface.
+ *
+ * Direction came from `.claude/skills/ui-ux-pro-max` (`--design-system`,
+ * "developer tool dark console agent workspace"): the Dark Mode (OLED) style,
+ * its palette, and the JetBrains Mono / IBM Plex Sans pairing. The style's own
+ * guidance is "light mode not recommended", and this is a console you watch a
+ * long-running process in, so there is no light theme — an agent workbench that
+ * flips white halfway through a run is worse than one that commits.
+ *
+ * Motion values are not defined here. They come from `@cloud-march/motion`, and
+ * the reduced-motion collapse comes with them.
+ */
+
+@import '@cloud-march/motion/tokens.css';
+
+:root {
+  color-scheme: dark;
+
+  /* ui-ux-pro-max, Dark Mode (OLED) */
+  --bg: #0f172a;
+  --fg: #f8fafc;
+  --card: #1b2336;
+  --card-fg: #f8fafc;
+  --primary: #1e293b;
+  --secondary: #334155;
+  --muted: #272f42;
+  --muted-fg: #94a3b8;
+  --border: #475569;
+  --accent: #22c55e;
+  --on-accent: #0f172a;
+  --destructive: #ef4444;
+  --ring: #f8fafc;
+
+  /* A quieter border than the palette's, for the many hairlines in this layout.
+     #475569 at full strength turns a three-pane view into a grid of boxes. */
+  --hairline: color-mix(in oklab, var(--border) 45%, transparent);
+
+  --radius: 8px;
+  --radius-sm: 5px;
+
+  --step: 1.4rem;
+  --gutter: 1.25rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+code,
+kbd,
+pre,
+.mono {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Anything scrollable in a dark console reads better with a thin, dim bar than
+   with the platform default sitting on top of the content. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary);
+  background-clip: content-box;
+}
+
+/* Visible to a screen reader, not on screen. Used where a colour or an icon
+   carries meaning that text has to carry too. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

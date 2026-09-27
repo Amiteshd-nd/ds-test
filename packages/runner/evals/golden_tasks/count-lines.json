@@ -1,0 +1,11 @@
+{
+  "id": "count-lines",
+  "prompt": "Create a file notes.txt with five lines of text, then count the lines with a shell command and write the count to count.txt.",
+  "note": "Two artefacts and a dependency between them: the second cannot be right unless the first was read back.",
+  "checks": {
+    "status": "succeeded",
+    "tools_called": ["file_write", "shell_exec"],
+    "files_exist": ["notes.txt", "count.txt"],
+    "file_matches": { "count.txt": "5" }
+  }
+}

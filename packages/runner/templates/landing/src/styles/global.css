@@ -1,0 +1,276 @@
+/*
+ * The template's whole visual system.
+ *
+ * Every business that comes through this template picks four axes — palette,
+ * type, rhythm, radius — in `src/site.ts`. Those become data attributes on
+ * <html>, and everything below reads from them. That indirection is the point:
+ * a template with one fixed look turns thirty different businesses into thirty
+ * copies of the same page, which is the exact failure a template is supposed to
+ * prevent.
+ *
+ * Three locks hold for the whole page, no exceptions: one theme, one accent,
+ * one radius system. Changing them per section is the tell.
+ */
+
+@import 'tailwindcss';
+
+@theme {
+  --color-bg: var(--p-bg);
+  --color-surface: var(--p-surface);
+  --color-ink: var(--p-ink);
+  --color-muted: var(--p-muted);
+  --color-line: var(--p-line);
+  --color-accent: var(--p-accent);
+  --color-on-accent: var(--p-on-accent);
+
+  --font-display: var(--t-display);
+  --font-body: var(--t-body);
+
+  --radius-card: var(--r-card);
+  --radius-control: var(--r-control);
+  --radius-media: var(--r-media);
+}
+
+/* ------------------------------------------------------------------ palettes
+ *
+ * Six families. None of them is the beige + brass + espresso combination that
+ * every AI-built "artisan" site reaches for. Each defines a light and a dark
+ * value for the same seven roles, so hierarchy that works in one works in the
+ * other. No pure #000 or #fff anywhere: pure values kill depth.
+ */
+
+:root {
+  /* forest - deep green, bone, amber. Trades, outdoors, anything physical. */
+  --p-bg: #f7f6f1;
+  --p-surface: #ffffff;
+  --p-ink: #14201a;
+  --p-muted: #5d6b63;
+  --p-line: #dcdcd2;
+  --p-accent: #1d6b45;
+  --p-on-accent: #f7f6f1;
+}
+
+[data-palette='cobalt'] {
+  --p-bg: #f6f7f9;
+  --p-surface: #ffffff;
+  --p-ink: #14181f;
+  --p-muted: #5a6472;
+  --p-line: #d9dde3;
+  --p-accent: #1b47c4;
+  --p-on-accent: #f6f7f9;
+}
+
+[data-palette='terracotta'] {
+  --p-bg: #f5f5f4;
+  --p-surface: #ffffff;
+  --p-ink: #1c1a19;
+  --p-muted: #6b6560;
+  --p-line: #dedad6;
+  --p-accent: #b8442a;
+  --p-on-accent: #faf8f7;
+}
+
+[data-palette='olive'] {
+  --p-bg: #f4f4ef;
+  --p-surface: #fbfbf8;
+  --p-ink: #1e2018;
+  --p-muted: #63685a;
+  --p-line: #dcddd2;
+  --p-accent: #9b3116;
+  --p-on-accent: #f4f4ef;
+}
+
+[data-palette='ink'] {
+  --p-bg: #f4f3f1;
+  --p-surface: #ffffff;
+  --p-ink: #171614;
+  --p-muted: #625f59;
+  --p-line: #dbd9d4;
+  --p-accent: #1f1e1c;
+  --p-on-accent: #f4f3f1;
+}
+
+[data-palette='signal'] {
+  --p-bg: #f7f7f8;
+  --p-surface: #ffffff;
+  --p-ink: #131316;
+  --p-muted: #5f5f67;
+  --p-line: #dedee2;
+  --p-accent: #0b7c6b;
+  --p-on-accent: #f7f7f8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --p-bg: #10150f;
+    --p-surface: #182019;
+    --p-ink: #eef1ea;
+    --p-muted: #9aa79d;
+    --p-line: #2b352d;
+    --p-accent: #5fbf8c;
+    --p-on-accent: #0d1410;
+  }
+
+  [data-palette='cobalt'] {
+    --p-bg: #0f1116;
+    --p-surface: #171b22;
+    --p-ink: #eceff4;
+    --p-muted: #9aa3b2;
+    --p-line: #2a303a;
+    --p-accent: #7ea2ff;
+    --p-on-accent: #0d1016;
+  }
+
+  [data-palette='terracotta'] {
+    --p-bg: #141211;
+    --p-surface: #1d1a18;
+    --p-ink: #f0ece9;
+    --p-muted: #a49b94;
+    --p-line: #322d2a;
+    --p-accent: #e7815f;
+    --p-on-accent: #16100e;
+  }
+
+  [data-palette='olive'] {
+    --p-bg: #14160f;
+    --p-surface: #1c1f17;
+    --p-ink: #eff0e7;
+    --p-muted: #9ba392;
+    --p-line: #2e3227;
+    --p-accent: #e8795a;
+    --p-on-accent: #14160f;
+  }
+
+  [data-palette='ink'] {
+    --p-bg: #131211;
+    --p-surface: #1b1a18;
+    --p-ink: #f1efec;
+    --p-muted: #a09c96;
+    --p-line: #2f2d2a;
+    --p-accent: #e6e2dc;
+    --p-on-accent: #161513;
+  }
+
+  [data-palette='signal'] {
+    --p-bg: #101113;
+    --p-surface: #18191c;
+    --p-ink: #eeeff1;
+    --p-muted: #9b9da4;
+    --p-line: #2a2c30;
+    --p-accent: #45c9b0;
+    --p-on-accent: #0e100f;
+  }
+}
+
+/* ------------------------------------------------------------- type pairings
+ *
+ * No Inter as the default, and no Fraunces or Instrument Serif: those three are
+ * the most legible fingerprints of a page nobody chose. `heritage` is the only
+ * serif here and it is gated in AI_RULES.md - a serif needs a reason that is
+ * about this business, not a feeling that serif looks premium.
+ */
+
+:root {
+  --t-display: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+  --t-body: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+}
+
+[data-type='warm'] {
+  --t-display: 'Outfit Variable', ui-sans-serif, system-ui, sans-serif;
+  --t-body: 'Instrument Sans Variable', ui-sans-serif, system-ui, sans-serif;
+}
+
+[data-type='character'] {
+  --t-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+  --t-body: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+}
+
+[data-type='heritage'] {
+  --t-display: 'EB Garamond Variable', ui-serif, Georgia, serif;
+  --t-body: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ----------------------------------------------------------- radius systems */
+
+:root {
+  --r-card: 0px;
+  --r-control: 0px;
+  --r-media: 0px;
+}
+
+[data-radius='soft'] {
+  --r-card: 14px;
+  --r-control: 10px;
+  --r-media: 14px;
+}
+
+[data-radius='pill'] {
+  --r-card: 18px;
+  --r-control: 999px;
+  --r-media: 18px;
+}
+
+/* ------------------------------------------------------------------- basics */
+
+html {
+  scroll-behavior: smooth;
+  background: var(--color-bg);
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  /* 1.1, never 1 or none: a descender in an italic display word gets clipped
+     at leading-none, and there is no way to see that from the markup. */
+  line-height: 1.1;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+/* MOTION_INTENSITY 3. One entrance reveal, nothing else. These pages load on a
+   phone with one bar for someone who needs a plumber today. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.reveal {
+  animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* `backwards` via `both`: without it a delayed element flashes at full
+     opacity, pops out, then fades in. */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    animation: none;
+  }
+}

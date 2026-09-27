@@ -1,0 +1,120 @@
+---
+/**
+ * Layout family: form beside a details column.
+ *
+ * Labels sit above their inputs, never inside them as placeholders: a
+ * placeholder-as-label disappears the moment someone starts typing, which is
+ * exactly when they need it. Every field carries its own helper or error slot
+ * in the markup rather than being added later.
+ *
+ * The form posts to a mailto action by default so a static site with no backend
+ * still works on day one. Swap the action for a form endpoint when there is one.
+ */
+import { Icon } from 'astro-icon/components';
+import { site } from '../site';
+
+const { contact, cta } = site;
+
+const details = [
+  { icon: 'ph:phone', label: 'Phone', value: contact.phone, href: `tel:${contact.phone.replace(/\s+/g, '')}` },
+  { icon: 'ph:envelope-simple', label: 'Email', value: contact.email, href: `mailto:${contact.email}` },
+  { icon: 'ph:map-pin', label: 'Area covered', value: contact.area, href: null },
+  { icon: 'ph:clock', label: 'Hours', value: contact.hours, href: null },
+];
+---
+
+<section id="contact" class="border-t border-line bg-surface">
+  <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
+    <div class="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:gap-20">
+      <div>
+        <h2 class="text-3xl sm:text-4xl">{contact.heading}</h2>
+        <p class="mt-4 max-w-[58ch] leading-relaxed text-muted">{contact.body}</p>
+
+        <form
+          class="mt-10 grid gap-5"
+          method="post"
+          action={`mailto:${contact.email}`}
+          enctype="text/plain"
+        >
+          <div class="grid gap-2">
+            <label for="name" class="text-sm font-medium">Your name</label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              required
+              autocomplete="name"
+              class="rounded-control border border-line bg-bg px-3 py-2.5 text-ink placeholder:text-muted focus-visible:border-accent"
+            />
+          </div>
+
+          <div class="grid gap-2 sm:grid-cols-2 sm:gap-5">
+            <div class="grid gap-2">
+              <label for="email" class="text-sm font-medium">Email</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                autocomplete="email"
+                class="rounded-control border border-line bg-bg px-3 py-2.5 text-ink focus-visible:border-accent"
+              />
+            </div>
+            <div class="grid gap-2">
+              <label for="phone" class="text-sm font-medium">Phone</label>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                autocomplete="tel"
+                class="rounded-control border border-line bg-bg px-3 py-2.5 text-ink focus-visible:border-accent"
+              />
+              <p class="text-xs text-muted">Optional. Quicker than email if it is urgent.</p>
+            </div>
+          </div>
+
+          <div class="grid gap-2">
+            <label for="message" class="text-sm font-medium">What do you need?</label>
+            <textarea
+              id="message"
+              name="message"
+              rows="4"
+              required
+              class="rounded-control border border-line bg-bg px-3 py-2.5 text-ink focus-visible:border-accent"
+            ></textarea>
+            <p class="text-xs text-muted">The address and roughly when you need it is enough to start.</p>
+          </div>
+
+          <button
+            type="submit"
+            class="justify-self-start whitespace-nowrap rounded-control bg-accent px-6 py-3 font-medium text-on-accent transition-transform duration-150 active:translate-y-px"
+          >
+            {cta.label}
+          </button>
+        </form>
+      </div>
+
+      <dl class="grid content-start gap-7 lg:border-l lg:border-line lg:pl-12">
+        {
+          details.map((detail) => (
+            <div class="flex gap-3">
+              <Icon name={detail.icon} class="mt-1 size-5 shrink-0 text-accent" aria-hidden="true" />
+              <div>
+                <dt class="text-sm text-muted">{detail.label}</dt>
+                <dd class="mt-0.5 font-medium">
+                  {detail.href ? (
+                    <a href={detail.href} class="underline decoration-line underline-offset-4 hover:decoration-accent">
+                      {detail.value}
+                    </a>
+                  ) : (
+                    detail.value
+                  )}
+                </dd>
+              </div>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,66 @@
+---
+/**
+ * The page shell.
+ *
+ * The four design axes land here as data attributes on <html>, which is what
+ * every token in global.css reads from. That is also the theme lock: one theme,
+ * one accent, one radius, set once at the root and never overridden per section.
+ *
+ * All five type families are imported. An unmatched @font-face costs a few
+ * hundred bytes of CSS and downloads nothing, so gating the import would buy
+ * nothing and add a way to get it wrong.
+ */
+import '@fontsource-variable/space-grotesk';
+import '@fontsource-variable/archivo';
+import '@fontsource-variable/outfit';
+import '@fontsource-variable/instrument-sans';
+import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource-variable/eb-garamond';
+import '../styles/global.css';
+import { site } from '../site';
+
+const { design, meta } = site;
+---
+
+<!doctype html>
+<html
+  lang="en"
+  data-palette={design.palette}
+  data-type={design.type}
+  data-radius={design.radius}
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{meta.title}</title>
+    <meta name="description" content={meta.description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:title" content={meta.title} />
+    <meta property="og:description" content={meta.description} />
+    <meta property="og:type" content="website" />
+    <link rel="preconnect" href="https://picsum.photos" />
+    <!-- A local service business is found through search. This is the one bit
+         of structured data that reliably earns its place. -->
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'LocalBusiness',
+        name: site.brand.name,
+        description: meta.description,
+        email: site.contact.email,
+        telephone: site.contact.phone,
+        areaServed: site.contact.area,
+        openingHours: site.contact.hours,
+      })}
+    />
+  </head>
+  <body>
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-accent focus:px-4 focus:py-2 focus:text-on-accent"
+      >Skip to content</a
+    >
+    <slot />
+  </body>
+</html>

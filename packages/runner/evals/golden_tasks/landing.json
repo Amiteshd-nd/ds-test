@@ -1,0 +1,492 @@
+{
+  "note": "The Phase 1 golden suite (PRD section 9). Thirty real small businesses, none of them invented to flatter the template: half are trades, the rest are professional, creative, food, health and education. Each is fed through the onboarding profile exactly as the interview would fill it, so the eval exercises the same path a real user takes.\n\nEvery task is checked the same way, so the per-task checks live in `checks` below rather than being repeated thirty times. The suite-level checks in the runner are the ones worth reading: thirty pages that all pass individually but all look identical would be a failure of the template, and only the suite can see that.",
+  "checks": {
+    "status": "succeeded",
+    "site_version": true,
+    "blocking_browser_checks_pass": true,
+    "business_name_on_page": true,
+    "no_placeholder_business": true
+  },
+  "tasks": [
+    {
+      "id": "landing-hedgelaying",
+      "type": "landing",
+      "profile": {
+        "name": "Kestrel Hedgelaying",
+        "offer": "Hedgelaying and hedgerow restoration, all by hand in the Midland style.",
+        "audience": "Farm managers and estate agents looking after large country properties.",
+        "tone": "Plain and unhurried, a little proud of the craft.",
+        "area": "Herefordshire and the Welsh borders",
+        "since": "2016",
+        "differentiator": "Two of us, laid by hand. No flails and no subcontractors, so the hedge is still thick at the base in five years.",
+        "email": "hello@kestrelhedge.example",
+        "phone": "01432 660194"
+      },
+      "prompt": "Build a landing page for Kestrel Hedgelaying."
+    },
+    {
+      "id": "landing-bakery",
+      "type": "landing",
+      "profile": {
+        "name": "Salt Pan Bakehouse",
+        "offer": "A sourdough bakery and micro-cafe. Everything is a long ferment, baked overnight, sold the same morning.",
+        "audience": "People who live within walking distance, plus three cafes we wholesale to.",
+        "tone": "Warm and a bit chatty. It is a corner shop, not a brand.",
+        "area": "Margate old town",
+        "since": "2019",
+        "differentiator": "We only make what we can sell by noon, so nothing is a day old and nothing is frozen.",
+        "email": "hello@saltpanbakehouse.example",
+        "phone": "01843 220117"
+      },
+      "prompt": "Build a landing page for Salt Pan Bakehouse."
+    },
+    {
+      "id": "landing-employment-law",
+      "type": "landing",
+      "profile": {
+        "name": "Dearne & Voss",
+        "offer": "Employment law for individuals. Settlement agreements, unfair dismissal, discrimination claims.",
+        "audience": "People who have just been dismissed or are in a grievance process, usually in a hurry and frightened.",
+        "tone": "Calm and reassuring. People arrive here worried.",
+        "area": "Leeds and remote across England and Wales",
+        "since": "2008",
+        "differentiator": "We act only for employees, never employers, so there is no conflict and no softening of advice.",
+        "email": "enquiries@dearnevoss.example",
+        "phone": "0113 482 0075"
+      },
+      "prompt": "Build a landing page for Dearne & Voss."
+    },
+    {
+      "id": "landing-physio",
+      "type": "landing",
+      "profile": {
+        "name": "Taff Vale Sports Injury",
+        "offer": "Sports physiotherapy and rehab. Mostly runners, cyclists and rugby players.",
+        "audience": "Amateur athletes and two local rugby clubs.",
+        "tone": "Direct and practical. No wellness language.",
+        "area": "Cardiff",
+        "since": "2014",
+        "differentiator": "Forty five minute appointments, hands on the whole time. You will not be handed a sheet and left with a machine.",
+        "email": "clinic@taffvalephysio.example",
+        "phone": "029 2018 4412"
+      },
+      "prompt": "Build a landing page for Taff Vale Sports Injury."
+    },
+    {
+      "id": "landing-photographer",
+      "type": "landing",
+      "profile": {
+        "name": "Iona Brackett",
+        "offer": "Wedding and elopement photography, documentary style, no posing.",
+        "audience": "Couples getting married on the coast, usually forty guests or fewer.",
+        "tone": "Personal and quietly confident. First person.",
+        "area": "Cornwall and the Isles of Scilly",
+        "since": "2015",
+        "differentiator": "I shoot one wedding a weekend and I stay the whole day. You get the boring bits as well as the speeches.",
+        "email": "hello@ionabrackett.example",
+        "phone": "07700 900412"
+      },
+      "prompt": "Build a landing page for Iona Brackett."
+    },
+    {
+      "id": "landing-bookkeeping",
+      "type": "landing",
+      "profile": {
+        "name": "Ledger & Lathe",
+        "offer": "Bookkeeping and VAT returns for building trades. CIS, subcontractor statements, the lot.",
+        "audience": "Builders, electricians and plumbers running one to ten vans.",
+        "tone": "Blunt and friendly. No accountancy jargon.",
+        "area": "Stoke-on-Trent and Staffordshire",
+        "since": "2012",
+        "differentiator": "We speak trade. Send us a shoebox of receipts and a WhatsApp and we will sort it.",
+        "email": "hello@ledgerandlathe.example",
+        "phone": "01782 660244"
+      },
+      "prompt": "Build a landing page for Ledger & Lathe."
+    },
+    {
+      "id": "landing-dog-groomer",
+      "type": "landing",
+      "profile": {
+        "name": "Braemore Dog Grooming",
+        "offer": "One dog at a time grooming. Hand stripping, puppy introductions, elderly and anxious dogs.",
+        "audience": "Owners of working breeds and anxious rescues.",
+        "tone": "Gentle and reassuring, aimed at worried owners.",
+        "area": "Inverness",
+        "since": "2017",
+        "differentiator": "One dog in the salon at a time, so no cages and no waiting around in a noisy room.",
+        "email": "hello@braemoredogs.example",
+        "phone": "01463 220891"
+      },
+      "prompt": "Build a landing page for Braemore Dog Grooming."
+    },
+    {
+      "id": "landing-electrician",
+      "type": "landing",
+      "profile": {
+        "name": "Verge Electrical",
+        "offer": "Domestic electrical work and EV charger installation. NICEIC approved.",
+        "audience": "Homeowners who have just bought an electric car, and landlords needing EICRs.",
+        "tone": "Straightforward and no nonsense.",
+        "area": "Milton Keynes and north Buckinghamshire",
+        "since": "2011",
+        "differentiator": "We quote a fixed price after a video call, so the number on the quote is the number on the invoice.",
+        "email": "book@vergeelectrical.example",
+        "phone": "01908 440172"
+      },
+      "prompt": "Build a landing page for Verge Electrical."
+    },
+    {
+      "id": "landing-nursery",
+      "type": "landing",
+      "profile": {
+        "name": "Pebble Lane Nursery",
+        "offer": "A Montessori nursery for two to five year olds. Twenty four places, four staff.",
+        "audience": "Parents within a mile, mostly returning to work part time.",
+        "tone": "Warm and unhurried, written for a tired parent.",
+        "area": "Brighton",
+        "since": "2009",
+        "differentiator": "Twenty four children, not two hundred. Every member of staff knows every child's name and every parent's.",
+        "email": "hello@pebblelanenursery.example",
+        "phone": "01273 220884"
+      },
+      "prompt": "Build a landing page for Pebble Lane Nursery."
+    },
+    {
+      "id": "landing-joinery",
+      "type": "landing",
+      "profile": {
+        "name": "Thwaite Joinery",
+        "offer": "Bespoke staircases, doors and fitted furniture in solid timber.",
+        "audience": "Architects and homeowners doing a significant renovation.",
+        "tone": "Understated. The work should do the talking.",
+        "area": "The Lake District and south Cumbria",
+        "since": "1998",
+        "differentiator": "Everything is drawn, made and fitted by the same two people. Nothing is bought in and badged.",
+        "email": "workshop@thwaitejoinery.example",
+        "phone": "015394 32118"
+      },
+      "prompt": "Build a landing page for Thwaite Joinery."
+    },
+    {
+      "id": "landing-tutor",
+      "type": "landing",
+      "profile": {
+        "name": "Mandarin with Wen",
+        "offer": "One to one Mandarin tuition, online. GCSE, A level, and adults starting from nothing.",
+        "audience": "Parents of exam students, and adults relocating for work.",
+        "tone": "Encouraging and precise.",
+        "area": "Online, UK time zone",
+        "since": "2018",
+        "differentiator": "Every lesson is recorded and you keep it, so revision is watching yourself get it wrong and right.",
+        "email": "wen@mandarinwithwen.example",
+        "phone": "07700 900188"
+      },
+      "prompt": "Build a landing page for Mandarin with Wen."
+    },
+    {
+      "id": "landing-coffee",
+      "type": "landing",
+      "profile": {
+        "name": "Ninth Wave Coffee",
+        "offer": "A small batch coffee roastery. Single origin, roasted to order, shipped on the day.",
+        "audience": "Home brewers and eleven independent cafes.",
+        "tone": "Enthusiastic but not precious.",
+        "area": "Belfast",
+        "since": "2016",
+        "differentiator": "We roast on Tuesday and post on Tuesday. Nothing sits in a warehouse for a month.",
+        "email": "hello@ninthwavecoffee.example",
+        "phone": "028 9099 4120"
+      },
+      "prompt": "Build a landing page for Ninth Wave Coffee."
+    },
+    {
+      "id": "landing-bike-repair",
+      "type": "landing",
+      "profile": {
+        "name": "Spindle Mobile Bicycle Repair",
+        "offer": "A mobile bike workshop in a van. Servicing, wheel building, e-bike diagnostics.",
+        "audience": "Commuters and families who cannot get a bike to a shop.",
+        "tone": "Practical and cheerful.",
+        "area": "Bristol and Bath",
+        "since": "2020",
+        "differentiator": "We come to your door and most jobs are done on the pavement while you make a cup of tea.",
+        "email": "hello@spindlebikes.example",
+        "phone": "07700 900733"
+      },
+      "prompt": "Build a landing page for Spindle Mobile Bicycle Repair."
+    },
+    {
+      "id": "landing-accountant",
+      "type": "landing",
+      "profile": {
+        "name": "Weft Accounting",
+        "offer": "Accountancy for freelancers and one person limited companies.",
+        "audience": "Designers, developers and consultants earning between forty and a hundred and fifty thousand.",
+        "tone": "Clear and calm. Assume the reader hates admin.",
+        "area": "London and remote",
+        "since": "2013",
+        "differentiator": "A fixed monthly fee with unlimited questions. We would rather you asked than guessed.",
+        "email": "hello@weftaccounting.example",
+        "phone": "020 3488 1190"
+      },
+      "prompt": "Build a landing page for Weft Accounting."
+    },
+    {
+      "id": "landing-garden-design",
+      "type": "landing",
+      "profile": {
+        "name": "Broads Edge Garden Design",
+        "offer": "Garden design and planting plans for coastal and exposed sites.",
+        "audience": "Homeowners with large gardens and a wind problem.",
+        "tone": "Knowledgeable and a little dry.",
+        "area": "Norfolk and north Suffolk",
+        "since": "2010",
+        "differentiator": "We plant for the wind and the salt first and the look second, which is why our gardens are still there in year five.",
+        "email": "studio@broadsedge.example",
+        "phone": "01603 220445"
+      },
+      "prompt": "Build a landing page for Broads Edge Garden Design."
+    },
+    {
+      "id": "landing-house-clearance",
+      "type": "landing",
+      "profile": {
+        "name": "Kelvin House Clearance",
+        "offer": "Full and part house clearance, including probate and hoarding situations.",
+        "audience": "Executors, families, and letting agents.",
+        "tone": "Respectful and matter of fact. People are often grieving.",
+        "area": "Glasgow and the west of Scotland",
+        "since": "2015",
+        "differentiator": "We sort, donate and recycle before anything goes to landfill, and we send you the receipts.",
+        "email": "office@kelvinclearance.example",
+        "phone": "0141 328 7702"
+      },
+      "prompt": "Build a landing page for Kelvin House Clearance."
+    },
+    {
+      "id": "landing-yoga",
+      "type": "landing",
+      "profile": {
+        "name": "Steel City Yoga",
+        "offer": "Iyengar yoga classes and one to one work. Props, alignment, no music.",
+        "audience": "Adults with back problems and people who have been told yoga is not for them.",
+        "tone": "Calm and precise. Avoid spiritual language.",
+        "area": "Sheffield",
+        "since": "2011",
+        "differentiator": "Classes are capped at twelve, so you get adjusted rather than watched.",
+        "email": "hello@steelcityyoga.example",
+        "phone": "0114 272 4410"
+      },
+      "prompt": "Build a landing page for Steel City Yoga."
+    },
+    {
+      "id": "landing-drone-survey",
+      "type": "landing",
+      "profile": {
+        "name": "Tamar Aerial Survey",
+        "offer": "Roof and building inspection by drone. Reports for insurers and surveyors.",
+        "audience": "Chartered surveyors, loss adjusters, and facilities managers.",
+        "tone": "Technical and efficient.",
+        "area": "Plymouth, Cornwall and south Devon",
+        "since": "2019",
+        "differentiator": "No scaffolding and no cherry picker, so a roof inspection costs a fraction and happens next week.",
+        "email": "survey@tamaraerial.example",
+        "phone": "01752 660118"
+      },
+      "prompt": "Build a landing page for Tamar Aerial Survey."
+    },
+    {
+      "id": "landing-catering",
+      "type": "landing",
+      "profile": {
+        "name": "Anjali's Kitchen",
+        "offer": "Home style Gujarati catering for weddings, parties and office lunches.",
+        "audience": "Families across the East Midlands and three local employers.",
+        "tone": "Warm and generous.",
+        "area": "Leicester and the East Midlands",
+        "since": "2007",
+        "differentiator": "Everything is cooked on the day by the same three people, and we have never used a buffet warmer.",
+        "email": "anjali@anjaliskitchen.example",
+        "phone": "0116 274 8802"
+      },
+      "prompt": "Build a landing page for Anjali's Kitchen."
+    },
+    {
+      "id": "landing-piano-tuner",
+      "type": "landing",
+      "profile": {
+        "name": "Osney Piano Services",
+        "offer": "Piano tuning, regulation and small repairs.",
+        "audience": "Households with an upright, plus two colleges and a recording studio.",
+        "tone": "Quiet and exact.",
+        "area": "Oxford and within thirty miles",
+        "since": "2004",
+        "differentiator": "Tuning is thirty minutes of work and an hour of listening. We do not book two in the same morning.",
+        "email": "tuning@osneypiano.example",
+        "phone": "01865 220771"
+      },
+      "prompt": "Build a landing page for Osney Piano Services."
+    },
+    {
+      "id": "landing-copywriter",
+      "type": "landing",
+      "profile": {
+        "name": "Hale & Plain",
+        "offer": "B2B copywriting for software companies. Websites, docs and case studies.",
+        "audience": "Marketing leads at companies of twenty to two hundred people.",
+        "tone": "Confident and unshowy. No agency language.",
+        "area": "Remote, UK based",
+        "since": "2017",
+        "differentiator": "We interview your customers before we write a word, and you get the transcripts whether or not you use us again.",
+        "email": "hello@haleandplain.example",
+        "phone": "07700 900521"
+      },
+      "prompt": "Build a landing page for Hale & Plain."
+    },
+    {
+      "id": "landing-dyslexia",
+      "type": "landing",
+      "profile": {
+        "name": "Trent Assessment",
+        "offer": "Diagnostic assessment for dyslexia, dyscalculia and ADHD, for children and adults.",
+        "audience": "Parents, universities and employers arranging workplace assessments.",
+        "tone": "Clear and reassuring. Avoid clinical coldness.",
+        "area": "Nottingham and remote",
+        "since": "2013",
+        "differentiator": "The report is written to be used, not filed. Schools and employers can act on it without a translator.",
+        "email": "admin@trentassessment.example",
+        "phone": "0115 822 4417"
+      },
+      "prompt": "Build a landing page for Trent Assessment."
+    },
+    {
+      "id": "landing-tree-surgeon",
+      "type": "landing",
+      "profile": {
+        "name": "Weald Tree Surgery",
+        "offer": "Tree surgery, crown reduction, felling and stump grinding. Arb Association approved.",
+        "audience": "Homeowners, two golf courses and a parish council.",
+        "tone": "Practical and safety conscious.",
+        "area": "Kent and east Sussex",
+        "since": "2006",
+        "differentiator": "We are approved contractors and we handle the TPO paperwork, so you do not find out afterwards that you needed consent.",
+        "email": "office@wealdtree.example",
+        "phone": "01892 440228"
+      },
+      "prompt": "Build a landing page for Weald Tree Surgery."
+    },
+    {
+      "id": "landing-cybersecurity",
+      "type": "landing",
+      "profile": {
+        "name": "Ridgeback Security",
+        "offer": "Security reviews and Cyber Essentials certification for small companies.",
+        "audience": "Firms of ten to a hundred and fifty who have just been asked for certification by a customer.",
+        "tone": "Calm and unalarmist. No fear selling.",
+        "area": "Manchester and remote",
+        "since": "2018",
+        "differentiator": "We do the assessment and the remediation with you, not a report that lands on your desk with ninety findings.",
+        "email": "hello@ridgebacksecurity.example",
+        "phone": "0161 660 2214"
+      },
+      "prompt": "Build a landing page for Ridgeback Security."
+    },
+    {
+      "id": "landing-upholstery",
+      "type": "landing",
+      "profile": {
+        "name": "Lansdown Upholstery",
+        "offer": "Traditional upholstery and restoration. Horsehair, springs, hand stitched edges.",
+        "audience": "Antique dealers, interior designers and people with a chair they cannot part with.",
+        "tone": "Craft focused and a little opinionated.",
+        "area": "Bath and north east Somerset",
+        "since": "1996",
+        "differentiator": "Everything is stripped back to the frame. We do not staple new foam over old webbing and call it restored.",
+        "email": "workshop@lansdownupholstery.example",
+        "phone": "01225 440118"
+      },
+      "prompt": "Build a landing page for Lansdown Upholstery."
+    },
+    {
+      "id": "landing-childminder",
+      "type": "landing",
+      "profile": {
+        "name": "Mumbles Childminding",
+        "offer": "Ofsted registered childminding for under fives, in a family home with a garden.",
+        "audience": "Working parents within walking distance of the school.",
+        "tone": "Warm and personal. Written by the childminder.",
+        "area": "Swansea",
+        "since": "2015",
+        "differentiator": "Six children, one garden, and the same face every day for three years.",
+        "email": "hello@mumbleschildminding.example",
+        "phone": "01792 660334"
+      },
+      "prompt": "Build a landing page for Mumbles Childminding."
+    },
+    {
+      "id": "landing-cleaning",
+      "type": "landing",
+      "profile": {
+        "name": "Granite Commercial Cleaning",
+        "offer": "Office and commercial cleaning, including out of hours and end of tenancy.",
+        "audience": "Offices, two dental practices and a small hotel.",
+        "tone": "Professional and reliable. No superlatives.",
+        "area": "Aberdeen and Aberdeenshire",
+        "since": "2012",
+        "differentiator": "The same cleaner does your site every week, and you have their number.",
+        "email": "office@granitecleaning.example",
+        "phone": "01224 220719"
+      },
+      "prompt": "Build a landing page for Granite Commercial Cleaning."
+    },
+    {
+      "id": "landing-van-conversion",
+      "type": "landing",
+      "profile": {
+        "name": "Dart Van Conversions",
+        "offer": "Campervan conversions, from a simple bed and units to full off grid builds.",
+        "audience": "People who have just bought a Transit or a Sprinter and want it done properly.",
+        "tone": "Enthusiastic and honest about cost.",
+        "area": "Devon",
+        "since": "2018",
+        "differentiator": "We build to a fixed spec and a fixed price, and the electrical work is signed off by a qualified auto electrician.",
+        "email": "hello@dartvans.example",
+        "phone": "01803 440226"
+      },
+      "prompt": "Build a landing page for Dart Van Conversions."
+    },
+    {
+      "id": "landing-translation",
+      "type": "landing",
+      "profile": {
+        "name": "Nene Language Services",
+        "offer": "Translation and interpreting, English and Polish. Legal, medical and technical.",
+        "audience": "Solicitors, the NHS and manufacturers.",
+        "tone": "Precise and professional.",
+        "area": "Peterborough and remote",
+        "since": "2009",
+        "differentiator": "Sworn translations accepted by the Home Office and the courts, turned around in two working days.",
+        "email": "office@nenelanguage.example",
+        "phone": "01733 440129"
+      },
+      "prompt": "Build a landing page for Nene Language Services."
+    },
+    {
+      "id": "landing-bees",
+      "type": "landing",
+      "profile": {
+        "name": "Alde Valley Bees",
+        "offer": "Beekeeping supplies, nucleus colonies, and free swarm collection.",
+        "audience": "New and established beekeepers, and anyone who has found a swarm in their garden.",
+        "tone": "Friendly and a bit evangelical about bees.",
+        "area": "Suffolk and north Essex",
+        "since": "2010",
+        "differentiator": "Swarm collection is free and always will be. The bees are worth more to us than the call out.",
+        "email": "hello@aldevalleybees.example",
+        "phone": "01728 440155"
+      },
+      "prompt": "Build a landing page for Alde Valley Bees."
+    }
+  ]
+}

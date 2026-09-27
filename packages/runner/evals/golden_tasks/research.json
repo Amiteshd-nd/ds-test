@@ -1,0 +1,69 @@
+{
+  "note": "The research suite. Each task is a question a real small-business owner would ask, run through the same profile the onboarding interview fills.\n\nThe checks are about whether the report can be trusted rather than whether it reads well: does every citation resolve to a listed source, are there enough distinct sources to be worth calling research, and does it say what it could not find. A report that reads beautifully and cites nothing is the failure mode worth catching.\n\nOffline these report N/A: the fixture search provider only covers the queries it recorded, and a research suite that passes on recorded answers is measuring the fixtures.",
+  "checks": {
+    "status": "succeeded",
+    "report_filed": true,
+    "citations_resolve": true,
+    "min_distinct_sources": 3,
+    "min_length": 500,
+    "has_sources_section": true
+  },
+  "tasks": [
+    {
+      "id": "research-pricing",
+      "profile": "surveyor",
+      "prompt": "Research what independent damp surveyors charge in Bristol, and how that compares to firms that offer a free survey."
+    },
+    {
+      "id": "research-competitors",
+      "profile": "surveyor",
+      "prompt": "Who else offers survey-only damp and timber reports in the Bristol area, and how do they position themselves?"
+    },
+    {
+      "id": "research-demand",
+      "profile": "hedgelayer",
+      "prompt": "What grant schemes currently pay for hedgerow restoration in England, and roughly what do they pay per unit?"
+    },
+    {
+      "id": "research-market",
+      "profile": "bakery",
+      "prompt": "What does the UK craft bakery market look like, and is it growing or shrinking?"
+    },
+    {
+      "id": "research-regulation",
+      "profile": "surveyor",
+      "prompt": "What do mortgage lenders require from a damp report, and does it have to come from a particular kind of firm?"
+    },
+    {
+      "id": "research-pricing-model",
+      "profile": "hedgelayer",
+      "prompt": "How do hedgelaying contractors in the UK usually price their work, and what are typical rates?"
+    }
+  ],
+  "profiles": {
+    "surveyor": {
+      "name": "Halstead & Rowe",
+      "offer": "Independent damp and timber surveys on older houses. We do not carry out remedial work.",
+      "audience": "Homeowners and buying agents, usually mid purchase.",
+      "tone": "Plain and direct. No sales language.",
+      "area": "Bristol, Bath and north Somerset",
+      "since": "2011"
+    },
+    "hedgelayer": {
+      "name": "Kestrel Hedgelaying",
+      "offer": "Hedgelaying and hedgerow restoration by hand, Midland style.",
+      "audience": "Farm managers and estate agents.",
+      "tone": "Plain and unhurried.",
+      "area": "Herefordshire and the Welsh borders",
+      "since": "2016"
+    },
+    "bakery": {
+      "name": "Salt Pan Bakehouse",
+      "offer": "A sourdough bakery and micro-cafe. Long ferment, baked overnight.",
+      "audience": "People within walking distance, plus three wholesale cafes.",
+      "tone": "Warm and a bit chatty.",
+      "area": "Margate old town",
+      "since": "2019"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+---
+/**
+ * Layout family: numbered columns on a shared rule.
+ *
+ * A full-bleed band in the surface colour, so the page has a horizontal break
+ * between two content-heavy sections. The numbers are the structure, which is
+ * also why this section does not need an icon each.
+ */
+import { site } from '../site';
+
+const { process } = site;
+---
+
+<section id="process" class="border-y border-line bg-surface">
+  <div class="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
+    <h2 class="max-w-2xl text-3xl sm:text-4xl">{process.heading}</h2>
+
+    <ol
+      class="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4"
+      role="list"
+    >
+      {
+        process.steps.map((step, i) => (
+          <li class="border-t-2 border-accent pt-5">
+            <span class="font-display text-sm tabular-nums text-accent">
+              Step {i + 1}
+            </span>
+            <h3 class="mt-2 text-lg font-medium">{step.title}</h3>
+            <p class="mt-2 text-sm leading-relaxed text-muted">{step.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>

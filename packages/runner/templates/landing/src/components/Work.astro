@@ -1,0 +1,55 @@
+---
+/**
+ * Layout family: asymmetric media grid.
+ *
+ * The first job runs wide and the rest sit beside it, so the grid has rhythm
+ * rather than three identical tiles. Cell count always matches item count: an
+ * empty tile at the end means the grid was planned before the content was.
+ */
+import { site } from '../site';
+
+const { work } = site;
+const [lead, ...rest] = work.items;
+---
+
+<section id="work" class="mx-auto max-w-6xl px-4 py-20 sm:px-6 lg:py-28">
+  <h2 class="max-w-2xl text-3xl sm:text-4xl">{work.heading}</h2>
+
+  <div class="mt-12 grid gap-8 lg:grid-cols-2">
+    <figure class="lg:row-span-2">
+      <img
+        src={lead.image.src}
+        alt={lead.image.alt}
+        width={lead.image.width}
+        height={lead.image.height}
+        loading="lazy"
+        decoding="async"
+        class="aspect-[4/3] w-full rounded-media object-cover lg:aspect-[3/4]"
+      />
+      <figcaption class="mt-4">
+        <span class="block font-display text-lg font-medium">{lead.title}</span>
+        <span class="text-sm text-muted">{lead.place}</span>
+      </figcaption>
+    </figure>
+
+    {
+      rest.map((item) => (
+        <figure>
+          <img
+            src={item.image.src}
+            alt={item.image.alt}
+            width={item.image.width}
+            height={item.image.height}
+            loading="lazy"
+            decoding="async"
+            class="aspect-[16/10] w-full rounded-media object-cover"
+          />
+          <figcaption class="mt-4">
+            <span class="block font-display text-lg font-medium">{item.title}</span>
+            <span class="text-sm text-muted">{item.place}</span>
+          </figcaption>
+        </figure>
+      ))
+    }
+  </div>
+</section>

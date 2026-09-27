@@ -1,0 +1,25 @@
+---
+/**
+ * Layout family: a divided rule of facts.
+ *
+ * Under the hero, never inside it. Facts a local customer actually weighs -
+ * how long, regulated by whom, how far they travel - rather than a wall of
+ * logos a two-person business does not have.
+ */
+import { site } from '../site';
+---
+
+<section class="border-y border-line">
+  <dl
+    class="mx-auto grid max-w-6xl grid-cols-2 gap-px bg-line sm:grid-cols-4"
+  >
+    {
+      site.proof.map((item) => (
+        <div class="bg-bg px-4 py-5 sm:px-6">
+          <dt class="text-sm text-muted">{item.label}</dt>
+          <dd class="mt-1 font-display text-lg font-medium">{item.detail}</dd>
+        </div>
+      ))
+    }
+  </dl>
+</section>

@@ -59,6 +59,22 @@ const PROJECTS = [
     port: 6177,
   },
   {
+    id: 'runner',
+    name: 'Runner',
+    tag: 'General agent · Next.js',
+    desc:
+      'The small-business agent from the Forge PRD. Answer six questions and it builds a landing ' +
+      'page, a competitor report with citations, an editable deck, and a queue of posts and ' +
+      'emails — without asking again, without sending anything you have not approved, and ' +
+      'metering every task against a credit balance. ' +
+      'Needs `pnpm --filter runner seed` and `browsers` once. With no ANTHROPIC_API_KEY it runs ' +
+      'a scripted provider — the footer says which.',
+    cwd: path.join(ROOT, 'packages/runner'),
+    bin: 'next',
+    args: ['dev', '-p', '6184'],
+    port: 6184,
+  },
+  {
     id: 'file-compressor',
     name: 'File Compressor',
     tag: 'PDF · Next.js + Wasm-free browser pipeline',

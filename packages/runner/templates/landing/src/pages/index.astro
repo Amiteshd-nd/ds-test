@@ -1,0 +1,33 @@
+---
+/**
+ * Eight sections, eight different layout families. Nothing repeats, and no two
+ * consecutive sections are an image-and-text split.
+ *
+ * To reorder or drop a section, edit this file. To change what a section says,
+ * edit src/site.ts. Most briefs only need the second.
+ */
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import ProofStrip from '../components/ProofStrip.astro';
+import Offer from '../components/Offer.astro';
+import Process from '../components/Process.astro';
+import Work from '../components/Work.astro';
+import Questions from '../components/Questions.astro';
+import Contact from '../components/Contact.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Base>
+  <Nav />
+  <main id="main">
+    <Hero />
+    <ProofStrip />
+    <Offer />
+    <Process />
+    <Work />
+    <Questions />
+    <Contact />
+  </main>
+  <Footer />
+</Base>

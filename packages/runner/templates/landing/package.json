@@ -1,0 +1,24 @@
+{
+  "name": "@runner/template-landing",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@fontsource-variable/archivo": "^5.2.5",
+    "@fontsource-variable/bricolage-grotesque": "^5.2.5",
+    "@fontsource-variable/eb-garamond": "^5.2.5",
+    "@fontsource-variable/instrument-sans": "^5.2.5",
+    "@fontsource-variable/outfit": "^5.2.5",
+    "@fontsource-variable/space-grotesk": "^5.2.5",
+    "@iconify-json/ph": "^1.2.2",
+    "@tailwindcss/vite": "^4.1.0",
+    "astro": "^5.14.0",
+    "astro-icon": "^1.1.5",
+    "tailwindcss": "^4.1.0"
+  }
+}

@@ -1,0 +1,47 @@
+[
+  {
+    "match": ["damp", "survey", "cost"],
+    "results": [
+      {
+        "title": "How much does a damp survey cost? - Checkatrade",
+        "url": "https://www.example-checkatrade.test/cost-guides/damp-survey-cost",
+        "snippet": "A damp survey typically costs between £150 and £400 in the UK, with the average around £250 for a standard three bedroom property. Independent surveyors who do not carry out remedial work usually charge more, between £400 and £600, because the fee is not subsidised by the treatment contract. Prices in London and the South East run roughly 20 percent higher. A full timber and damp report including a moisture map and repair specification is at the upper end of the range. Last updated March 2026."
+      },
+      {
+        "title": "Damp and timber survey fees explained - Property Care Association",
+        "url": "https://www.example-pca.test/homeowners/survey-fees",
+        "snippet": "PCA member firms that offer free damp surveys generally recover the cost through the remedial works quotation. Independent consultants charge a fee, commonly £350 to £550 plus VAT for a residential property, and do not tender for the repair. The Association notes that a free survey is not independent advice and recommends homeowners understand which they are commissioning before booking. Figures collected from member returns, 2025."
+      },
+      {
+        "title": "What I charge for a damp survey, and why - Bristol Damp Consultancy",
+        "url": "https://www.example-bristoldamp.test/fees",
+        "snippet": "Our fixed fee is £425 plus VAT for a standard residential damp and timber survey within Bristol and Bath, including thermal imaging and a written report within three working days. We do not carry out remedial work. Larger or listed properties are quoted individually. We have held this price since 2024."
+      }
+    ]
+  },
+  {
+    "match": ["damp", "survey", "bristol"],
+    "results": [
+      {
+        "title": "Damp surveyors in Bristol - Which? Trusted Traders",
+        "url": "https://www.example-which.test/trusted-traders/bristol/damp-proofing",
+        "snippet": "There are 34 damp proofing and survey businesses listed in the Bristol area. Of these, 11 describe themselves as independent surveyors who do not undertake remedial work. The remainder are treatment contractors offering free surveys. Customer reviews most frequently mention report turnaround time and whether the surveyor explained the findings in person."
+      },
+      {
+        "title": "RICS members offering damp and timber reports, South West",
+        "url": "https://www.example-rics.test/find-a-surveyor/south-west/damp",
+        "snippet": "Search results for damp and timber specialists in the BS and BA postcodes return 19 RICS regulated firms. Most also offer Level 2 and Level 3 building surveys. Seven state that they hold PCA membership in addition to RICS regulation."
+      }
+    ]
+  },
+  {
+    "match": ["damp", "competitor"],
+    "results": [
+      {
+        "title": "Damp proofing market report 2026 - IBISWorld UK",
+        "url": "https://www.example-ibisworld.test/uk/damp-proofing-services",
+        "snippet": "The UK damp proofing and remedial treatment industry is worth an estimated £780 million, growing at 2.1 percent a year. The sector is highly fragmented: no operator holds more than 3 percent market share and around 78 percent of businesses employ fewer than five people. Independent survey-only practices are a small but growing niche, driven by lender requirements for reports from firms with no interest in the remedial work."
+      }
+    ]
+  }
+]

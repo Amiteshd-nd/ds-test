@@ -6,6 +6,7 @@ node_modules/
 **/dist/
 **/dist-ssr/
 **/.next/
+**/.next-build/
 **/out/
 
 # Logs
@@ -35,3 +36,13 @@ pnpm-debug.log*
 
 # TS incremental build info
 *.tsbuildinfo
+
+# PRD reference repos (studied, never vendored) and motion audit reports
+/references/
+/motion-audits/
+
+# runner: local sandbox scratch, sqlite state, and the pre-seeded site template
+packages/runner/.runner/
+packages/runner/templates/*/node_modules/
+packages/runner/templates/*/dist/
+packages/runner/templates/*/.astro/

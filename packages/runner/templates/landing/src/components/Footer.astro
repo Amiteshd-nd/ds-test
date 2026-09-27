@@ -1,0 +1,21 @@
+---
+/**
+ * No version number, no build id, no "made with" line. Those belong on a
+ * product's status page, not on a page whose job is to get somebody to call.
+ */
+import { site } from '../site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-line">
+  <div
+    class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-10 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6"
+  >
+    <div>
+      <p class="font-display font-medium text-ink">{site.brand.name}</p>
+      <p class="mt-1">{site.brand.tagline}</p>
+    </div>
+    <p>&copy; {year} {site.brand.name}</p>
+  </div>
+</footer>

@@ -13,6 +13,7 @@ packages/
 ├── carcinogen/    # one self-contained HTML page: the carcinogen heatmap (no build step)
 ├── file-compressor/ # Next.js: adaptive PDF compression behind a perceptual quality gate (see its own README)
 ├── cortex/        # @cloud-march/cortex — a portable AI agent layer behind eight adapters, plus the demo host it installs into
+├── runner/        # Next.js: the general small-business agent from the Forge PRD (all four phases — see its own README)
 └── motion-kit/    # @cloud-march/motion — shared motion tokens and helpers on motion.dev (library, no dev server)
 ```
 
@@ -28,6 +29,21 @@ Atlas that it is installed into, so the thing is runnable rather than only descr
 same package holds the manifests, prompts, evals, red-team suite, and a self-hosted trace
 store — it takes three runtime dependencies and talks to no vendor. Start at
 `packages/cortex/README.md`.
+
+**runner** is the newest, and the only package built to a written PRD. It is the general
+agent for small businesses: answer six questions about what you do, and it builds you a
+landing page, a competitor report with working citations, a deck you can edit in
+PowerPoint, and a queue of posts and emails waiting for you to say yes. It asks those six
+questions once. Under that sits a thin agent loop on the Messages API shared by five
+agents, every external service (sandbox, model, browser, search, deploy, posting, email,
+tracing, store) behind a swappable interface, and two fixed templates that fail their own
+build when the content breaks a design rule. Two things are gated rather than trusted:
+facts it learns about the business need confirming before any prompt sees them, and
+nothing can be sent or published without an approval the compiler insists on. All four phases of the PRD are done, including a credit ledger that meters every task
+and refuses one it cannot pay for. It runs offline on development stand-ins with no
+accounts and no keys, and the footer says which providers are live. Start at
+`packages/runner/README.md`, and read its `DECISIONS.md` for every place it departs from
+the PRD.
 
 **motion-kit** is the odd one out: a library, not an app. It holds the repo's motion
 vocabulary (durations, easings, springs, stagger budgets) on top of
@@ -61,7 +77,7 @@ and live **Logs**. Quitting the hub (`Ctrl-C`) stops every server it started.
 
 Fixed ports: personal-doc `:6173`, game `:6174`, gully `:6175`, blockmodel `:6176`, discovery `:6177`,
 trimension `:6178`, file-compressor `:6179`, carcinogen `:6180`, cortex `:6181` (its agent
-service sits behind it on `:6182`).
+service sits behind it on `:6182`), runner `:6184`.
 
 ## Run a package directly (without the hub)
 
@@ -74,11 +90,12 @@ pnpm dev:discovery      # discovery → http://localhost:6177  (surfaces at /cod
 pnpm dev:file-compressor # file-compressor → http://localhost:6179  (see packages/file-compressor/README.md)
 pnpm dev:carcinogen     # carcinogen → http://localhost:6180  (or just open packages/carcinogen/index.html)
 pnpm dev:cortex         # cortex → http://localhost:6181  (Atlas demo + agent service; see packages/cortex/README.md)
+pnpm dev:runner         # runner → http://localhost:6184  (works with no API key; see packages/runner/README.md)
 ```
 
 Or target any package directly: `pnpm --filter <name> <script>`
 (names: `personal-doc`, `@cloud-march/game`, `blockmodel`, `gully`, `discovery`, `carcinogen`,
-`file-compressor`, `@cloud-march/cortex`, `@cloud-march/motion`).
+`file-compressor`, `@cloud-march/cortex`, `runner`, `@cloud-march/motion`).
 
 ## Build
 

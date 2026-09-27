@@ -1,0 +1,11 @@
+{
+  "id": "hello-world",
+  "prompt": "Create a hello-world Python script and run it.",
+  "note": "The Phase 0 acceptance task. Exercises plan, write, run, verify.",
+  "checks": {
+    "status": "succeeded",
+    "tools_called": ["file_write", "shell_exec"],
+    "files_exist": ["hello.py", "todo.md"],
+    "output_contains": ["Hello"]
+  }
+}

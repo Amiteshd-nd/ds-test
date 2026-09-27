@@ -1,0 +1,12 @@
+{
+  "id": "recover-from-error",
+  "prompt": "Run `python3 missing_script.py`. It will fail. Work out why, create a working version, and run it so it prints OK.",
+  "note": "PRD section 6.1, adopt 5: failures stay in context and the model adapts rather than retrying the same command. A task that passes only by ignoring the error is a fail.",
+  "checks": {
+    "status": "succeeded",
+    "tools_called": ["shell_exec", "file_write"],
+    "files_exist": ["missing_script.py"],
+    "output_contains": ["OK"],
+    "max_repeated_identical_commands": 2
+  }
+}

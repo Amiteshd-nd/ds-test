@@ -1,0 +1,88 @@
+---
+/**
+ * Layout family: asymmetric split, in three variants.
+ *
+ * Never centered. A centered headline over a full-bleed image is the shape a
+ * page takes when nobody chose one, and it is the first thing that makes a
+ * generated site look generated.
+ *
+ * Four text elements, hard cap: headline, subtext, one CTA, and the phone line
+ * that a service business genuinely needs above the fold. No eyebrow, no trust
+ * strip, no tagline under the button. Those go in their own sections below.
+ */
+import { site } from '../site';
+
+const { hero, cta, contact, design } = site;
+
+// Planned with the font scale, not independently of it: the guard caps the
+// headline at 10 words so these sizes never produce a four-line hero.
+const rhythms = {
+  // Each rhythm sizes its headline for the column width it actually gets. A
+  // display size chosen without looking at the column is how an eight-word
+  // headline ends up on four lines.
+  split: {
+    wrap: 'grid items-center gap-10 lg:grid-cols-[1.25fr_1fr] lg:gap-14',
+    copy: '',
+    media: 'lg:order-last',
+    // Sized so the guard's 8-word ceiling still lands on two lines in a
+    // column this width. Bigger looks better with a short headline and breaks
+    // the moment someone writes a long one.
+    headline: 'text-[2.1rem] sm:text-[2.5rem] lg:text-[2.6rem]',
+  },
+  offset: {
+    // Full page width, so it can carry the largest size on the page. The image
+    // runs under it at full width, which is why it gets a height cap below:
+    // uncropped, a 4:3 image at 1150px wide is 860px tall on its own.
+    wrap: 'flex flex-col gap-10',
+    copy: 'max-w-4xl',
+    media: '[&>img]:max-h-[46vh]',
+    headline: 'text-[2.4rem] sm:text-5xl lg:text-6xl',
+  },
+  frame: {
+    wrap: 'grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12',
+    copy: 'lg:pt-4',
+    media: '',
+    headline: 'text-[2rem] sm:text-[2.4rem] lg:text-[2.9rem]',
+  },
+}[design.rhythm];
+---
+
+<section class="mx-auto max-w-6xl px-4 pt-14 pb-16 sm:px-6 lg:pt-24 lg:pb-24">
+  <div class={rhythms.wrap}>
+    <div class={`reveal ${rhythms.copy}`}>
+      <h1 class={`${rhythms.headline} text-balance`}>{hero.headline}</h1>
+
+      <p class="mt-5 max-w-[46ch] text-lg leading-relaxed text-muted">
+        {hero.subtext}
+      </p>
+
+      <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+        <a
+          href={cta.href}
+          class="whitespace-nowrap rounded-control bg-accent px-6 py-3 font-medium text-on-accent transition-transform duration-150 active:translate-y-px"
+        >
+          {cta.label}
+        </a>
+        <a
+          href={`tel:${contact.phone.replace(/\s+/g, '')}`}
+          class="text-lg font-medium underline decoration-line underline-offset-4 transition-colors duration-150 hover:decoration-accent"
+        >
+          {contact.phone}
+        </a>
+      </div>
+    </div>
+
+    <div class={`reveal ${rhythms.media}`} style="animation-delay:90ms">
+      <img
+        src={hero.image.src}
+        alt={hero.image.alt}
+        width={hero.image.width}
+        height={hero.image.height}
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        class="aspect-[4/3] w-full rounded-media object-cover"
+      />
+    </div>
+  </div>
+</section>
