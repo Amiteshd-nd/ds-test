@@ -30,6 +30,10 @@
   --accent: #c2410c;
   --accent-wash: #fbeee6;
 
+  /* Outbound links to a full-screen prototype. Blue so they read as a way out
+     of the page, not as data; 6.3:1 on paper. */
+  --link: #1d4ed8;
+
   --measure: 680px;
   --gutter: 24px;
 
@@ -223,3 +227,29 @@
 }
 
 /* Marquee-free, loop-free. Nothing on this page moves on its own. */
+
+/* A prototype frame fades in over its facade once the document has loaded,
+   so the reader never sees a white flash of a half-booted workbench. */
+.case-embed {
+  opacity: 0;
+  transition: opacity var(--motion-duration-gentle, 320ms) var(--motion-ease-out, ease-out);
+}
+
+.case-embed[data-loaded] {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .case-embed {
+    transition: none;
+  }
+}
+
+.case-link--out {
+  color: var(--link);
+  text-decoration-color: color-mix(in srgb, var(--link) 40%, transparent);
+}
+
+.case-link--out:hover {
+  text-decoration-color: var(--link);
+}

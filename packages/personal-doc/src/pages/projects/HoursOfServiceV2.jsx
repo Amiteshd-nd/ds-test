@@ -7,6 +7,7 @@ import StatRow from '../../components/case/StatRow';
 import DutyLogGraph from '../../components/case/DutyLogGraph';
 import SceneTabs from '../../components/case/SceneTabs';
 import { ProofVideo, ProofShot } from '../../components/case/ProofMedia';
+import PrototypeEmbed from '../../components/case/PrototypeEmbed';
 
 import dashOnDuty from '../../assets/images/projects/hours-of-service/dashboard-on-duty.webp';
 import dashDriving from '../../assets/images/projects/hours-of-service/dashboard-driving.webp';
@@ -467,6 +468,26 @@ const HoursOfServiceV2 = () => {
         wide
       >
         <SceneTabs scenes={scenes} />
+      </Section>
+
+      <Section
+        kicker="Prototype"
+        title="Every scenario the release had to pass, in one working build"
+        wide
+      >
+        <p className="case-body">
+          Specs described the rules. This is what engineering and QA actually built against: the
+          driver app and the manager portal in one file, with the vehicle, the clocks and the
+          ruleset on switches, so a reviewer can put the truck in motion or run a clock down to
+          five minutes instead of waiting for it.
+        </p>
+        <PrototypeEmbed
+          src="/prototypes/hos-fleet-compliance.html"
+          title="Driver•i fleet compliance, Hours of Service"
+          weight="14 MB"
+          caption="Switch persona between Driver and Manager. The right rail jumps straight to each of the release’s scenarios."
+          className="mt-8"
+        />
       </Section>
 
       <Section title="Roughly half of these drivers are on a tablet" wide>

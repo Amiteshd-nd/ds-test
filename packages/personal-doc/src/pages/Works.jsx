@@ -39,6 +39,19 @@ const PROJECTS = [
     locked: true,
   },
   {
+    title: 'Driver AI App',
+    eyebrow: 'Netradyne\nAI integration',
+    subtitle: 'Look and feel, and a voice',
+    description:
+      'An AI layer over the driver app, then a voice agent that lets a new fleet ask instead of hunt.',
+    stat: '7',
+    statLabel: 'driver personas',
+    note: 'In progress',
+    palette: 'signal',
+    link: '/projects/driver-ai-app',
+    locked: true,
+  },
+  {
     title: 'Ask Amitesh',
     eyebrow: 'This site\nHome 2.2',
     subtitle: 'A portfolio you can talk to',

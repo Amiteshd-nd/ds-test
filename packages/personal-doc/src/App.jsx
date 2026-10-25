@@ -13,6 +13,7 @@ import HoursOfService from './pages/projects/HoursOfService';
 import HoursOfServiceV2 from './pages/projects/HoursOfServiceV2';
 import VehicleHealth from './pages/projects/VehicleHealth';
 import VehicleHealthV2 from './pages/projects/VehicleHealthV2';
+import DriverAiApp from './pages/projects/DriverAiApp';
 import GazeboComplexOrganisms from './pages/projects/GazeboComplexOrganisms';
 import GazeboComplexOrganismsV2 from './pages/projects/GazeboComplexOrganismsV2';
 import VendingAnalytics from './pages/projects/VendingAnalytics';
@@ -106,6 +107,14 @@ function App() {
               element={
                 <PasswordGate title="Vehicle Health is under wraps">
                   <VehicleHealthV2 />
+                </PasswordGate>
+              }
+            />
+            <Route
+              path="/projects/driver-ai-app"
+              element={
+                <PasswordGate title="Driver AI App is under wraps">
+                  <DriverAiApp />
                 </PasswordGate>
               }
             />
