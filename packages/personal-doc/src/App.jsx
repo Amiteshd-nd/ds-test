@@ -20,7 +20,7 @@ import VendingAnalytics from './pages/projects/VendingAnalytics';
 import VendingAnalyticsV2 from './pages/projects/VendingAnalyticsV2';
 import TeluguStreaming from './pages/projects/TeluguStreaming';
 import TeluguStreamingV2 from './pages/projects/TeluguStreamingV2';
-import BangaloreTimesComingSoon from './pages/BangaloreTimesComingSoon';
+import DocPage from './components/case/DocPage';
 import PasswordGate from './components/PasswordGate';
 
 // Home 2.2 — the chat-native surface. Lazy so its canvas material and chat
@@ -30,8 +30,9 @@ const HomeV22 = lazy(() => import('./pages/HomeV22'));
 // Museum renders the same live canvases, so it is split out for the same reason.
 const Museum = lazy(() => import('./pages/Museum'));
 
-// The Bangalore Times build is parked behind a holding screen, so the game
-// package is deliberately not imported here and Phaser stays out of the bundle.
+// Bangalore Times shows its design document rather than the Phaser build, so
+// the game package is deliberately not imported here and Phaser stays out of
+// the bundle.
 
 const FULL_SHELL_ROUTES = ['/home-2.2', '/museum'];
 
@@ -124,7 +125,20 @@ function App() {
             <Route path="/projects/vending-analytics-2" element={<VendingAnalyticsV2 />} />
             <Route path="/projects/telugu-streaming" element={<TeluguStreaming />} />
             <Route path="/projects/telugu-streaming-2" element={<TeluguStreamingV2 />} />
-            <Route path="/game/bangalore-times" element={<BangaloreTimesComingSoon />} />
+            <Route
+              path="/projects/gazelle"
+              element={<DocPage project="Gazelle" src="/docs/gazelle.html" title="Gazelle design document" />}
+            />
+            <Route
+              path="/game/bangalore-times"
+              element={
+                <DocPage
+                  project="Bangalore Times"
+                  src="/docs/bangalore-times.html"
+                  title="Bangalore Times design document"
+                />
+              }
+            />
           </Routes>
         </AnimatePresence>
 

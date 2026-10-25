@@ -82,9 +82,21 @@ const PROJECTS = [
     description: 'A casual social game set in Bangalore, built with Phaser and React.',
     stat: '1',
     statLabel: 'city',
-    note: 'Playable',
+    note: 'Design doc',
     palette: 'moss',
     link: '/game/bangalore-times',
+  },
+  {
+    title: 'Gazelle',
+    eyebrow: 'Side project\nJogging app',
+    subtitle: 'Run. Collect. Keep.',
+    description:
+      'A jogging app for India where every run earns a collectible animal card with a serial number only you hold.',
+    stat: '1',
+    statLabel: 'card per run',
+    note: 'Design doc',
+    palette: 'tide',
+    link: '/projects/gazelle',
   },
   {
     title: 'Gazebo Design System',
