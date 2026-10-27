@@ -133,6 +133,42 @@
       "cwd": "packages/teaser",
       "port": 6300,
       "autoPort": false
+    },
+    {
+      "name": "landing",
+      "runtimeExecutable": "corepack",
+      "runtimeArgs": [
+        "pnpm",
+        "--filter",
+        "landing",
+        "dev"
+      ],
+      "port": 6186,
+      "autoPort": false
+    },
+    {
+      "name": "landing-email",
+      "runtimeExecutable": "corepack",
+      "runtimeArgs": [
+        "pnpm",
+        "--filter",
+        "landing",
+        "email:preview"
+      ],
+      "port": 6187,
+      "autoPort": false
+    },
+    {
+      "name": "landing-prod",
+      "runtimeExecutable": "corepack",
+      "runtimeArgs": [
+        "pnpm",
+        "--filter",
+        "landing",
+        "start"
+      ],
+      "port": 6186,
+      "autoPort": false
     }
   ]
 }

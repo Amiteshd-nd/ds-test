@@ -14,6 +14,7 @@ packages/
 ├── file-compressor/ # Next.js: adaptive PDF compression behind a perceptual quality gate (see its own README)
 ├── cortex/        # @cloud-march/cortex — a portable AI agent layer behind eight adapters, plus the demo host it installs into
 ├── runner/        # Next.js: the general small-business agent from the Forge PRD (all four phases — see its own README)
+├── landing/       # Next.js: one-screen pre-launch waitlist page, Resend confirmation email (see its own README)
 └── motion-kit/    # @cloud-march/motion — shared motion tokens and helpers on motion.dev (library, no dev server)
 ```
 
@@ -77,7 +78,7 @@ and live **Logs**. Quitting the hub (`Ctrl-C`) stops every server it started.
 
 Fixed ports: personal-doc `:6173`, game `:6174`, gully `:6175`, blockmodel `:6176`, discovery `:6177`,
 trimension `:6178`, file-compressor `:6179`, carcinogen `:6180`, cortex `:6181` (its agent
-service sits behind it on `:6182`), runner `:6184`.
+service sits behind it on `:6182`), runner `:6184`, landing `:6186` (email preview `:6187`).
 
 ## Run a package directly (without the hub)
 
@@ -91,11 +92,12 @@ pnpm dev:file-compressor # file-compressor → http://localhost:6179  (see packa
 pnpm dev:carcinogen     # carcinogen → http://localhost:6180  (or just open packages/carcinogen/index.html)
 pnpm dev:cortex         # cortex → http://localhost:6181  (Atlas demo + agent service; see packages/cortex/README.md)
 pnpm dev:runner         # runner → http://localhost:6184  (works with no API key; see packages/runner/README.md)
+pnpm dev:landing        # landing → http://localhost:6186  (works with no Resend key; see packages/landing/README.md)
 ```
 
 Or target any package directly: `pnpm --filter <name> <script>`
 (names: `personal-doc`, `@cloud-march/game`, `blockmodel`, `gully`, `discovery`, `carcinogen`,
-`file-compressor`, `@cloud-march/cortex`, `runner`, `@cloud-march/motion`).
+`file-compressor`, `@cloud-march/cortex`, `runner`, `landing`, `@cloud-march/motion`).
 
 ## Build
 

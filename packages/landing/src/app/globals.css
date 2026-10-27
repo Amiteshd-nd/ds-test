@@ -1,0 +1,807 @@
+@import 'tailwindcss';
+@import '@cloud-march/motion/tokens.css';
+
+/* A phone held sideways: too short for the lede and the frame. The headline,
+   the form and a pill to the teaser are what fit. */
+@custom-variant short (@media (max-height: 540px) and (max-width: 1023px));
+
+/*
+ * Theme. One dark surface for the whole page, one accent (the mint of the aurora),
+ * and chrome as a material rather than a second colour. Colours are oklch so the
+ * gradients interpolate without muddy midpoints.
+ */
+@theme {
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, 'Times New Roman', serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-blackletter: var(--font-unifraktur), var(--font-newsreader), Georgia, serif;
+
+  --color-ground: oklch(0.17 0.006 260);
+  --color-ink: oklch(0.96 0.005 90);
+  --color-ink-dim: oklch(0.74 0.008 90);
+  --color-ink-faint: oklch(0.56 0.008 90);
+  --color-accent: oklch(0.86 0.12 168);
+  --color-danger: oklch(0.78 0.14 25);
+}
+
+:root {
+  /* Aurora hues. Mint is the accent; the gold is a second light source, never
+     applied to UI. */
+  --aurora-mint: oklch(0.84 0.13 168);
+  --aurora-ice: oklch(0.82 0.08 220);
+  --aurora-gold: oklch(0.86 0.11 85);
+
+  /* Type scales with both axes, so a short laptop screen shrinks the headline
+     rather than pushing the form off the bottom. */
+  --text-headline: clamp(2.125rem, min(4.3vw, 8.5dvh), 4.375rem);
+  --text-lede: clamp(0.9375rem, 0.85rem + 0.35vw, 1.125rem);
+  --text-wordmark: clamp(1.375rem, min(2vw, 4dvh), 1.75rem);
+  --text-body: clamp(0.9375rem, 0.9rem + 0.15vw, 1rem);
+  --text-small: 0.8125rem;
+  --text-mono: 0.6875rem;
+
+  --control-height: 2.875rem;
+  --radius: 2px;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-ground);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-ground);
+}
+
+/* ------------------------------------------------------------------ Aurora
+ * Three large, blurred light sources drifting very slowly behind the content.
+ * Ambient motion is the one loop on the page; it is the light the whole scene
+ * is lit by, and it stops entirely under reduced motion.
+ */
+.aurora {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  /* Blurred ellipses look brighter than they are. Keep the layer under control
+     in one place rather than per ellipse. */
+  opacity: 0.9;
+}
+
+.aurora-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(64px);
+  will-change: transform;
+  animation: drift var(--aurora-duration, 48s) ease-in-out infinite alternate;
+  animation-delay: var(--aurora-delay, 0s);
+}
+
+.aurora-mint {
+  width: 60vmax;
+  height: 42vmax;
+  left: -12vmax;
+  top: -10vmax;
+  background: radial-gradient(closest-side, var(--aurora-mint), transparent 70%);
+  opacity: 0.6;
+  --aurora-duration: 52s;
+}
+
+.aurora-ice {
+  width: 56vmax;
+  height: 40vmax;
+  right: -16vmax;
+  top: 6vmax;
+  background: radial-gradient(closest-side, var(--aurora-ice), transparent 70%);
+  opacity: 0.45;
+  --aurora-duration: 64s;
+  --aurora-delay: -20s;
+}
+
+.aurora-gold {
+  width: 50vmax;
+  height: 30vmax;
+  left: 22vmax;
+  bottom: -18vmax;
+  background: radial-gradient(closest-side, var(--aurora-gold), transparent 70%);
+  opacity: 0.34;
+  --aurora-duration: 58s;
+  --aurora-delay: -40s;
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(6vmax, -3vmax, 0) scale(1.08);
+  }
+  to {
+    transform: translate3d(-4vmax, 4vmax, 0) scale(0.96);
+  }
+}
+
+/* Fine grain so the gradients do not band on 8-bit panels. */
+.grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+/* The light that follows the pointer. A single element moved with transform;
+   the spring that drives it lives in aurora.tsx. */
+.pointer-light {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 70vmax;
+  height: 70vmax;
+  margin: -35vmax 0 0 -35vmax;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side, oklch(0.9 0.1 168 / 0.22), transparent 70%);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob {
+    animation: none;
+  }
+  .pointer-light {
+    display: none;
+  }
+}
+
+@media (hover: none) {
+  .pointer-light {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ Chrome
+ * Brushed-metal treatments. Two uses only: the wordmark and the primary button,
+ * so the material means "the one thing to press" and not "decoration".
+ */
+.chrome-text {
+  background-image: linear-gradient(
+    175deg,
+    oklch(0.99 0 0) 0%,
+    oklch(0.84 0.004 250) 38%,
+    oklch(0.66 0.006 250) 50%,
+    oklch(0.93 0.003 250) 62%,
+    oklch(0.78 0.004 250) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.chrome-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: oklch(0.15 0.005 260);
+  background-image: linear-gradient(
+    180deg,
+    oklch(0.985 0 0) 0%,
+    oklch(0.9 0.003 250) 42%,
+    oklch(0.78 0.005 250) 50%,
+    oklch(0.94 0.002 250) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0),
+    inset 0 -1px 0 oklch(0 0 0 / 0.35),
+    0 1px 2px oklch(0 0 0 / 0.5),
+    0 10px 24px -14px oklch(0 0 0 / 0.7);
+  transition:
+    transform var(--motion-duration-quick) var(--motion-ease-out),
+    box-shadow var(--motion-duration-quick) var(--motion-ease-out);
+}
+
+/* The sheen: a diagonal highlight parked off the left edge, that crosses the
+   button once when hovered. A transition rather than a keyframe loop, so it only
+   moves in response to the pointer. */
+.chrome-button::after {
+  content: '';
+  position: absolute;
+  inset: -40% -60%;
+  z-index: -1;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    oklch(1 0 0 / 0.9) 50%,
+    transparent 60%
+  );
+  transform: translateX(-70%);
+  transition: transform var(--motion-duration-deliberate) var(--motion-ease-out);
+}
+
+.chrome-button:hover::after,
+.chrome-button:focus-visible::after {
+  transform: translateX(70%);
+}
+
+.chrome-button:hover {
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0),
+    inset 0 -1px 0 oklch(0 0 0 / 0.35),
+    0 1px 2px oklch(0 0 0 / 0.5),
+    0 14px 28px -14px oklch(0 0 0 / 0.8);
+}
+
+.chrome-button:active {
+  transform: translateY(1px);
+  transition-duration: var(--motion-duration-instant);
+}
+
+.chrome-button:disabled {
+  filter: saturate(0) brightness(0.8);
+  cursor: progress;
+}
+
+/* ------------------------------------------------------------------ Glass field
+ * Dark-side glass: a thin edge of light, a frosted fill, text at full contrast.
+ */
+.glass-field {
+  background-color: oklch(1 0 0 / 0.06);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid oklch(1 0 0 / 0.16);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.14),
+    0 1px 2px oklch(0 0 0 / 0.3);
+  transition:
+    background-color var(--motion-duration-quick) var(--motion-ease-out),
+    border-color var(--motion-duration-quick) var(--motion-ease-out),
+    box-shadow var(--motion-duration-quick) var(--motion-ease-out);
+}
+
+.glass-field::placeholder {
+  color: var(--color-ink-faint);
+}
+
+.glass-field:hover {
+  background-color: oklch(1 0 0 / 0.09);
+}
+
+.glass-field:focus-visible {
+  outline: none;
+  background-color: oklch(1 0 0 / 0.1);
+  border-color: oklch(0.86 0.12 168 / 0.7);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.14),
+    0 0 0 3px oklch(0.86 0.12 168 / 0.22);
+}
+
+.glass-field[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-field {
+    background-color: oklch(0.22 0.006 260);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-field,
+  .glass-field:hover,
+  .glass-field:focus-visible {
+    background-color: oklch(0.22 0.006 260);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* ------------------------------------------------------------------ The frame
+ * The render sits in a drafting-sheet frame: thin light edge, corner ticks like a
+ * title block, and a sheen that follows the pointer. The 3D tilt is applied by
+ * hero-frame.tsx through transforms; everything here is static.
+ */
+.frame {
+  --mx: 50%;
+  --my: 50%;
+  position: relative;
+  transform-style: preserve-3d;
+  background: oklch(0.2 0.006 260);
+  border: 1px solid oklch(1 0 0 / 0.14);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 0.12),
+    0 30px 60px -30px oklch(0 0 0 / 0.9),
+    0 0 0 1px oklch(0 0 0 / 0.4);
+}
+
+.frame-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    60% 60% at var(--mx) var(--my),
+    oklch(1 0 0 / 0.14),
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+}
+
+.frame-edge {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* A metallic rim: the highlight sits opposite the sheen, like light on a bevel. */
+  background: conic-gradient(
+    from 200deg at var(--mx) var(--my),
+    oklch(1 0 0 / 0.5),
+    oklch(1 0 0 / 0.05) 25%,
+    oklch(1 0 0 / 0.3) 50%,
+    oklch(1 0 0 / 0.05) 75%,
+    oklch(1 0 0 / 0.5)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 1px;
+}
+
+.frame-tick {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  border-color: oklch(1 0 0 / 0.45);
+  border-style: solid;
+  border-width: 0;
+}
+
+.frame-tick-tl {
+  top: 8px;
+  left: 8px;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+.frame-tick-tr {
+  top: 8px;
+  right: 8px;
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+.frame-tick-bl {
+  bottom: 8px;
+  left: 8px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+.frame-tick-br {
+  bottom: 8px;
+  right: 8px;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+
+.frame-badge {
+  transition: transform var(--motion-duration-gentle) var(--motion-ease-out);
+}
+
+.frame-link:hover .frame-badge,
+.frame-link:focus-visible .frame-badge {
+  transform: scale(1.06);
+}
+
+.frame-link:active .frame-badge {
+  transform: scale(0.97);
+  transition-duration: var(--motion-duration-instant);
+}
+
+/* ------------------------------------------------------------------ Player
+ * Native <dialog>, faded and lifted in, the page frosted behind it.
+ */
+.teaser-dialog {
+  opacity: 0;
+  transform: translateY(var(--motion-distance-step)) scale(0.98);
+  transition:
+    opacity var(--motion-duration-gentle) var(--motion-ease-out),
+    transform var(--motion-duration-gentle) var(--motion-ease-out),
+    overlay var(--motion-duration-gentle) allow-discrete,
+    display var(--motion-duration-gentle) allow-discrete;
+}
+
+.teaser-dialog[open] {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  .teaser-dialog[open] {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-step)) scale(0.98);
+  }
+}
+
+.teaser-dialog::backdrop {
+  background-color: oklch(0 0 0 / 0);
+  -webkit-backdrop-filter: blur(0);
+  backdrop-filter: blur(0);
+  transition:
+    background-color var(--motion-duration-gentle) var(--motion-ease-out),
+    backdrop-filter var(--motion-duration-gentle) var(--motion-ease-out),
+    overlay var(--motion-duration-gentle) allow-discrete,
+    display var(--motion-duration-gentle) allow-discrete;
+}
+
+.teaser-dialog[open]::backdrop {
+  background-color: oklch(0 0 0 / 0.78);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+@starting-style {
+  .teaser-dialog[open]::backdrop {
+    background-color: oklch(0 0 0 / 0);
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+  }
+}
+
+/* ------------------------------------------------------------------ Iteration 2
+ * Paper and pills on a crowd of stickers. The page is light while the rest of
+ * the stylesheet (and /v1) is dark, so colour-scheme is set here, not on html.
+ */
+.paper-page {
+  color-scheme: light;
+  background: #fff;
+}
+
+.paper-page ::selection {
+  background: #141414;
+  color: #fff;
+}
+
+/*
+ * The crowd. A fixed 4000x2400 field of stickers, centred and scaled to the
+ * screen, in two layers around the card. Each sticker is positioned by custom
+ * properties set in crowd.tsx and pops toward the pointer on hover. The field's
+ * transform makes a stacking context, which is why the front layer is a second
+ * element placed after the card in the DOM rather than a z-index.
+ */
+.crowd {
+  --crowd-scale: 0.56;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.crowd-front {
+  z-index: 20;
+}
+
+.crowd-field {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4000px;
+  height: 2400px;
+  transform: translate(-50%, -50%) scale(var(--crowd-scale));
+  transform-origin: center;
+}
+
+.sticker {
+  position: absolute;
+  left: calc(var(--x) * 1px - 50px);
+  top: calc(var(--y) * 1px - 50px);
+  width: 100px;
+  height: 100px;
+  display: block;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+  transform: rotate(var(--rot)) scale(var(--s));
+  transform-origin: 50% 50%;
+  transition:
+    transform var(--motion-duration-brisk) var(--motion-ease-overshoot),
+    filter var(--motion-duration-brisk) var(--motion-ease-out);
+}
+
+.sticker > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+/* The fill layer: a PNG of the drawing's enclosed regions painted in flat colours
+   (scripts/colour-stickers.py), multiplied over the sticker so the colour sits
+   inside the lines and the lines stay black. */
+.sticker-fill {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--fill-src) center / contain no-repeat;
+  mix-blend-mode: multiply;
+  opacity: 0;
+  transition: opacity var(--motion-duration-quick) var(--motion-ease-out);
+}
+
+/* The reaction: a pop, a small tilt, the fill, and it rises above its neighbours. */
+.sticker:hover {
+  z-index: 5;
+  transform: rotate(calc(var(--rot) - 7deg)) scale(calc(var(--s) * 1.18));
+  filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.18));
+}
+
+.sticker:hover .sticker-fill {
+  opacity: 1;
+}
+
+/* A clicked sticker keeps its hover state while its label is open. */
+.sticker.is-active {
+  z-index: 6;
+  transform: rotate(calc(var(--rot) - 7deg)) scale(calc(var(--s) * 1.18));
+  filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.18));
+}
+
+.sticker.is-active .sticker-fill {
+  opacity: 1;
+}
+
+/* The label: name over place, with a swatch of the building's colour. Sits
+   above the clicked sticker, above every layer, and rises in like the success
+   line on the form. */
+/* The label: name with a copy button, place beneath. Sits above (or below) the
+   clicked sticker, above every layer, inside the window, and rises in like the
+   success line on the form. */
+.crowd-tip {
+  position: fixed;
+  z-index: 40;
+  max-width: 18rem;
+  padding: 8px 10px 8px 12px;
+  background: #fff;
+  color: #141414;
+  border: 2px solid #141414;
+  border-radius: 12px;
+  box-shadow:
+    0 1px 0 #141414,
+    0 12px 28px -12px rgb(0 0 0 / 0.35);
+  animation: arrive var(--motion-duration-brisk) var(--motion-ease-out) both;
+}
+
+.crowd-tip-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.crowd-tip-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.crowd-tip-name strong {
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.crowd-tip-copy {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: #6b6b6b;
+  cursor: pointer;
+  transition:
+    color var(--motion-duration-quick) var(--motion-ease-out),
+    background-color var(--motion-duration-quick) var(--motion-ease-out);
+}
+
+.crowd-tip-copy svg {
+  width: 14px;
+  height: 14px;
+}
+
+.crowd-tip-copy:hover {
+  color: #141414;
+  background: rgb(0 0 0 / 0.06);
+}
+
+.crowd-tip-copy:focus-visible {
+  outline: 2px solid #141414;
+  outline-offset: 1px;
+}
+
+.crowd-tip-place {
+  margin-top: 2px;
+  font-size: 0.75rem;
+  color: #6b6b6b;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .crowd {
+    --crowd-scale: 0.4;
+  }
+  /* The card is a different shape on a phone, so the front band no longer
+     lines up with its edges. Keep every sticker behind it there. */
+  .crowd-front {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sticker:hover {
+    transform: rotate(var(--rot)) scale(var(--s));
+  }
+}
+
+/* A white surface floating on the crowd: the nav, the footer tag. */
+.paper {
+  background: #fff;
+  border: 1px solid rgb(0 0 0 / 0.06);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.06),
+    0 14px 40px -16px rgb(0 0 0 / 0.3);
+}
+
+/* The card: a white surface with a drawn outline, like one more sticker.
+   After .paper so its border wins. */
+/* The nav pill: same ink, a lighter line for a smaller shape. */
+.paper-outlined-thin {
+  border: 2px solid #141414;
+}
+
+.paper-outlined {
+  border: 3px solid #141414;
+  box-shadow:
+    0 1px 0 #141414,
+    0 16px 40px -16px rgb(0 0 0 / 0.35);
+}
+
+.pill-field {
+  border-radius: 9999px;
+  background: #fff;
+  color: #141414;
+  border: 1px solid rgb(0 0 0 / 0.18);
+  transition:
+    border-color var(--motion-duration-quick) var(--motion-ease-out),
+    box-shadow var(--motion-duration-quick) var(--motion-ease-out);
+}
+
+.pill-field::placeholder {
+  color: rgb(0 0 0 / 0.42);
+}
+
+.pill-field:hover {
+  border-color: rgb(0 0 0 / 0.35);
+}
+
+.pill-field:focus-visible {
+  outline: none;
+  border-color: #141414;
+  box-shadow: 0 0 0 3px rgb(0 0 0 / 0.12);
+}
+
+.pill-field[aria-invalid='true'] {
+  border-color: #b3261e;
+}
+
+.pill-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #141414;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color var(--motion-duration-quick) var(--motion-ease-out),
+    transform var(--motion-duration-quick) var(--motion-ease-out);
+}
+
+.pill-button:hover {
+  background: #2a2a2a;
+}
+
+.pill-button:active {
+  transform: translateY(1px);
+  transition-duration: var(--motion-duration-instant);
+}
+
+.pill-button:focus-visible {
+  outline: 2px solid #141414;
+  outline-offset: 2px;
+}
+
+.pill-button:disabled {
+  background: #6b6b6b;
+  cursor: progress;
+}
+
+/* ------------------------------------------------------------------ Entrance
+ * First paint: each piece rises out of a blur in order (the enter recipe from
+ * the motion skill). CSS rather than JS so it runs before hydration: the server
+ * HTML is never hidden, and the largest elements paint at first-paint plus a
+ * stagger, not at hydration. `--i` on the element is its place in the order.
+ * The tokens collapse duration and distance under reduced motion; the blur is
+ * collapsed here.
+ */
+@keyframes enter {
+  from {
+    opacity: var(--enter-from, 0);
+    transform: translateY(var(--motion-distance-step));
+    filter: blur(var(--enter-blur, 6px));
+  }
+}
+
+.enter {
+  animation: enter var(--motion-duration-slow) var(--motion-ease-out) both;
+  animation-delay: calc(var(--i, 0) * var(--motion-stagger-loose) * 2);
+}
+
+/* The headline and the frame start dim rather than invisible. An element whose
+   first paint is at opacity 0 is never recorded as painted by the browser, since
+   the fade that follows runs on the compositor; starting visible keeps the
+   largest-contentful-paint honest at first paint, and reads the same. */
+.enter-large {
+  --enter-from: 0.35;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter {
+    --enter-blur: 0px;
+    animation-delay: 0s;
+  }
+}
+
+/* ------------------------------------------------------------------ Bits */
+
+/* The success line replaces the form. It rises a few pixels so the swap reads as
+   a response to the click. Tokens collapse it under reduced motion. */
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance-rise));
+  }
+}
+
+.arrive {
+  animation: arrive var(--motion-duration-slow) var(--motion-ease-out) both;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.spinner {
+  animation: spin 700ms linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The button label already says "Sending"; a still ring is enough. */
+  .spinner {
+    animation: none;
+  }
+}

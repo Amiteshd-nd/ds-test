@@ -75,6 +75,19 @@ const PROJECTS = [
     port: 6184,
   },
   {
+    id: 'landing',
+    name: 'Landing',
+    tag: 'Waitlist · Next.js + Resend',
+    desc:
+      'A one-screen pre-launch page for an architecture platform: a card on a crowd of landmark ' +
+      'stickers, one email field, and a confirmation email through Resend. With no RESEND_API_KEY ' +
+      'the signup logs what it would have sent and succeeds, so the page is testable offline.',
+    cwd: path.join(ROOT, 'packages/landing'),
+    bin: 'next',
+    args: ['dev', '-p', '6186'],
+    port: 6186,
+  },
+  {
     id: 'file-compressor',
     name: 'File Compressor',
     tag: 'PDF · Next.js + Wasm-free browser pipeline',
