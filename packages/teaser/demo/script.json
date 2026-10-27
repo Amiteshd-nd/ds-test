@@ -1,8 +1,8 @@
 {
   "$comment": "Every string and every timestamp in the teaser. Scenes play in order as separate chat sessions; times inside a scene are seconds from that scene's start. Edit, then `pnpm render`.",
   "product": {
-    "name": "Plinth",
-    "domain": "plinth.example",
+    "name": "Gazebo",
+    "domain": "gazebo.biz",
     "brandColor": "#141414",
     "brandInk": "#f4f1ea"
   },
@@ -30,7 +30,7 @@
     "zoom": "100%"
   },
   "chat": {
-    "assistantLabel": "Plinth",
+    "assistantLabel": "Gazebo",
     "assistantBadge": "AI",
     "inputPlaceholder": "Describe what you want to build",
     "newChat": "New chat"
@@ -115,8 +115,9 @@
         "walls-interior": 2.0,
         "openings": 1.5,
         "labels": 1.5,
-        "furniture": 1.5,
-        "dims": 1.0
+        "furniture": 1.3,
+        "hidden": 0.3,
+        "dims": 0.9
       },
       "click": {
         "pill": 0,
@@ -256,8 +257,9 @@
         "openings": 0.7,
         "tiles": 1.3,
         "labels": 0.9,
-        "furniture": 1.1,
-        "dims": 0.5
+        "furniture": 1.0,
+        "hidden": 0.2,
+        "dims": 0.4
       },
       "camera": [
         {
@@ -363,11 +365,12 @@
         "end": 25.0
       },
       "layers": {
-        "walls-outer": 1.2,
+        "grid": 0.5,
+        "walls-outer": 1.0,
         "walls-interior": 1.6,
         "openings": 1.0,
-        "labels": 1.2,
-        "furniture": 1.5,
+        "labels": 1.1,
+        "furniture": 1.3,
         "dims": 0.5
       },
       "click": {
@@ -433,13 +436,13 @@
     "separator": "·"
   },
   "audio": {
-    "$comment": "Gains are linear, pre-normalisation. Cues come from out/events.json, written by the capture from the timeline. The bed is synthesised unless assets/music.(mp3|wav|m4a|aac) exists, which assemble.sh then mixes in at musicGainDb instead.",
+    "$comment": "Gains are linear, pre-normalisation; 0 mutes a cue. Typing is silent on purpose (typewriter 0); the send bell is kept very quiet. Cues come from out/events.json, written by the capture from the timeline. The bed is synthesised unless assets/music.(mp3|wav|m4a|aac) exists, which assemble.sh then mixes in at musicGainDb instead.",
     "targetLufs": -18,
     "typewriter": {
-      "gain": 0.09
+      "gain": 0.0
     },
     "bell": {
-      "gain": 0.08
+      "gain": 0.06
     },
     "pop": {
       "gain": 0.14

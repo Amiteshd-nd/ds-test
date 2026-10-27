@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Plinth teaser floor plan. Hand-authored. Scale: 1 ft = 20 px. Origin (0 ft, 0 ft) is at (70, 120) px; north is up.
-  Layers are <g> elements in draw order: walls-outer, walls-interior, openings, labels, furniture, dims.
-  Elements with a data-after attribute carry their "living room bigger" state; the timeline morphs to it.
+  Gazebo teaser: 3BHK floor plan at working-drawing level. Hand-authored. Scale: 1 ft = 20 px, origin (0 ft, 0 ft) at (70, 120) px; north is up.
+  Room dimensions are wall-centreline to centreline; walls are drawn at thickness (exterior 9", interior 4.5") as solid poché.
+  Line hierarchy: cut walls heaviest (poché, black), doors/windows 1.4 black, fixtures 1.1 dark grey, furniture 0.8 light grey, dimensions/tags 0.6, hidden/overhead dashed grey.
+  Layers in draw order: walls-outer, walls-interior, openings, labels, furniture, hidden, dims.
+  Elements with a data-after attribute carry the "living room bigger" state; the timeline morphs to it.
 
-  Room areas (carpet, wall faces as drawn):
+  Room areas (centreline):
   Living      15'0" x 12'0"  =  180.00 sq ft
   Bedroom 3   12'6" x 8'0"   =  100.00 sq ft
   Bedroom 2   12'6" x 8'5"   =  105.21 sq ft
@@ -17,13 +19,12 @@
   Listed total               = 698 sq ft (698 target)
   After "make the living room bigger": wall x=15 -> x=17 for y 0..8. Living 180+16=196, Bedroom 3 12'6"x8'0" -> 10'6"x8'0" = 84.
 -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 710" width="720" height="710" fill="none" stroke="#141414" stroke-linecap="square" stroke-linejoin="miter" font-family="Inter, system-ui, sans-serif">
-<g id="walls-outer" stroke-width="3" shape-rendering="crispEdges">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 750" fill="none" stroke="#141414" stroke-linecap="square" stroke-linejoin="miter" font-family="Inter, system-ui, sans-serif">
+<g id="walls-outer" stroke-width="15" shape-rendering="crispEdges">
   <path id="outline" d="M70 120 H620 V640 H70 Z"/>
-  <path id="balcony-rail" stroke-width="2" d="M130 120 V65 H370 V120"/>
-  <path id="balcony-rail-inner" stroke-width="1" d="M136 120 V71 H364 V120"/>
+  <path id="balcony-rail" stroke-width="7.5" d="M130 120 V65 H370 V120"/>
 </g>
-<g id="walls-interior" stroke-width="2" shape-rendering="crispEdges">
+<g id="walls-interior" stroke-width="7.5" shape-rendering="crispEdges">
   <path id="wall-living-bed3" d="M370 120 V280" data-after='{"d":"M410 120 V280"}'/>
   <path d="M370 280 V640"/>
   <path d="M370 280 H620"/>
@@ -33,152 +34,143 @@
   <path d="M70 500 H170"/>
   <path d="M170 540 H370"/>
 </g>
-<g id="openings" stroke-width="1.5">
+<g id="openings">
   <g class="door">
-    <path class="door-gap" stroke="#fff" stroke-width="5" d="M70 210 L70 150"/>
-    <path d="M70 210 L130 210" stroke-width="2"/>
-    <path d="M130 210 A60 60 0 0 1 70 150" stroke-width="1" stroke-dasharray="none"/>
+    <path stroke="#fff" stroke-width="17" d="M70 210 L70 150"/>
+    <path stroke-width="1.4" d="M62.5 210 L77.5 210 M62.5 150 L77.5 150"/>
+    <path fill="#fff" stroke-width="1.4" d="M70 211.2 L130 211.2 L130 208.8 L70 208.8 Z"/>
+    <path stroke-width="0.6" d="M130 210 A60 60 0 0 1 70 150"/>
   </g>
   <g class="slider">
-    <path stroke="#fff" stroke-width="6" d="M170 120 H290"/>
-    <path stroke-width="1.5" d="M170 116 H234 M226 124 H290"/>
+    <path stroke="#fff" stroke-width="17" d="M170 120 H290"/>
+    <path stroke-width="1.4" d="M170 115 H234 M226 125 H290 M170 112.5 V127.5 M290 112.5 V127.5"/>
   </g>
   <g class="door" id="door-bed3" data-after='{"transform":"translate(40,0)"}'>
-    <path class="door-gap" stroke="#fff" stroke-width="5" d="M370 270 L370 220"/>
-    <path d="M370 270 L420 270" stroke-width="2"/>
-    <path d="M420 270 A50 50 0 0 1 370 220" stroke-width="1" stroke-dasharray="none"/>
+    <path stroke="#fff" stroke-width="9.5" d="M370 270 L370 220"/>
+    <path stroke-width="1.4" d="M366.25 270 L373.75 270 M366.25 220 L373.75 220"/>
+    <path fill="#fff" stroke-width="1.4" d="M370 271.2 L420 271.2 L420 268.8 L370 268.8 Z"/>
+    <path stroke-width="0.6" d="M420 270 A50 50 0 0 1 370 220"/>
   </g>
   <g class="door">
-    <path class="door-gap" stroke="#fff" stroke-width="5" d="M370 295 L370 345"/>
-    <path d="M370 295 L420 295" stroke-width="2"/>
-    <path d="M420 295 A50 50 0 0 0 370 345" stroke-width="1" stroke-dasharray="none"/>
+    <path stroke="#fff" stroke-width="9.5" d="M370 295 L370 345"/>
+    <path stroke-width="1.4" d="M366.25 295 L373.75 295 M366.25 345 L373.75 345"/>
+    <path fill="#fff" stroke-width="1.4" d="M370 296.2 L420 296.2 L420 293.8 L370 293.8 Z"/>
+    <path stroke-width="0.6" d="M420 295 A50 50 0 0 0 370 345"/>
   </g>
   <g class="door">
-    <path class="door-gap" stroke="#fff" stroke-width="5" d="M370 600 L370 550"/>
-    <path d="M370 600 L420 600" stroke-width="2"/>
-    <path d="M420 600 A50 50 0 0 1 370 550" stroke-width="1" stroke-dasharray="none"/>
+    <path stroke="#fff" stroke-width="9.5" d="M370 600 L370 550"/>
+    <path stroke-width="1.4" d="M366.25 600 L373.75 600 M366.25 550 L373.75 550"/>
+    <path fill="#fff" stroke-width="1.4" d="M370 601.2 L420 601.2 L420 598.8 L370 598.8 Z"/>
+    <path stroke-width="0.6" d="M420 600 A50 50 0 0 1 370 550"/>
   </g>
   <g class="door">
-    <path class="door-gap" stroke="#fff" stroke-width="5" d="M150 360 L100 360"/>
-    <path d="M150 360 L150 410" stroke-width="2"/>
-    <path d="M150 410 A50 50 0 0 0 100 360" stroke-width="1" stroke-dasharray="none"/>
+    <path stroke="#fff" stroke-width="9.5" d="M150 360 L100 360"/>
+    <path stroke-width="1.4" d="M150 356.25 L150 363.75 M100 356.25 L100 363.75"/>
+    <path fill="#fff" stroke-width="1.4" d="M148.8 360 L148.8 410 L151.2 410 L151.2 360 Z"/>
+    <path stroke-width="0.6" d="M150 410 A50 50 0 0 0 100 360"/>
   </g>
   <g class="door">
-    <path class="door-gap" stroke="#fff" stroke-width="5" d="M170 600 L170 550"/>
-    <path d="M170 600 L120 600" stroke-width="2"/>
-    <path d="M120 600 A50 50 0 0 0 170 550" stroke-width="1" stroke-dasharray="none"/>
+    <path stroke="#fff" stroke-width="9.5" d="M170 600 L170 550"/>
+    <path stroke-width="1.4" d="M173.75 600 L166.25 600 M173.75 550 L166.25 550"/>
+    <path fill="#fff" stroke-width="1.4" d="M170 598.8 L120 598.8 L120 601.2 L170 601.2 Z"/>
+    <path stroke-width="0.6" d="M120 600 A50 50 0 0 0 170 550"/>
   </g>
   <g class="opening">
-    <path stroke="#fff" stroke-width="5" d="M220 360 H350"/>
-    <path stroke-width="1" stroke-dasharray="3 3" d="M220 360 H350"/>
+    <path stroke="#fff" stroke-width="9.5" d="M220 360 L350 360"/>
+    <path stroke-width="0.6" stroke-dasharray="3 3" d="M220 360 L350 360"/>
   </g>
   <g class="opening">
-    <path stroke="#fff" stroke-width="5" d="M230 540 H330"/>
-    <path stroke-width="1" stroke-dasharray="3 3" d="M230 540 H330"/>
+    <path stroke="#fff" stroke-width="9.5" d="M230 540 L330 540"/>
+    <path stroke-width="0.6" stroke-dasharray="3 3" d="M230 540 L330 540"/>
   </g>
   <g class="window">
-    <path stroke="#fff" stroke-width="6" d="M70 260 L70 320"/>
-    <path stroke-width="1.5" d="M66 260 V320 M74 260 V320"/>
-    <path stroke-width="1.5" d="M70 260 L70 320" stroke-opacity="0.35"/>
+    <path stroke="#fff" stroke-width="17" d="M70 260 L70 320"/>
+    <path stroke-width="1.4" d="M62.5 260 V320 M70 260 V320 M77.5 260 V320M62.5 260 H77.5 M62.5 320 H77.5"/>
   </g>
   <g class="window">
-    <path stroke="#fff" stroke-width="6" d="M570 120 L610 120"/>
-    <path stroke-width="1.5" d="M570 116 H610 M570 124 H610"/>
-    <path stroke-width="1.5" d="M570 120 L610 120" stroke-opacity="0.35"/>
+    <path stroke="#fff" stroke-width="17" d="M570 120 L610 120"/>
+    <path stroke-width="1.4" d="M570 112.5 H610 M570 120 H610 M570 127.5 H610M570 112.5 V127.5 M610 112.5 V127.5"/>
   </g>
   <g class="window">
-    <path stroke="#fff" stroke-width="6" d="M620 330 L620 400"/>
-    <path stroke-width="1.5" d="M616 330 V400 M624 330 V400"/>
-    <path stroke-width="1.5" d="M620 330 L620 400" stroke-opacity="0.35"/>
+    <path stroke="#fff" stroke-width="17" d="M620 330 L620 400"/>
+    <path stroke-width="1.4" d="M612.5 330 V400 M620 330 V400 M627.5 330 V400M612.5 330 H627.5 M612.5 400 H627.5"/>
   </g>
   <g class="window">
-    <path stroke="#fff" stroke-width="6" d="M410 640 L490 640"/>
-    <path stroke-width="1.5" d="M410 636 H490 M410 644 H490"/>
-    <path stroke-width="1.5" d="M410 640 L490 640" stroke-opacity="0.35"/>
+    <path stroke="#fff" stroke-width="17" d="M410 640 L490 640"/>
+    <path stroke-width="1.4" d="M410 632.5 H490 M410 640 H490 M410 647.5 H490M410 632.5 V647.5 M490 632.5 V647.5"/>
   </g>
   <g class="window">
-    <path stroke="#fff" stroke-width="6" d="M70 400 L70 440"/>
-    <path stroke-width="1.5" d="M66 400 V440 M74 400 V440"/>
-    <path stroke-width="1.5" d="M70 400 L70 440" stroke-opacity="0.35"/>
+    <path stroke="#fff" stroke-width="17" d="M70 400 L70 440"/>
+    <path stroke-width="1.4" d="M62.5 400 V440 M70 400 V440 M77.5 400 V440M62.5 400 H77.5 M62.5 440 H77.5"/>
   </g>
   <g class="window">
-    <path stroke="#fff" stroke-width="6" d="M70 540 L70 580"/>
-    <path stroke-width="1.5" d="M66 540 V580 M74 540 V580"/>
-    <path stroke-width="1.5" d="M70 540 L70 580" stroke-opacity="0.35"/>
+    <path stroke="#fff" stroke-width="17" d="M70 540 L70 580"/>
+    <path stroke-width="1.4" d="M62.5 540 V580 M70 540 V580 M77.5 540 V580M62.5 540 H77.5 M62.5 580 H77.5"/>
   </g>
   <g class="window">
-    <path stroke="#fff" stroke-width="6" d="M210 640 L250 640"/>
-    <path stroke-width="1.5" d="M210 636 H250 M210 644 H250"/>
-    <path stroke-width="1.5" d="M210 640 L250 640" stroke-opacity="0.35"/>
+    <path stroke="#fff" stroke-width="17" d="M210 640 L250 640"/>
+    <path stroke-width="1.4" d="M210 632.5 H250 M210 640 H250 M210 647.5 H250M210 632.5 V647.5 M250 632.5 V647.5"/>
   </g>
 </g>
 <g id="labels">
-  <g class="label"><text class="room-name" x="220" y="175" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">LIVING</text><text class="room-dim" id="dim-living" x="220" y="189" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none">15'0" × 12'0"</text><text class="room-area" x="220" y="202" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none"><tspan id="area-living">180</tspan> sq ft</text></g>
-  <g class="label" id="label-bed3" data-after='{"transform":"translate(20,0)"}'><text class="room-name" x="495" y="185" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">BEDROOM 3</text><text class="room-dim" id="dim-bed3" x="495" y="199" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none">12'6" × 8'0"</text><text class="room-area" x="495" y="212" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none"><tspan id="area-bed3">100</tspan> sq ft</text></g>
-  <g class="label"><text class="room-name" x="495" y="353" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">BEDROOM 2</text><text class="room-dim" id="dim-bed2" x="495" y="367" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none">12'6" × 8'5"</text><text class="room-area" x="495" y="380" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none"><tspan id="area-bed2">105</tspan> sq ft</text></g>
-  <g class="label"><text class="room-name" x="495" y="533" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">BEDROOM 1</text><text class="room-dim" id="dim-bed1" x="495" y="547" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none">12'6" × 9'7"</text><text class="room-area" x="495" y="560" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none"><tspan id="area-bed1">120</tspan> sq ft</text></g>
-  <g class="label"><text class="room-name" x="120" y="419" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">BATH</text><text class="room-dim" id="dim-bath1" x="120" y="433" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none">5'0" × 7'0"</text><text class="room-area" x="120" y="446" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none"><tspan id="area-bath1">35</tspan> sq ft</text></g>
-  <g class="label"><text class="room-name" x="120" y="559" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">BATH</text><text class="room-dim" id="dim-bath2" x="120" y="573" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none">5'0" × 7'0"</text><text class="room-area" x="120" y="586" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none"><tspan id="area-bath2">35</tspan> sq ft</text></g>
-  <g class="label"><text class="room-name" x="270" y="449" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">KITCHEN</text><text class="room-dim" id="dim-kitchen" x="270" y="463" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none">10'0" × 9'0"</text><text class="room-area" x="270" y="476" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none"><tspan id="area-kitchen">90</tspan> sq ft</text></g>
-  <g class="label"><text class="room-name" x="270" y="585" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">LOBBY</text></g>
-  <g class="label"><text class="room-name" x="214" y="82" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">BALCONY</text><text class="room-dim" id="dim-balcony" x="214" y="96" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none">12'0" × 2'9"</text><text class="room-area" x="214" y="109" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none"><tspan id="area-balcony">33</tspan> sq ft</text></g>
+  <g class="label"><text x="220" y="175" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">LIVING</text><text id="dim-living" x="220" y="189" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none">15'0" × 12'0"</text><text x="220" y="202" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none"><tspan id="area-living">180</tspan> sq ft</text></g>
+  <g class="label" id="label-bed3" data-after='{"transform":"translate(20,0)"}'><text x="495" y="185" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">BEDROOM 3</text><text id="dim-bed3" x="495" y="199" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none">12'6" × 8'0"</text><text x="495" y="212" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none"><tspan id="area-bed3">100</tspan> sq ft</text></g>
+  <g class="label"><text x="495" y="353" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">BEDROOM 2</text><text id="dim-bed2" x="495" y="367" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none">12'6" × 8'5"</text><text x="495" y="380" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none"><tspan id="area-bed2">105</tspan> sq ft</text></g>
+  <g class="label"><text x="495" y="533" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">BEDROOM 1</text><text id="dim-bed1" x="495" y="547" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none">12'6" × 9'7"</text><text x="495" y="560" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none"><tspan id="area-bed1">120</tspan> sq ft</text></g>
+  <g class="label"><text x="108" y="419" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">BATH</text><text id="dim-bath1" x="108" y="433" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none">5'0" × 7'0"</text><text x="108" y="446" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none"><tspan id="area-bath1">35</tspan> sq ft</text></g>
+  <g class="label"><text x="120" y="559" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">BATH</text><text id="dim-bath2" x="120" y="573" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none">5'0" × 7'0"</text><text x="120" y="586" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none"><tspan id="area-bath2">35</tspan> sq ft</text></g>
+  <g class="label"><text x="270" y="449" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">KITCHEN</text><text id="dim-kitchen" x="270" y="463" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none">10'0" × 9'0"</text><text x="270" y="476" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none"><tspan id="area-kitchen">90</tspan> sq ft</text></g>
+  <g class="label"><text x="270" y="585" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">LOBBY</text></g>
+  <g class="label"><text x="214" y="82" text-anchor="middle" font-size="10.5" font-weight="600" letter-spacing="1.4" fill="#141414" stroke="none">BALCONY</text><text id="dim-balcony" x="214" y="96" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none">12'0" × 2'9"</text><text x="214" y="109" text-anchor="middle" font-size="9.5" fill="#6b6b6b" stroke="none"><tspan id="area-balcony">33</tspan> sq ft</text></g>
+  <g class="label"><text x="220" y="224" text-anchor="middle" font-size="7.5" letter-spacing="0.8" fill="#6b6b6b" stroke="none">FFL ±0'-0"</text></g>
+  <g class="label tag"><circle cx="52" cy="180" r="6.5" fill="#fff" stroke="#141414" stroke-width="0.6"/><text x="52" y="182.4" text-anchor="middle" font-size="6.5" font-weight="600" fill="#141414" stroke="none">D1</text></g>
+  <g class="label tag"><circle cx="262" cy="77" r="6.5" fill="#fff" stroke="#141414" stroke-width="0.6"/><text x="262" y="79.4" text-anchor="middle" font-size="6.5" font-weight="600" fill="#141414" stroke="none">D7</text></g>
+  <g class="label tag" data-after='{"transform":"translate(40,0)"}'><circle cx="394" cy="210" r="6.5" fill="#fff" stroke="#141414" stroke-width="0.6"/><text x="394" y="212.4" text-anchor="middle" font-size="6.5" font-weight="600" fill="#141414" stroke="none">D2</text></g>
+  <g class="label tag"><circle cx="394" cy="348" r="6.5" fill="#fff" stroke="#141414" stroke-width="0.6"/><text x="394" y="350.4" text-anchor="middle" font-size="6.5" font-weight="600" fill="#141414" stroke="none">D3</text></g>
+  <g class="label tag"><circle cx="394" cy="572" r="6.5" fill="#fff" stroke="#141414" stroke-width="0.6"/><text x="394" y="574.4" text-anchor="middle" font-size="6.5" font-weight="600" fill="#141414" stroke="none">D4</text></g>
+  <g class="label tag"><circle cx="122" cy="342" r="6.5" fill="#fff" stroke="#141414" stroke-width="0.6"/><text x="122" y="344.4" text-anchor="middle" font-size="6.5" font-weight="600" fill="#141414" stroke="none">D5</text></g>
+  <g class="label tag"><circle cx="194" cy="572" r="6.5" fill="#fff" stroke="#141414" stroke-width="0.6"/><text x="194" y="574.4" text-anchor="middle" font-size="6.5" font-weight="600" fill="#141414" stroke="none">D6</text></g>
+  <g class="label tag"><circle cx="52" cy="290" r="6.5" fill="#fff" stroke="#141414" stroke-width="0.6"/><text x="52" y="292.4" text-anchor="middle" font-size="6.5" font-weight="600" fill="#141414" stroke="none">W1</text></g>
+  <g class="label tag"><circle cx="590" cy="102" r="6.5" fill="#fff" stroke="#141414" stroke-width="0.6"/><text x="590" y="104.4" text-anchor="middle" font-size="6.5" font-weight="600" fill="#141414" stroke="none">W2</text></g>
+  <g class="label tag"><circle cx="642" cy="365" r="6.5" fill="#fff" stroke="#141414" stroke-width="0.6"/><text x="642" y="367.4" text-anchor="middle" font-size="6.5" font-weight="600" fill="#141414" stroke="none">W3</text></g>
+  <g class="label tag"><circle cx="450" cy="658" r="6.5" fill="#fff" stroke="#141414" stroke-width="0.6"/><text x="450" y="660.4" text-anchor="middle" font-size="6.5" font-weight="600" fill="#141414" stroke="none">W4</text></g>
+  <g class="label tag"><circle cx="52" cy="420" r="6.5" fill="#fff" stroke="#141414" stroke-width="0.6"/><text x="52" y="422.4" text-anchor="middle" font-size="6.5" font-weight="600" fill="#141414" stroke="none">W5</text></g>
+  <g class="label tag"><circle cx="52" cy="560" r="6.5" fill="#fff" stroke="#141414" stroke-width="0.6"/><text x="52" y="562.4" text-anchor="middle" font-size="6.5" font-weight="600" fill="#141414" stroke="none">W6</text></g>
+  <g class="label tag"><circle cx="230" cy="658" r="6.5" fill="#fff" stroke="#141414" stroke-width="0.6"/><text x="230" y="660.4" text-anchor="middle" font-size="6.5" font-weight="600" fill="#141414" stroke="none">W7</text></g>
 </g>
-<g id="furniture" stroke="#141414" stroke-width="1">
-  <g class="furn"><rect x="94" y="264" width="140.00" height="52.00" stroke-width="1.2"/><path stroke-width="0.8" d="M94 280 L234 280"/><path stroke-width="0.6" d="M140.6 280 L140.6 316"/><path stroke-width="0.6" d="M187.4 280 L187.4 316"/></g>
-  <g class="furn"><rect x="134" y="212" width="60.00" height="28.00" stroke-width="1"/></g>
-  <g class="furn"><rect x="296" y="126" width="66.00" height="16.00" stroke-width="1"/></g>
-  <g class="furn"><circle cx="300" cy="272" r="32.00" stroke-width="1.2"/><rect x="286" y="214" width="28.00" height="28.00" stroke-width="0.9"/><rect x="286" y="302" width="28.00" height="28.00" stroke-width="0.9"/><rect x="242" y="258" width="28.00" height="28.00" stroke-width="0.9"/><rect x="330" y="258" width="28.00" height="28.00" stroke-width="0.9"/></g>
-  <g class="furn"><rect x="450" y="120" width="100.00" height="120.00" stroke-width="1.2"/><rect x="458" y="127" width="38.00" height="23.00" stroke-width="1"/><rect x="504" y="127" width="38.00" height="23.00" stroke-width="1"/><path stroke-width="0.8" d="M450 168 L550 168"/><rect x="558" y="126" width="24.00" height="24.00" stroke-width="1"/><rect x="430" y="248" width="90.00" height="32.00" stroke-width="1"/><path stroke-width="0.6" d="M430 248 L520 280"/><path stroke-width="0.6" d="M430 280 L520 248"/></g>
-  <g class="furn"><rect x="490" y="310" width="130.00" height="100.00" stroke-width="1.2"/><rect x="590" y="318" width="23.00" height="38.00" stroke-width="1"/><rect x="590" y="364" width="23.00" height="38.00" stroke-width="1"/><path stroke-width="0.8" d="M572 310 L572 410"/><rect x="464" y="310" width="22.00" height="24.00" stroke-width="1"/><rect x="390" y="412" width="90.00" height="36.33" stroke-width="1"/><path stroke-width="0.6" d="M390 412 L480 448.33"/><path stroke-width="0.6" d="M390 448.33 L480 412"/></g>
-  <g class="furn"><rect x="490" y="480" width="130.00" height="100.00" stroke-width="1.2"/><rect x="590" y="488" width="23.00" height="38.00" stroke-width="1"/><rect x="590" y="534" width="23.00" height="38.00" stroke-width="1"/><path stroke-width="0.8" d="M572 480 L572 580"/><rect x="464" y="480" width="22.00" height="24.00" stroke-width="1"/><rect x="390" y="448.33" width="100.00" height="37.67" stroke-width="1"/><path stroke-width="0.6" d="M390 448.33 L490 486"/><path stroke-width="0.6" d="M390 486 L490 448.33"/><rect x="390" y="592" width="48.00" height="46.00" stroke-width="1"/></g>
-  <g class="furn"><rect x="76" y="452" width="10.00" height="32.00" stroke-width="1"/><ellipse cx="102" cy="468" rx="16" ry="13" stroke-width="1"/><rect x="128" y="374" width="36.00" height="24.00" stroke-width="1"/><circle cx="146" cy="386" r="8.00" stroke-width="0.8"/><rect x="122" y="452" width="48.00" height="48.00" stroke-width="1"/><path stroke-width="0.6" d="M122 452 L170 500"/><circle cx="146" cy="476" r="5.00" stroke-width="0.8"/></g>
-  <g class="furn"><rect x="76" y="522" width="10.00" height="32.00" stroke-width="1"/><ellipse cx="102" cy="538" rx="16" ry="13" stroke-width="1"/><rect x="128" y="512" width="36.00" height="24.00" stroke-width="1"/><circle cx="146" cy="524" r="8.00" stroke-width="0.8"/><rect x="70" y="590" width="50.00" height="50.00" stroke-width="1"/><path stroke-width="0.6" d="M70 590 L120 640"/><circle cx="95" cy="615" r="5.00" stroke-width="0.8"/></g>
-  <g class="furn"><path stroke-width="1" d="M210 400 L210 540"/><path stroke-width="1" d="M210 400 L370 400"/><rect x="178" y="432" width="26.00" height="36.00" stroke-width="1"/><circle cx="191" cy="450" r="6.00" stroke-width="0.8"/><circle cx="256" cy="380" r="6.00" stroke-width="1"/><circle cx="276" cy="380" r="6.00" stroke-width="1"/><circle cx="256" cy="380" r="6.00" stroke-width="1"/><circle cx="296" cy="380" r="6.00" stroke-width="1"/><circle cx="316" cy="380" r="6.00" stroke-width="1"/><rect x="336" y="504" width="34.00" height="36.00" stroke-width="1"/><path stroke-width="0.6" d="M336 504 L370 540"/></g>
-  <g class="furn"><rect x="170" y="544" width="26.00" height="92.00" stroke-width="1"/><path stroke-width="0.6" d="M170 544 L196 636"/></g>
-  <g class="furn"><circle cx="320" cy="93" r="11.00" stroke-width="1"/><rect x="280" y="79" width="28.00" height="28.00" stroke-width="0.9"/><rect x="332" y="79" width="28.00" height="28.00" stroke-width="0.9"/></g>
+<g id="furniture" stroke="#8a8a8a">
+  <g class="furn"><rect stroke="#8a8a8a" x="94" y="264" width="140.00" height="52.00" stroke-width="0.8"/><path stroke="#8a8a8a" stroke-width="0.6" d="M94 280 L234 280"/><path stroke="#8a8a8a" stroke-width="0.5" d="M140.6 280 L140.6 316"/><path stroke="#8a8a8a" stroke-width="0.5" d="M187.4 280 L187.4 316"/></g>
+  <g class="furn"><rect stroke="#8a8a8a" x="134" y="212" width="60.00" height="28.00" stroke-width="0.8"/></g>
+  <g class="furn"><rect stroke="#4a4a4a" x="296" y="129" width="66.00" height="16.00" stroke-width="1.1"/></g>
+  <g class="furn"><circle stroke="#8a8a8a" cx="300" cy="272" r="32.00" stroke-width="0.8"/><rect stroke="#8a8a8a" x="286" y="214" width="28.00" height="28.00" stroke-width="0.8"/><rect stroke="#8a8a8a" x="286" y="302" width="28.00" height="28.00" stroke-width="0.8"/><rect stroke="#8a8a8a" x="242" y="258" width="28.00" height="28.00" stroke-width="0.8"/><rect stroke="#8a8a8a" x="330" y="258" width="28.00" height="28.00" stroke-width="0.8"/></g>
+  <g class="furn"><rect stroke="#8a8a8a" x="450" y="128" width="100.00" height="120.00" stroke-width="0.8"/><rect stroke="#8a8a8a" x="458" y="135" width="38.00" height="23.00" stroke-width="0.8"/><rect stroke="#8a8a8a" x="504" y="135" width="38.00" height="23.00" stroke-width="0.8"/><path stroke="#8a8a8a" stroke-width="0.6" d="M450 176 L550 176"/><rect stroke="#8a8a8a" x="558" y="129" width="24.00" height="24.00" stroke-width="0.8"/><rect stroke="#4a4a4a" x="430" y="246" width="90.00" height="30.00" stroke-width="1.1"/><path stroke="#8a8a8a" stroke-width="0.5" d="M430 246 L520 276"/><path stroke="#8a8a8a" stroke-width="0.5" d="M430 276 L520 246"/></g>
+  <g class="furn"><rect stroke="#8a8a8a" x="482" y="310" width="130.00" height="100.00" stroke-width="0.8"/><rect stroke="#8a8a8a" x="582" y="318" width="23.00" height="38.00" stroke-width="0.8"/><rect stroke="#8a8a8a" x="582" y="364" width="23.00" height="38.00" stroke-width="0.8"/><path stroke="#8a8a8a" stroke-width="0.6" d="M564 310 L564 410"/><rect stroke="#8a8a8a" x="456" y="310" width="22.00" height="24.00" stroke-width="0.8"/><rect stroke="#4a4a4a" x="390" y="410" width="90.00" height="34.40" stroke-width="1.1"/><path stroke="#8a8a8a" stroke-width="0.5" d="M390 410 L480 444.4"/><path stroke="#8a8a8a" stroke-width="0.5" d="M390 444.4 L480 410"/></g>
+  <g class="furn"><rect stroke="#8a8a8a" x="482" y="480" width="130.00" height="100.00" stroke-width="0.8"/><rect stroke="#8a8a8a" x="582" y="488" width="23.00" height="38.00" stroke-width="0.8"/><rect stroke="#8a8a8a" x="582" y="534" width="23.00" height="38.00" stroke-width="0.8"/><path stroke="#8a8a8a" stroke-width="0.6" d="M564 480 L564 580"/><rect stroke="#8a8a8a" x="456" y="480" width="22.00" height="24.00" stroke-width="0.8"/><rect stroke="#4a4a4a" x="390" y="452" width="100.00" height="36.00" stroke-width="1.1"/><path stroke="#8a8a8a" stroke-width="0.5" d="M390 452 L490 488"/><path stroke="#8a8a8a" stroke-width="0.5" d="M390 488 L490 452"/><rect stroke="#4a4a4a" x="390" y="586" width="48.00" height="46.00" stroke-width="1.1"/></g>
+  <g class="furn"><rect stroke="#4a4a4a" x="82" y="450" width="10.00" height="32.00" stroke-width="1.1"/><ellipse stroke="#4a4a4a" cx="108" cy="466" rx="16" ry="13" stroke-width="1.1"/><rect stroke="#4a4a4a" x="130" y="416" width="36.00" height="24.00" stroke-width="1.1"/><circle stroke="#4a4a4a" cx="148" cy="428" r="8.00" stroke-width="1.1"/><rect stroke="#4a4a4a" x="122" y="452" width="44.00" height="44.00" stroke-width="1.1"/><path stroke="#8a8a8a" stroke-width="0.5" d="M122 452 L166 496"/><circle stroke="#4a4a4a" cx="144" cy="474" r="5.00" stroke-width="1.1"/></g>
+  <g class="furn"><rect stroke="#4a4a4a" x="82" y="522" width="10.00" height="32.00" stroke-width="1.1"/><ellipse stroke="#4a4a4a" cx="108" cy="538" rx="16" ry="13" stroke-width="1.1"/><rect stroke="#4a4a4a" x="128" y="512" width="36.00" height="24.00" stroke-width="1.1"/><circle stroke="#4a4a4a" cx="146" cy="524" r="8.00" stroke-width="1.1"/><rect stroke="#4a4a4a" x="78" y="590" width="42.00" height="42.00" stroke-width="1.1"/><path stroke="#8a8a8a" stroke-width="0.5" d="M78 590 L120 632"/><circle stroke="#4a4a4a" cx="99" cy="611" r="5.00" stroke-width="1.1"/></g>
+  <g class="furn"><path stroke="#4a4a4a" stroke-width="1.1" d="M210 400 L210 536"/><path stroke="#4a4a4a" stroke-width="1.1" d="M210 400 L366 400"/><rect stroke="#4a4a4a" x="178" y="432" width="26.00" height="36.00" stroke-width="1.1"/><circle stroke="#8a8a8a" cx="191" cy="450" r="6.00" stroke-width="0.6"/><circle stroke="#8a8a8a" cx="256" cy="380" r="6.00" stroke-width="0.6"/><circle stroke="#8a8a8a" cx="276" cy="380" r="6.00" stroke-width="0.6"/><circle stroke="#8a8a8a" cx="296" cy="380" r="6.00" stroke-width="0.6"/><circle stroke="#8a8a8a" cx="316" cy="380" r="6.00" stroke-width="0.6"/><rect stroke="#4a4a4a" x="336" y="504" width="30.00" height="32.00" stroke-width="1.1"/><path stroke="#8a8a8a" stroke-width="0.5" d="M336 504 L366 536"/></g>
+  <g class="furn"><rect stroke="#4a4a4a" x="174" y="544" width="26.00" height="88.00" stroke-width="1.1"/><path stroke="#8a8a8a" stroke-width="0.5" d="M174 544 L200 632"/></g>
+  <g class="furn"><circle stroke="#8a8a8a" cx="320" cy="93" r="11.00" stroke-width="0.8"/><rect stroke="#8a8a8a" x="280" y="79" width="28.00" height="28.00" stroke-width="0.8"/><rect stroke="#8a8a8a" x="332" y="79" width="28.00" height="28.00" stroke-width="0.8"/></g>
+</g>
+<g id="hidden" stroke="#141414" stroke-opacity="0.55" stroke-width="0.7" stroke-dasharray="5 3">
+  <path d="M120 120 V55 H380 V120"/>
+  <path d="M174 368 H194 V536 H174"/>
+  <path d="M214 368 V388 H366"/>
 </g>
 <g id="dims" stroke="#141414">
-  <path class="ext" stroke-width="0.6" stroke-opacity="0.45" d="M70 120 L70 32"/>  <path class="ext" stroke-width="0.6" stroke-opacity="0.45" d="M620 120 L620 32"/>
-  <g class="dim">
-    <path stroke-width="0.8" d="M70 38 L620 38 M70 31 V45 M620 31 V45"/>
-    <text x="345" y="41.2" text-anchor="middle" font-size="9" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round">27'6"</text>
-  </g>
-  <path class="ext" stroke-width="0.6" stroke-opacity="0.45" d="M70 120 L32 120"/>  <path class="ext" stroke-width="0.6" stroke-opacity="0.45" d="M70 640 L32 640"/>
-  <g class="dim">
-    <path stroke-width="0.8" d="M38 120 L38 640 M31 120 H45 M31 640 H45"/>
-    <text x="38" y="383.2" text-anchor="middle" font-size="9" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round" transform="rotate(-90 38 380)">26'0"</text>
-  </g>
-  <path class="ext" stroke-width="0.6" stroke-opacity="0.45" d="M130 65 L98 65"/>
-  <g class="dim">
-    <path stroke-width="0.8" d="M104 65 L104 120 M97 65 H111 M97 120 H111"/>
-    <text x="104" y="95.7" text-anchor="middle" font-size="9" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round" transform="rotate(-90 104 92.5)">2'9"</text>
-  </g>
-  <path class="ext" stroke-width="0.6" stroke-opacity="0.45" d="M620 280 L654 280"/>  <path class="ext" stroke-width="0.6" stroke-opacity="0.45" d="M620 448.33 L654 448.33"/>
-  <g class="dim">
-    <path stroke-width="0.8" d="M648 120 L648 280 M641 120 H655 M641 280 H655"/>
-    <text x="648" y="203.2" text-anchor="middle" font-size="9" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round" transform="rotate(-90 648 200)">8'0"</text>
-  </g>
-  <g class="dim">
-    <path stroke-width="0.8" d="M648 280 L648 448.33 M641 280 H655 M641 448.33 H655"/>
-    <text x="648" y="367.37" text-anchor="middle" font-size="9" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round" transform="rotate(-90 648 364.17)">8'5"</text>
-  </g>
-  <g class="dim">
-    <path stroke-width="0.8" d="M648 448.33 L648 640 M641 448.33 H655 M641 640 H655"/>
-    <text x="648" y="547.37" text-anchor="middle" font-size="9" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round" transform="rotate(-90 648 544.17)">9'7"</text>
-  </g>
-  <path class="ext" stroke-width="0.6" stroke-opacity="0.45" d="M70 640 L70 678"/>  <path class="ext" stroke-width="0.6" stroke-opacity="0.45" d="M370 640 L370 678"/>  <path class="ext" stroke-width="0.6" stroke-opacity="0.45" d="M620 640 L620 678"/>
-  <g class="dim">
-    <path stroke-width="0.8" d="M70 672 L370 672 M70 665 V679 M370 665 V679"/>
-    <text x="220" y="675.2" text-anchor="middle" font-size="9" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round">15'0"</text>
-  </g>
-  <g class="dim">
-    <path stroke-width="0.8" d="M370 672 L620 672 M370 665 V679 M620 665 V679"/>
-    <text x="495" y="675.2" text-anchor="middle" font-size="9" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round">12'6"</text>
-  </g>
-  <g class="north" id="north">
-    <circle cx="662" cy="68" r="14" stroke-width="1"/>
-    <path d="M662 57 L667 74 L662 70 L657 74 Z" fill="#141414" stroke="none"/>
-    <text x="662" y="51" text-anchor="middle" font-size="9" font-weight="600" fill="#141414" stroke="none">N</text>
-  </g>
+  <path class="ext" stroke-width="0.6" stroke-opacity="0.5" d="M70 120 L70 12"/>  <path class="ext" stroke-width="0.6" stroke-opacity="0.5" d="M620 120 L620 12"/>  <path class="ext" stroke-width="0.6" stroke-opacity="0.5" d="M370 120 L370 32"/>  <path class="ext" stroke-width="0.6" stroke-opacity="0.5" d="M130 65 L130 32"/>
+  <g class="dim"><path stroke-width="0.6" d="M70 18 L620 18 M64 24 L76 12 M614 24 L626 12"/><text x="345" y="21.2" text-anchor="middle" font-size="8.5" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round">27'6"</text></g>
+  <g class="dim"><path stroke-width="0.6" d="M70 38 L130 38 M64 44 L76 32 M124 44 L136 32"/><text x="100" y="41.2" text-anchor="middle" font-size="8.5" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round">3'0"</text></g>  <g class="dim"><path stroke-width="0.6" d="M130 38 L370 38 M124 44 L136 32 M364 44 L376 32"/><text x="250" y="41.2" text-anchor="middle" font-size="8.5" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round">12'0"</text></g>  <g class="dim"><path stroke-width="0.6" d="M370 38 L620 38 M364 44 L376 32 M614 44 L626 32"/><text x="495" y="41.2" text-anchor="middle" font-size="8.5" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round">12'6"</text></g>
+  <path class="ext" stroke-width="0.6" stroke-opacity="0.5" d="M70 120 L12 120"/>  <path class="ext" stroke-width="0.6" stroke-opacity="0.5" d="M70 640 L12 640"/>  <path class="ext" stroke-width="0.6" stroke-opacity="0.5" d="M70 360 L32 360"/>  <path class="ext" stroke-width="0.6" stroke-opacity="0.5" d="M70 500 L32 500"/>
+  <g class="dim"><path stroke-width="0.6" d="M18 120 L18 640 M12 126 L24 114 M12 646 L24 634"/><text x="18" y="383.2" text-anchor="middle" font-size="8.5" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round" transform="rotate(-90 18 380)">26'0"</text></g>
+  <g class="dim"><path stroke-width="0.6" d="M38 120 L38 360 M32 126 L44 114 M32 366 L44 354"/><text x="38" y="243.2" text-anchor="middle" font-size="8.5" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round" transform="rotate(-90 38 240)">12'0"</text></g>  <g class="dim"><path stroke-width="0.6" d="M38 360 L38 500 M32 366 L44 354 M32 506 L44 494"/><text x="38" y="433.2" text-anchor="middle" font-size="8.5" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round" transform="rotate(-90 38 430)">7'0"</text></g>  <g class="dim"><path stroke-width="0.6" d="M38 500 L38 640 M32 506 L44 494 M32 646 L44 634"/><text x="38" y="573.2" text-anchor="middle" font-size="8.5" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round" transform="rotate(-90 38 570)">7'0"</text></g>
+  <path class="ext" stroke-width="0.6" stroke-opacity="0.5" d="M130 65 L98 65"/>  <g class="dim"><path stroke-width="0.6" d="M104 65 L104 120 M98 71 L110 59 M98 126 L110 114"/><text x="104" y="95.7" text-anchor="middle" font-size="8.5" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round" transform="rotate(-90 104 92.5)">2'9"</text></g>
+  <path class="ext" stroke-width="0.6" stroke-opacity="0.5" d="M620 280 L674 280"/>  <path class="ext" stroke-width="0.6" stroke-opacity="0.5" d="M620 448.33 L674 448.33"/>  <path class="ext" stroke-width="0.6" stroke-opacity="0.5" d="M620 120 L674 120"/>  <path class="ext" stroke-width="0.6" stroke-opacity="0.5" d="M620 640 L674 640"/>
+  <g class="dim"><path stroke-width="0.6" d="M668 120 L668 280 M662 126 L674 114 M662 286 L674 274"/><text x="668" y="203.2" text-anchor="middle" font-size="8.5" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round" transform="rotate(-90 668 200)">8'0"</text></g>  <g class="dim"><path stroke-width="0.6" d="M668 280 L668 448.33 M662 286 L674 274 M662 454.33 L674 442.33"/><text x="668" y="367.37" text-anchor="middle" font-size="8.5" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round" transform="rotate(-90 668 364.17)">8'5"</text></g>  <g class="dim"><path stroke-width="0.6" d="M668 448.33 L668 640 M662 454.33 L674 442.33 M662 646 L674 634"/><text x="668" y="547.37" text-anchor="middle" font-size="8.5" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round" transform="rotate(-90 668 544.17)">9'7"</text></g>
+  <path class="ext" stroke-width="0.6" stroke-opacity="0.5" d="M70 640 L70 698"/>  <path class="ext" stroke-width="0.6" stroke-opacity="0.5" d="M370 640 L370 678"/>  <path class="ext" stroke-width="0.6" stroke-opacity="0.5" d="M620 640 L620 698"/>  <path class="ext" stroke-width="0.6" stroke-opacity="0.5" d="M170 640 L170 678"/>
+  <g class="dim"><path stroke-width="0.6" d="M70 672 L170 672 M64 678 L76 666 M164 678 L176 666"/><text x="120" y="675.2" text-anchor="middle" font-size="8.5" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round">5'0"</text></g>  <g class="dim"><path stroke-width="0.6" d="M170 672 L370 672 M164 678 L176 666 M364 678 L376 666"/><text x="270" y="675.2" text-anchor="middle" font-size="8.5" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round">10'0"</text></g>  <g class="dim"><path stroke-width="0.6" d="M370 672 L620 672 M364 678 L376 666 M614 678 L626 666"/><text x="495" y="675.2" text-anchor="middle" font-size="8.5" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round">12'6"</text></g>
+  <g class="dim"><path stroke-width="0.6" d="M70 692 L620 692 M64 698 L76 686 M614 698 L626 686"/><text x="345" y="695.2" text-anchor="middle" font-size="8.5" fill="#141414" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round">27'6"</text></g>
+  <g class="north" id="north"><circle cx="662" cy="32" r="13" stroke-width="0.6"/><path d="M662 22 L666.5 37.5 L662 34 L657.5 37.5 Z" fill="#141414" stroke="none"/><text x="662" y="16" text-anchor="middle" font-size="8.5" font-weight="600" fill="#141414" stroke="none">N</text></g>
+  <g class="title"><path stroke-width="1.4" d="M70 728 H620"/><text x="70" y="746" font-size="11" font-weight="600" letter-spacing="2" fill="#141414" stroke="none">GROUND FLOOR PLAN</text><text x="620" y="746" text-anchor="end" font-size="8.5" letter-spacing="1" fill="#6b6b6b" stroke="none">SCALE 1/4" = 1'-0"   ·   CARPET 698 SQ FT   ·   SHEET A-101</text></g>
 </g>
 </svg>

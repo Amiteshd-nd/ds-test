@@ -1,6 +1,6 @@
 # teaser
 
-The Plinth product teaser, rendered entirely from code. A 1920×1080 HTML mockup of the
+The Gazebo product teaser, rendered entirely from code. A 1920×1080 HTML mockup of the
 product (chat panel on the right, drafting canvas on the left) plays three chat sessions
 back to back, each a "New chat" click away and each faster than the last: a 3BHK home
 (prompt, thinking, the plan drawing itself, an edit that moves a wall), a master-bathroom
@@ -75,7 +75,15 @@ space plays).
 
 ## Changing the plan
 
-Each plan in `demo/plans/` is authored by hand at the scale its header comment states.
+Each plan in `demo/plans/` is authored by hand at the scale its header comment states, to
+working-drawing conventions: cut walls as solid poché at their thickness (9" exterior,
+4.5" interior), then a three-tier line hierarchy of roughly 2:1 between tiers (doors and
+windows, then fixtures, then furniture; dimensions, hatching, grids and tags lightest;
+overhead elements dashed and grey). Doors are leaves with jambs and a swing arc, windows
+are frame lines at both wall faces with a glass line between, dimensions run in stacked
+strings (overall, then room by room, then openings) with architectural ticks, and every
+door and window carries a tag. Each sheet ends in a title strip with scale and sheet
+number; the ward also carries a column grid.
 Top-level `<g>` layers draw in document order; the layer with id `labels` fades its
 `g.label` groups in one by one, every other layer draws its strokes at constant pen speed,
 reveals white "gap" strokes and fills when their group starts, and fades text in. Dashed

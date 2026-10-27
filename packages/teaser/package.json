@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "The Plinth product teaser, rendered from code: an HTML mockup on one GSAP timeline, captured frame by frame with Playwright, stitched with ffmpeg.",
+  "description": "The Gazebo product teaser, rendered from code: an HTML mockup on one GSAP timeline, captured frame by frame with Playwright, stitched with ffmpeg.",
   "scripts": {
     "render": "node render/pipeline.ts",
     "fonts": "node render/fonts.ts",

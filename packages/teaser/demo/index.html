@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Plinth teaser mockup</title>
+<title>Gazebo teaser mockup</title>
 <meta name="viewport" content="width=1920, height=1080" />
 <!--
   Self-contained 1920x1080 mockup. Every movement sits on one paused GSAP timeline
@@ -196,19 +196,19 @@
   #composer { padding: 18px 28px 28px; }
   #input {
     position: relative;
-    display: flex; align-items: center;
-    min-height: 56px; padding: 14px 64px 14px 18px;
+    display: block;
+    min-height: 56px; padding: 15px 64px 15px 18px;
     border: 1px solid var(--line-strong); border-radius: 16px;
     background: #fff;
     box-shadow: 0 0 0 0 rgba(20,20,20,0);
     font-size: 15.5px; line-height: 1.45;
   }
   #placeholder { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--ink-3); }
-  #typed { white-space: pre; }
+  #typed { white-space: pre-wrap; overflow-wrap: anywhere; }   /* long prompts wrap; the box grows a line at a time */
   #typed .c { opacity: 0; display: none; }
   #caret { display: inline-block; width: 1.5px; height: 20px; background: var(--ink); margin-left: 1px; vertical-align: -4px; opacity: 0; }
   #send {
-    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    position: absolute; right: 10px; bottom: 10px;   /* anchored to the bottom so it stays put as the box grows */
     width: 36px; height: 36px; border-radius: 50%;
     background: var(--ink); color: #fff;
     display: flex; align-items: center; justify-content: center;
