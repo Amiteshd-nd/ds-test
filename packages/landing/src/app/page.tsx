@@ -55,7 +55,7 @@ export default function Home() {
             </div>
             <TeaserLink
               copy={content.teaser}
-              className="mt-1 inline-flex items-center gap-1.5 text-(length:--text-small) underline decoration-neutral-400 underline-offset-4 transition-colors duration-(--motion-duration-quick) hover:decoration-[#141414] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#141414]"
+              className="inline-flex items-center gap-1.5 text-(length:--text-small) underline decoration-neutral-400 underline-offset-4 transition-colors duration-(--motion-duration-quick) hover:decoration-[#141414] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#141414]"
             />
           </section>
         </div>

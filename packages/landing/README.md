@@ -105,7 +105,7 @@ src/lib/rate-limit.ts          in-memory token bucket, 5/min per IP
 emails/confirmation.tsx        the React Email template
 public/bg.jpg                  (v1) the hero render (drawn placeholder until the real one exists)
 public/stickers/               (v2) the 44 cut-out stickers
-public/teaser/                 placeholder teaser video and its poster
+public/teaser/                 the teaser film (from packages/teaser) and its poster
 public/fonts/                  TTFs for the OG image, favicon and email (OFL, licences alongside)
 assets/reference/              the reference the layout was matched against. Not served
 BACKGROUND-PROMPT.md           the prompt for the real render
@@ -172,10 +172,13 @@ To move to Postgres or Supabase, rewrite that function with an
 `insert ... on conflict (email) do nothing` and leave the rest alone.
 
 **The teaser.** The film itself is rendered from code in `packages/teaser`
-(`pnpm render:teaser` writes `out/teaser-1080p.mp4` and `out/teaser-4k.mp4`). Put the
-video in `public/teaser/` and update `teaser` in `src/content.ts` (`src`, `type`,
-`duration`, `isPlaceholder: false`). Steps are in `MANUAL-TASKS.md`. Without JavaScript
-the thumbnail links straight to the file.
+(`pnpm render:teaser` writes `out/teaser-1080p.mp4` and `out/teaser-4k.mp4`). The 1080p
+cut is copied to `public/teaser/plinth-teaser.mp4`, with its first frame as the poster;
+after a re-render, copy it again and update `duration` in `src/content.ts`. Hovering
+"Watch the teaser" shows a preview card with the poster; a longer hover plays the film
+inside it, muted and looping (not on touch screens, and never under reduced motion). A
+click opens it in a dialog with sound. Without JavaScript the link goes straight to the
+file.
 
 ## Where signups go
 

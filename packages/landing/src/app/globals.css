@@ -738,6 +738,88 @@ body {
   cursor: progress;
 }
 
+/* The teaser link's hover preview: a small card above the link with the poster
+   frame, which starts playing the film (muted, looping) after a longer hover. */
+.teaser-anchor {
+  position: relative;
+  display: inline-flex;
+  margin-top: 4px;
+}
+
+.teaser-preview {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 12px);
+  z-index: 30;
+  width: min(288px, calc(100vw - 32px));
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #141414;
+  border: 2px solid #141414;
+  border-radius: 12px;
+  box-shadow:
+    0 1px 0 #141414,
+    0 18px 36px -14px rgb(0 0 0 / 0.45);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, var(--motion-distance-rise)) scale(0.97);
+  transform-origin: 50% 100%;
+  transition:
+    opacity var(--motion-duration-brisk) var(--motion-ease-out),
+    transform var(--motion-duration-brisk) var(--motion-ease-out);
+}
+
+.teaser-preview[data-state='thumb'],
+.teaser-preview[data-state='play'] {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+.teaser-preview img,
+.teaser-preview video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The still frame stays until the film is actually playing, so there is no
+   black flash while it buffers. */
+.teaser-preview video {
+  opacity: 0;
+  transition: opacity var(--motion-duration-gentle) var(--motion-ease-out);
+}
+
+.teaser-preview[data-state='play'] video {
+  opacity: 1;
+}
+
+.teaser-preview-chip {
+  position: absolute;
+  left: 8px;
+  bottom: 10px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgb(20 20 20 / 0.72);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.teaser-preview-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: #fff;
+  transform-origin: 0 50%;
+  transition: transform 250ms linear;
+}
+
 /* ------------------------------------------------------------------ Entrance
  * First paint: each piece rises out of a blur in order (the enter recipe from
  * the motion skill). CSS rather than JS so it runs before hydration: the server

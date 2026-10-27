@@ -30,14 +30,13 @@ to the terminal instead of stored). Tick items off as you go.
 - [ ] Look at it at desktop and phone widths inside the frame.
 
 ### 3. Teaser video
-- [ ] Export the teaser as MP4 (H.264, 1920×1080 or 1280×720, under ~15 MB) and put it
-      in `public/teaser/`, e.g. `public/teaser/teaser.mp4`.
-- [ ] In `src/content.ts` → `teaser`: set `src: '/teaser/teaser.mp4'`,
-      `type: 'video/mp4'`, the real `duration`, and `isPlaceholder: false`.
-- [ ] Replace `public/teaser/poster.jpg` with a frame from the video (1280×720 JPEG).
-- [ ] Delete `public/teaser/placeholder.webm`.
-- [ ] Larger than ~20 MB, or want adaptive streaming? Host it on Mux, Cloudflare Stream
-      or Vercel Blob and put that URL in `src` instead.
+- [x] The Plinth film from `packages/teaser` is in: `public/teaser/plinth-teaser.mp4`
+      (1080p with sound, 1:25, 28 MB, encoded for streaming) with its first frame as
+      the poster.
+- [ ] If you re-render the film, copy `packages/teaser/out/teaser-1080p.mp4` over it
+      and update `duration` in `src/content.ts` if the length changed.
+- [ ] 28 MB is fine on Vercel, but if you want adaptive quality on slow phones, host it
+      on Mux or Cloudflare Stream and put that URL in `src`.
 
 ### 4. Resend account (this is where signups are stored)
 - [ ] Create an account at https://resend.com.

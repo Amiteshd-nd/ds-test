@@ -55,22 +55,23 @@ export const content = {
 
   teaser: {
     /**
-     * The teaser video. Drop the real file in public/teaser/ and point `src` at it.
-     * `isPlaceholder` adds a small "Placeholder" tag on the frame; set it false
-     * when the real video is in.
+     * The teaser film, rendered by packages/teaser (out/teaser-1080p.mp4, copied
+     * here). To replace it, drop the new file in public/teaser/ and update `src`,
+     * `poster` and `duration`. `isPlaceholder` adds a "Placeholder" tag.
      */
-    src: '/teaser/placeholder.webm',
-    type: 'video/webm',
+    src: '/teaser/plinth-teaser.mp4',
+    type: 'video/mp4',
     poster: '/teaser/poster.jpg',
-    isPlaceholder: true,
+    isPlaceholder: false,
     label: 'Watch the teaser',
-    duration: '0:08',
-    /** Mono caption in the frame's title block. */
+    duration: '1:25',
+    /** Mono caption in the frame's title block (iteration 1). */
     caption: 'First look',
     dialogTitle: `${productName}, a first look`,
     close: 'Close video',
     placeholderTag: 'Placeholder',
   },
+
 
   footer: {
     contact: 'Contact',
