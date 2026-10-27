@@ -29,6 +29,7 @@ Current allocation (all compliant):
 | cortex        | 6181 (Atlas demo UI), 6182 (agent service), 6183 (server tests) |
 | runner        | 6184 (app), 6200-6899 (throwaway servers, see below) |
 | teaser        | 6300-6399 (preview + capture static server, first free) |
+| landing       | 6186 (app), 6187 (email preview) |
 | hub           | 8787 |
 
 Set the port explicitly (e.g. Vite `server.port` + `strictPort`, Next `-p`) so it holds

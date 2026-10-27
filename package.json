@@ -15,6 +15,7 @@
     "dev:carcinogen": "pnpm --filter carcinogen dev",
     "dev:cortex": "pnpm --filter @cloud-march/cortex dev",
     "dev:runner": "pnpm --filter runner dev",
+    "dev:landing": "pnpm --filter landing dev",
     "render:teaser": "pnpm --filter teaser render",
     "preview:teaser": "pnpm --filter teaser preview",
     "build": "pnpm -r build",
@@ -26,6 +27,7 @@
     "build:file-compressor": "pnpm --filter file-compressor build",
     "build:cortex": "pnpm --filter @cloud-march/cortex build",
     "build:runner": "pnpm --filter runner build",
+    "build:landing": "pnpm --filter landing build",
     "lint": "pnpm -r --if-present lint",
     "test": "corepack pnpm -r --if-present test"
   }
