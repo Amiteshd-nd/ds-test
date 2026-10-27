@@ -1,0 +1,459 @@
+{
+  "$comment": "Every string and every timestamp in the teaser. Scenes play in order as separate chat sessions; times inside a scene are seconds from that scene's start. Edit, then `pnpm render`.",
+  "product": {
+    "name": "Plinth",
+    "domain": "plinth.example",
+    "brandColor": "#141414",
+    "brandInk": "#f4f1ea"
+  },
+  "video": {
+    "fps": 60,
+    "width": 1920,
+    "height": 1080
+  },
+  "hero": {
+    "$comment": "Open/close still (assets/hero.jpg), seconds each, and the cross-dissolve length.",
+    "seconds": 3,
+    "dissolve": 0.5
+  },
+  "canvas": {
+    "emptyHint": "Describe what you want to build",
+    "draftingPill": "Drafting…",
+    "toolbar": [
+      "Select",
+      "Wall",
+      "Door",
+      "Window",
+      "Label",
+      "Measure"
+    ],
+    "zoom": "100%"
+  },
+  "chat": {
+    "assistantLabel": "Plinth",
+    "assistantBadge": "AI",
+    "inputPlaceholder": "Describe what you want to build",
+    "newChat": "New chat"
+  },
+  "transition": {
+    "$comment": "Between scenes: the cursor goes to New chat, clicks, the session and plan clear, the next scene starts after settle.",
+    "cursorToNew": 0.6,
+    "settle": 1.0
+  },
+  "scenes": [
+    {
+      "id": "home",
+      "plan": "plans/home.svg",
+      "fileName": "Untitled plan",
+      "greeting": "Hi. Tell me about the home.",
+      "typing": {
+        "msPerChar": 45,
+        "jitterMs": 15,
+        "seed": 7
+      },
+      "prompt": "Generate a floor plan of a 3BHK with 700 sq ft total area",
+      "statusLines": [
+        "Reading your brief",
+        "Checking setback rules",
+        "Laying out rooms"
+      ],
+      "statusEvery": 1.0,
+      "reply": "Here's a first pass. Three bedrooms along the quieter east side, living and kitchen open to the balcony. Total 698 sq ft.",
+      "replyWordsPerSecond": 9,
+      "table": [
+        [
+          "Bedroom 1",
+          "120"
+        ],
+        [
+          "Bedroom 2",
+          "105"
+        ],
+        [
+          "Bedroom 3",
+          "100"
+        ],
+        [
+          "Living",
+          "180"
+        ],
+        [
+          "Kitchen",
+          "90"
+        ],
+        [
+          "Baths",
+          "2×35"
+        ],
+        [
+          "Balcony",
+          "33"
+        ]
+      ],
+      "tableUnit": "sq ft",
+      "pills": [
+        "Make the living room bigger",
+        "Swap kitchen and bedroom 3",
+        "Looks good, export"
+      ],
+      "t": {
+        "cursorToInput": 1.0,
+        "focus": 1.55,
+        "typingStart": 1.7,
+        "send": 4.6,
+        "thinking": 5.0,
+        "draw": 8.0,
+        "reply": 17.5,
+        "table": 19.8,
+        "pills": 21.0,
+        "cursorToPill": 23.3,
+        "click": 24.0,
+        "end": 29.2
+      },
+      "layers": {
+        "walls-outer": 2.0,
+        "walls-interior": 2.0,
+        "openings": 1.5,
+        "labels": 1.5,
+        "furniture": 1.5,
+        "dims": 1.0
+      },
+      "click": {
+        "pill": 0,
+        "action": "edit",
+        "$comment": "The living room's east wall slides 2 ft into Bedroom 3 (geometry: data-after attributes in the plan). Counters drive the text that counts.",
+        "start": 24.4,
+        "duration": 1.4,
+        "counters": [
+          {
+            "id": "area-living",
+            "from": 180,
+            "to": 196
+          },
+          {
+            "id": "area-bed3",
+            "from": 100,
+            "to": 84
+          },
+          {
+            "id": "dim-bed3",
+            "from": 12.5,
+            "to": 10.5,
+            "format": "ftin",
+            "suffix": " × 8'0\""
+          }
+        ],
+        "reply": "Done. Living is now 196 sq ft, Bedroom 3 is 84.",
+        "replyAt": 26.2
+      },
+      "camera": [
+        {
+          "at": 1.0,
+          "duration": 1.1,
+          "scale": 1.45,
+          "focus": {
+            "el": "#input"
+          }
+        },
+        {
+          "at": 4.9,
+          "duration": 1.3,
+          "scale": 1.0
+        },
+        {
+          "at": 8.2,
+          "duration": 1.8,
+          "scale": 1.15,
+          "focus": {
+            "el": ".plan svg"
+          },
+          "ease": "power1.inOut"
+        },
+        {
+          "at": 17.2,
+          "duration": 1.3,
+          "scale": 1.0
+        },
+        {
+          "at": 22.9,
+          "duration": 1.0,
+          "scale": 1.4,
+          "focus": {
+            "el": ".pills"
+          }
+        },
+        {
+          "at": 24.6,
+          "duration": 1.4,
+          "scale": 1.5,
+          "focus": {
+            "svg": [
+              370,
+              215
+            ]
+          }
+        },
+        {
+          "at": 27.6,
+          "duration": 1.4,
+          "scale": 1.0
+        }
+      ]
+    },
+    {
+      "id": "bath",
+      "plan": "plans/bath.svg",
+      "fileName": "Master bath detail",
+      "greeting": "Hi. What are we drawing?",
+      "typing": {
+        "msPerChar": 32,
+        "jitterMs": 10,
+        "seed": 11
+      },
+      "prompt": "Detail the master bathroom. Walk-in shower, double vanity, 2 ft tiles",
+      "statusLines": [
+        "Reading your brief",
+        "Setting out tiles",
+        "Placing fixtures"
+      ],
+      "statusEvery": 0.7,
+      "reply": "Here's the detail. A 4 by 5 wet area with a linear drain on the west wall, a double vanity under the mirror, and 2 ft tiles set out from the corner so nothing is cut at the door.",
+      "replyWordsPerSecond": 11,
+      "table": [
+        [
+          "Shower",
+          "4'0\" × 5'0\""
+        ],
+        [
+          "Vanity",
+          "5'6\" × 2'0\""
+        ],
+        [
+          "Tiles",
+          "2'0\" × 2'0\", 20 full"
+        ],
+        [
+          "Drain",
+          "Linear, 3'6\""
+        ]
+      ],
+      "tableUnit": "",
+      "pills": [],
+      "t": {
+        "cursorToInput": 0.4,
+        "focus": 0.85,
+        "typingStart": 0.95,
+        "send": 3.5,
+        "thinking": 3.8,
+        "draw": 6.0,
+        "reply": 12.0,
+        "table": 14.6,
+        "end": 16.6
+      },
+      "layers": {
+        "walls-outer": 0.8,
+        "walls-interior": 0.7,
+        "openings": 0.7,
+        "tiles": 1.3,
+        "labels": 0.9,
+        "furniture": 1.1,
+        "dims": 0.5
+      },
+      "camera": [
+        {
+          "at": 0.4,
+          "duration": 1.0,
+          "scale": 1.45,
+          "focus": {
+            "el": "#input"
+          }
+        },
+        {
+          "at": 3.7,
+          "duration": 1.1,
+          "scale": 1.0
+        },
+        {
+          "at": 6.2,
+          "duration": 1.6,
+          "scale": 1.25,
+          "focus": {
+            "el": ".plan svg"
+          },
+          "ease": "power1.inOut"
+        },
+        {
+          "at": 9.0,
+          "duration": 2.2,
+          "scale": 1.6,
+          "focus": {
+            "svg": [
+              220,
+              330
+            ]
+          },
+          "ease": "power1.inOut"
+        },
+        {
+          "at": 12.0,
+          "duration": 1.4,
+          "scale": 1.0
+        }
+      ]
+    },
+    {
+      "id": "ward",
+      "plan": "plans/ward.svg",
+      "fileName": "Ward A",
+      "greeting": "Hi. What are we drawing?",
+      "typing": {
+        "msPerChar": 27,
+        "jitterMs": 9,
+        "seed": 23
+      },
+      "prompt": "Plan a 20-bed ward: double rooms on the north side, nurse station in the middle, two isolation rooms at the end, 8 ft corridors",
+      "statusLines": [
+        "Reading your brief",
+        "Checking corridor widths",
+        "Placing rooms"
+      ],
+      "statusEvery": 0.7,
+      "reply": "Twenty beds in ten double rooms along the north side, each with its own bath. The nurse station sits at the midpoint with sightlines down both halves. Isolation at the east end behind ante-rooms. Corridor 8 ft clear.",
+      "replyWordsPerSecond": 11,
+      "table": [
+        [
+          "Beds",
+          "20"
+        ],
+        [
+          "Patient rooms",
+          "10"
+        ],
+        [
+          "Isolation",
+          "2"
+        ],
+        [
+          "Corridor",
+          "8'0\" clear"
+        ],
+        [
+          "Wing",
+          "136'0\" × 62'0\""
+        ]
+      ],
+      "tableUnit": "",
+      "pills": [
+        "Add a family lounge",
+        "Make them single rooms",
+        "Looks good, export"
+      ],
+      "t": {
+        "cursorToInput": 0.4,
+        "focus": 0.85,
+        "typingStart": 0.95,
+        "send": 4.6,
+        "thinking": 4.9,
+        "draw": 7.2,
+        "reply": 14.2,
+        "table": 17.8,
+        "pills": 18.8,
+        "cursorToPill": 20.4,
+        "click": 21.1,
+        "end": 25.0
+      },
+      "layers": {
+        "walls-outer": 1.2,
+        "walls-interior": 1.6,
+        "openings": 1.0,
+        "labels": 1.2,
+        "furniture": 1.5,
+        "dims": 0.5
+      },
+      "click": {
+        "pill": 2,
+        "action": "export",
+        "toast": "Exported ward-a.dwg · 2.1 MB",
+        "toastAt": 21.7,
+        "reply": "Exported. The DWG and a PDF set are in your project.",
+        "replyAt": 21.9
+      },
+      "camera": [
+        {
+          "at": 0.4,
+          "duration": 1.0,
+          "scale": 1.45,
+          "focus": {
+            "el": "#input"
+          }
+        },
+        {
+          "at": 4.8,
+          "duration": 1.1,
+          "scale": 1.0
+        },
+        {
+          "at": 8.0,
+          "duration": 2.4,
+          "scale": 1.7,
+          "focus": {
+            "svg": [
+              300,
+              200
+            ]
+          },
+          "ease": "power1.inOut"
+        },
+        {
+          "at": 11.0,
+          "duration": 2.2,
+          "scale": 1.0
+        },
+        {
+          "at": 20.3,
+          "duration": 0.9,
+          "scale": 1.35,
+          "focus": {
+            "el": ".pills"
+          }
+        },
+        {
+          "at": 21.3,
+          "duration": 1.3,
+          "scale": 1.0
+        }
+      ]
+    }
+  ],
+  "outro": {
+    "holdBefore": 1.6,
+    "fade": 0.9,
+    "hold": 5.0,
+    "line": "Join the waitlist",
+    "separator": "·"
+  },
+  "audio": {
+    "$comment": "Gains are linear, pre-normalisation. Cues come from out/events.json, written by the capture from the timeline. The bed is synthesised unless assets/music.(mp3|wav|m4a|aac) exists, which assemble.sh then mixes in at musicGainDb instead.",
+    "targetLufs": -18,
+    "typewriter": {
+      "gain": 0.09
+    },
+    "bell": {
+      "gain": 0.08
+    },
+    "pop": {
+      "gain": 0.14
+    },
+    "chime": {
+      "gain": 0.1
+    },
+    "bed": {
+      "gain": 0.8,
+      "bpm": 92,
+      "fadeIn": 1.5,
+      "fadeOut": 3.0
+    },
+    "musicGainDb": -14,
+    "sfxGainDb": -6
+  }
+}

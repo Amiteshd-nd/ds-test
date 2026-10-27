@@ -4,11 +4,13 @@ packages:
   - 'packages/trimension/apps/*'
 
 # Native/postinstall builds we trust and require:
-#   better-sqlite3 (blockmodel DB), esbuild (Vite/Next), sharp (portfolio image scripts)
+#   better-sqlite3 (blockmodel DB), esbuild (Vite/Next), sharp (portfolio image scripts),
+#   ffmpeg-static (teaser: downloads the ffmpeg binary into node_modules)
 allowBuilds:
   better-sqlite3: true
   esbuild: true
   sharp: true
+  ffmpeg-static: true
 
 minimumReleaseAgeExclude:
   - vite@8.3.0

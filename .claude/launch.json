@@ -123,6 +123,16 @@
       ],
       "port": 6184,
       "autoPort": false
+    },
+    {
+      "name": "teaser-preview",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "render/preview.ts"
+      ],
+      "cwd": "packages/teaser",
+      "port": 6300,
+      "autoPort": false
     }
   ]
 }

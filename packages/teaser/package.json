@@ -1,0 +1,23 @@
+{
+  "name": "teaser",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "The Plinth product teaser, rendered from code: an HTML mockup on one GSAP timeline, captured frame by frame with Playwright, stitched with ffmpeg.",
+  "scripts": {
+    "render": "node render/pipeline.ts",
+    "fonts": "node render/fonts.ts",
+    "hero": "node render/hero.ts",
+    "capture": "node render/capture.ts",
+    "audio": "node render/audio.ts",
+    "assemble": "bash render/assemble.sh",
+    "preview": "node render/preview.ts",
+    "check": "node render/check.ts",
+    "clean": "rm -rf frames out/*.mp4 out/*.wav out/*.png"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "gsap": "^3.13.0",
+    "playwright": "1.63.0"
+  }
+}
