@@ -15,7 +15,6 @@
     "generate:placeholders": "node scripts/generate-placeholders.js"
   },
   "dependencies": {
-    "@cloud-march/game": "workspace:*",
     "@cloud-march/motion": "workspace:*",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

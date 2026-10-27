@@ -32,17 +32,6 @@
       "port": 6175
     },
     {
-      "name": "game",
-      "runtimeExecutable": "corepack",
-      "runtimeArgs": [
-        "pnpm",
-        "--filter",
-        "@cloud-march/game",
-        "dev"
-      ],
-      "port": 6174
-    },
-    {
       "name": "personal-doc",
       "runtimeExecutable": "corepack",
       "runtimeArgs": [

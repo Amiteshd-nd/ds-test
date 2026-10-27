@@ -20,7 +20,6 @@ Current allocation (all compliant):
 | ------------- | ---- |
 | blockmodel    | 6176 |
 | personal-doc  | 6173 |
-| game          | 6174 |
 | gully         | 6175 |
 | discovery     | 6177 |
 | trimension    | 6178 (web), 8788 (session server) |
