@@ -19,7 +19,8 @@ to the terminal instead of stored). Tick items off as you go.
       search engines do not see two versions of the page.
 
 ### 1. Decide the name and contact address
-- [ ] Replace the placeholder `Plinth` and `hello@plinth.example` in `src/content.ts`.
+- [x] The name is Gazebo (`productName` in `src/content.ts`).
+- [ ] Replace the placeholder contact address `hello@gazebo.example` in `src/content.ts`.
       Everything else (wordmark, footer, page title, favicon, share card, email) reads
       from there.
 - [ ] Re-read the headline and support line in the same file.
@@ -30,7 +31,7 @@ to the terminal instead of stored). Tick items off as you go.
 - [ ] Look at it at desktop and phone widths inside the frame.
 
 ### 3. Teaser video
-- [x] The Plinth film from `packages/teaser` is in: `public/teaser/plinth-teaser.mp4`
+- [x] The Gazebo film from `packages/teaser` is in: `public/teaser/gazebo-teaser.mp4`
       (1080p with sound, 1:25, 28 MB, encoded for streaming) with its first frame as
       the poster.
 - [ ] If you re-render the film, copy `packages/teaser/out/teaser-1080p.mp4` over it
@@ -51,7 +52,7 @@ to the terminal instead of stored). Tick items off as you go.
 - [ ] `cp .env.example .env.local` and fill in:
   - `RESEND_API_KEY`
   - `RESEND_AUDIENCE_ID` (the segment ID)
-  - `EMAIL_FROM`, e.g. `Plinth <hello@mail.yourdomain.com>` (must be on the verified domain)
+  - `EMAIL_FROM`, e.g. `Gazebo <hello@mail.yourdomain.com>` (must be on the verified domain)
   - `NEXT_PUBLIC_SITE_URL`, e.g. `https://yourdomain.com` (no trailing slash)
 - [ ] Run `pnpm dev:landing`, sign up with your own address, and confirm: the contact
       appears in the Resend segment, and the email arrives (check spam too).

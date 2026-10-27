@@ -2,7 +2,7 @@
   "name": "cloud-march",
   "private": true,
   "version": "0.0.0",
-  "description": "Monorepo: personal-doc site, Bangalore Times game, the blockmodel prototype, the gully map foundation, the Discovery background studies, the adaptive PDF file-compressor, CORTEX, a portable AI agent layer, and Runner, the small-business agent, and the Plinth teaser render pipeline.",
+  "description": "Monorepo: personal-doc site, Bangalore Times game, the blockmodel prototype, the gully map foundation, the Discovery background studies, the adaptive PDF file-compressor, CORTEX, a portable AI agent layer, and Runner, the small-business agent, and the Gazebo teaser render pipeline.",
   "packageManager": "pnpm@11.25.0",
   "scripts": {
     "dev": "node hub/server.mjs",

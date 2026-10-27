@@ -122,7 +122,7 @@ MANUAL-TASKS.md                everything left that needs a person
    at your DNS provider. Add a DMARC record too if you do not have one:
    `_dmarc` `TXT` `v=DMARC1; p=none;`.
 3. Wait for **Verified**. `EMAIL_FROM` must use this domain, for example
-   `Plinth <hello@mail.yourdomain.com>`.
+   `Gazebo <hello@mail.yourdomain.com>`.
 
 ### 2. Resend: create the segment (formerly "audience")
 
@@ -173,7 +173,7 @@ To move to Postgres or Supabase, rewrite that function with an
 
 **The teaser.** The film itself is rendered from code in `packages/teaser`
 (`pnpm render:teaser` writes `out/teaser-1080p.mp4` and `out/teaser-4k.mp4`). The 1080p
-cut is copied to `public/teaser/plinth-teaser.mp4`, with its first frame as the poster;
+cut is copied to `public/teaser/gazebo-teaser.mp4`, with its first frame as the poster;
 after a re-render, copy it again and update `duration` in `src/content.ts`. Hovering
 "Watch the teaser" shows a preview card with the poster; a longer hover plays the film
 inside it, muted and looping (not on touch screens, and never under reduced motion). A

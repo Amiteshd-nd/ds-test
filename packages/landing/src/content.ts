@@ -5,10 +5,10 @@
  * .claude/skills/taste-skill). Use a period, comma, or colon instead.
  */
 
-/** Placeholder product name. Change it here and everywhere follows. */
-const productName = 'Plinth';
+/** The product name. Change it here and everywhere follows. */
+const productName = 'Gazebo';
 /** Shown in the footer mailto link and the email's contact line. */
-const contactEmail = 'hello@plinth.example';
+const contactEmail = 'hello@gazebo.example';
 
 export const content = {
   productName,
@@ -59,7 +59,7 @@ export const content = {
      * here). To replace it, drop the new file in public/teaser/ and update `src`,
      * `poster` and `duration`. `isPlaceholder` adds a "Placeholder" tag.
      */
-    src: '/teaser/plinth-teaser.mp4',
+    src: '/teaser/gazebo-teaser.mp4',
     type: 'video/mp4',
     poster: '/teaser/poster.jpg',
     isPlaceholder: false,
